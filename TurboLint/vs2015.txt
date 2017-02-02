@@ -1,0 +1,55 @@
+
+#define _own  ^ 
+#define _opt  ? 
+#define _move  &&
+#define _dtor %
+#define _mdtor |
+
+
+#define _M_IX86 400
+#define WIN32
+
+#define _WIN32
+#define _RELEASE
+#define _CONSOLE
+#define _UNICODE
+#define UNICODE
+
+#define _M_IX86
+#define __stdcall
+#define __fastcall
+#define __pragma(x)  
+#define __inline  
+#define  __cdecl  
+#define __declspec(x)  
+
+typedef long long __int64;
+typedef short wchar_t;
+
+typedef char* va_list;
+
+#define ASSERT(x)
+
+
+#pragma dir "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include"
+#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt"
+#pragma dir "C:\Program Files (x86)\Windows Kits\8.1\Include\um"
+#pragma dir "C:\Program Files (x86)\Windows Kits\8.1\Include\shared"
+
+
+#pragma dir "C:\Program Files (x86)\Windows Kits\8.1\Include\shared"
+
+#define NULL 0
+
+/*
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\core"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\platforms\win32"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\proxystub"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\securechannel"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\stackcore"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\transport"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\transport\https"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\uastack"
+#pragma dir "C:\ThiagoDevel\MobileServer\MobileServer\opcua\proxystub\clientproxy"
+
+*/
