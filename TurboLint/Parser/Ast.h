@@ -7,13 +7,13 @@
 #include "Scanner.h"
 
 #define CAST(FROM, TO) \
-inline TO * _opt FROM##_As_##TO(FROM* _opt p)\
+inline TO *  FROM##_As_##TO(FROM*  p)\
 {\
 if (p != NULL && p->type == TO##_ID)\
     return ( TO * )p;\
   return NULL;\
 }\
-inline FROM * _opt TO##_As_##FROM(TO* _opt p)\
+inline FROM *  TO##_As_##FROM(TO*  p)\
 {\
     return ( FROM * )p;\
 }
@@ -66,7 +66,7 @@ typedef enum
 #define CREATETYPEOR(TYPE)\
   typedef TTypePointer TYPE ;\
   void TYPE##_Destroy(TYPE* p);\
-inline void TYPE##_Delete(TYPE* _opt p)\
+inline void TYPE##_Delete(TYPE*  p)\
 {\
   if (p)\
   {\
@@ -74,19 +74,19 @@ inline void TYPE##_Delete(TYPE* _opt p)\
     free(p);\
   }\
 }\
-inline void TYPE##_DeleteVoid(void* _opt p)\
+inline void TYPE##_DeleteVoid(void*  p)\
 {\
   TYPE##_Delete((TYPE*)p);\
 }
 
 
-#define CREATETYPE(TYPE, INIT) inline TYPE* _own TYPE##_Create()\
+#define CREATETYPE(TYPE, INIT) inline TYPE*  TYPE##_Create()\
 {\
   TYPE* p = (TYPE*)malloc(sizeof * p);\
   if (p)\
   {\
     TYPE temp_Moved = INIT;\
-    *p = _move temp_Moved;\
+    *p =  temp_Moved;\
   }\
   else \
   {\
@@ -95,7 +95,7 @@ inline void TYPE##_DeleteVoid(void* _opt p)\
   return p;\
 }\
 void TYPE##_Destroy(TYPE* p);\
-inline void TYPE##_Delete(TYPE* _opt p)\
+inline void TYPE##_Delete(TYPE*  p)\
 {\
   if (p)\
   {\
@@ -103,7 +103,7 @@ inline void TYPE##_Delete(TYPE* _opt p)\
     free(p);\
   }\
 }\
-inline void TYPE##_DeleteVoid(void* _opt p)\
+inline void TYPE##_DeleteVoid(void*  p)\
 {\
   TYPE##_Delete((TYPE*)p);\
 }
@@ -170,7 +170,7 @@ typedef struct
   TTypePointer Type;
   Tokens token;
   String lexeme;
-  TExpression2* _own pExpressionOpt;
+  TExpression2*  pExpressionOpt;
 } TPrimaryExpressionValue;
 #define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL}
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
@@ -182,14 +182,14 @@ typedef struct TPostfixExpressionCoreTag
   TTypePointer Type;
   Tokens token;
   String lexeme;
-  TExpression2* _own pExpressionLeft;
-  TExpression2* _own pExpressionArray;
+  TExpression2*  pExpressionLeft;
+  TExpression2*  pExpressionArray;
   
   //cast
   
   
-  struct TPostfixExpressionCoreTag* _own pNext;
-  struct TInitializerList_ * _own pInitializerList;
+  struct TPostfixExpressionCoreTag*  pNext;
+  struct TInitializerList_ *  pInitializerList;
   String Identifier;
   //TTypeName TypeName;
 } TPostfixExpressionCore;
@@ -201,8 +201,8 @@ typedef struct
 {
   TTypePointer Type;
   Tokens token;
-  TExpression2* _own pExpressionLeft;
-  TExpression2* _own pExpressionRight;
+  TExpression2*  pExpressionLeft;
+  TExpression2*  pExpressionRight;
   TPosition Position;
 } TBinaryExpression;
 #define TBINARYEXPRESSION_INIT { {TBinaryExpression_ID}, TK_NONE, NULL, NULL, TPOSITION_INIT}
@@ -212,9 +212,9 @@ typedef struct
 {
   TTypePointer Type;
   Tokens token;
-  TExpression2* _own pExpressionLeft;
-  TExpression2* _own  pExpressionMiddle;
-  TExpression2* _own  pExpressionRight;
+  TExpression2*  pExpressionLeft;
+  TExpression2*   pExpressionMiddle;
+  TExpression2*   pExpressionRight;
 } TTernaryExpression;
 #define TTERNARYEXPRESSION_INIT { {TTernaryExpression_ID}, TK_NONE, NULL, NULL, NULL}
 CREATETYPE(TTernaryExpression, TTERNARYEXPRESSION_INIT)
@@ -251,7 +251,7 @@ typedef struct
 typedef struct
 {
   TTypePointer Type;  
-  TExpression2 * _own  pExpression;  
+  TExpression2 *   pExpression;  
 } TExpressionStatement;
 #define TEXPRESSION_STATEMENT_INIT { {TExpressionStatement_ID}, NULL}
 CREATETYPE(TExpressionStatement, TEXPRESSION_STATEMENT_INIT)
@@ -260,7 +260,7 @@ typedef struct
 {
   TTypePointer Type;
   Tokens token;
-  TExpression2 * _own pExpression;
+  TExpression2 *  pExpression;
 } TJumpStatement;
 
 #define TJUMP_STATEMENT_INIT {{TJumpStatement_ID}, TK_NONE, NULL }
@@ -280,11 +280,11 @@ CREATETYPE(TAsmStatement, TASM_STATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TAnyDeclaration* _own pInitDeclarationOpt;
-  TExpression2* _own pExpression1;
-  TExpression2*_own pExpression2;
-  TExpression2* _own pExpression3;
-  TStatement* _own pStatement;
+  TAnyDeclaration*  pInitDeclarationOpt;
+  TExpression2*  pExpression1;
+  TExpression2* pExpression2;
+  TExpression2*  pExpression3;
+  TStatement*  pStatement;
 } TForStatement;
 
 #define TFORSTATEMENT_INIT {{TForStatement_ID}, NULL, NULL, NULL, NULL, NULL}
@@ -293,8 +293,8 @@ CREATETYPE(TForStatement, TFORSTATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2* _own pExpression;
-  TStatement* _own pStatement;
+  TExpression2*  pExpression;
+  TStatement*  pStatement;
 } TWhileStatement;
 
 #define TWHILESTATEMENT_INIT { {TWhileStatement_ID}, NULL, NULL}
@@ -303,7 +303,7 @@ CREATETYPE(TWhileStatement, TWHILESTATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2* _own  pExpression;
+  TExpression2*   pExpression;
 } TReturnStatement;
 
 #define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL}
@@ -313,8 +313,8 @@ CREATETYPE(TReturnStatement, TRETURN_STATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2 *  _own pExpression;
-  TStatement*  _own pStatement;
+  TExpression2 *   pExpression;
+  TStatement*   pStatement;
 } TDoStatement;
 #define TDOSTATEMENT_INIT {{TDoStatement_ID}, NULL, NULL}
 CREATETYPE(TDoStatement, TDOSTATEMENT_INIT)
@@ -323,8 +323,8 @@ typedef struct
 {
   TTypePointer Type;
   
-  TStatement * _own  pStatementOpt;
-  TExpression2 * _own  pExpression;
+  TStatement *   pStatementOpt;
+  TExpression2 *   pExpression;
   String Identifier;
   Tokens token;
 } TLabeledStatement;
@@ -336,8 +336,8 @@ CREATETYPE(TLabeledStatement, TLABEDSTATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2 *  _own pConditionExpression;
-  TStatement*  _own pExpression;
+  TExpression2 *   pConditionExpression;
+  TStatement*   pExpression;
 } TSwitchStatement;
 
 #define TSWITCH_STATEMENT { {TSwitchStatement_ID}, NULL, NULL}
@@ -347,9 +347,9 @@ CREATETYPE(TSwitchStatement, TSWITCH_STATEMENT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2*  _own  pConditionExpression;
-  TStatement* _own  pStatement;
-  TStatement* _own  pElseStatement;
+  TExpression2*    pConditionExpression;
+  TStatement*   pStatement;
+  TStatement*   pElseStatement;
 } TIfStatement;
 #define TIFSTATEMENT_INIT { {TIfStatement_ID}, NULL, NULL, NULL}
 CREATETYPE(TIfStatement, TIFSTATEMENT_INIT)
@@ -424,7 +424,7 @@ void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p);
 typedef struct
 {
   String Name;  
-  TExpression2* _own  pExpression;
+  TExpression2*   pExpression;
 } TEnumerator;
 
 #define TENUMERATOR_INIT { STRING_INIT , NULL}
@@ -480,7 +480,7 @@ typedef TTypePointer TTypeSpecifier;
 typedef struct
 {
   TStorageSpecifier StorageSpecifiers;
-  TTypeSpecifier*  _own pTypeSpecifierOpt;
+  TTypeSpecifier*   pTypeSpecifierOpt;
   TTypeQualifier TypeQualifiers;
   TFunctionSpecifier FunctionSpecifiers;
   TAlignmentSpecifier AlignmentSpecifier;
@@ -498,7 +498,7 @@ struct ParameterList_T;
 typedef struct
 {
   String Name;
-  TExpression2 * _own pExpression;
+  TExpression2 *  pExpression;
 } TDesignator;
 #define TDESIGNATOR_INIT { STRING_INIT , NULL}
 CREATETYPE(TDesignator, TDESIGNATOR_INIT)
@@ -516,7 +516,7 @@ typedef TTypePointer TInitializer;
 
 typedef struct
 {
-  TDesignatorList*  _own pDesignatorList;
+  TDesignatorList*   pDesignatorList;
   TInitializer* pInitializer;
 } TInitializerListItem;
 #define TINITIALIZER_LIST_ITEM_INIT { NULL , NULL}
@@ -553,11 +553,11 @@ typedef struct TDeclarator_S
   String Name;
   TTypeQualifier Qualifiers;
   TPointerList PointerList;
-  struct TDeclarator_S*  _own pDeclaratorOpt;
-  struct ParameterList_T*  _own pParametersOpt;
-  TInitializer* _own  pInitializer;
+  struct TDeclarator_S*   pDeclaratorOpt;
+  struct ParameterList_T*   pParametersOpt;
+  TInitializer*   pInitializer;
 
-  TExpression2*  _own pExpression;
+  TExpression2*   pExpression;
   Tokens token;
   
   TPosition Position;
@@ -585,7 +585,7 @@ typedef TDeclaratorList TStructDeclaratorList;
 typedef struct
 {
   TTypePointer Type;//= {TStructDeclaration_ID}
-  TTypeSpecifier*  _own pSpecifier;
+  TTypeSpecifier*   pSpecifier;
   TTypeQualifier Qualifier;
   TStructDeclaratorList DeclaratorList;
 
@@ -758,7 +758,7 @@ typedef TParameterDeclaration TTypeName;
 typedef struct
 {
 	TTypePointer Type;
-	TExpression2*  _own pExpression;
+	TExpression2*   pExpression;
 	TTypeName TypeName;
 } TCastExpressionType;
 #define TCAST_EXPRESSION_INIT { {TCastExpressionType_ID}, NULL , TTYPENAME_INIT}
@@ -771,7 +771,7 @@ typedef struct
 {
 	TTypePointer Type;
 	Tokens token;
-	TExpression2* _own  pExpressionLeft;
+	TExpression2*   pExpressionLeft;
 	TTypeName TypeName;
 } TUnaryExpressionOperator;
 

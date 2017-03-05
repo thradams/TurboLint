@@ -11,8 +11,8 @@
 
 typedef struct
 {
-  TParameterDeclaration * _opt pParameter;
-  TDeclaration* _opt pDeclaration0;
+  TParameterDeclaration *  pParameter;
+  TDeclaration*  pDeclaration0;
   TDeclarator* pDeclarator0;
 
   int nUses;
@@ -66,7 +66,7 @@ TVariable* TVariable_Create()
   if (p)
   {
     TVariable temp_Moved = TVARIABLE_INIT;
-    *p = _move temp_Moved;
+    *p =  temp_Moved;
   }
 
   return p;
@@ -164,7 +164,7 @@ static void TBlockItem_Analise(TProgram* pProgram, TBlockItem * p, TVariablesMap
 static void TInitializer_Analise(TProgram* pProgram,
                                  TDeclaration * pDeclaration,
                                  TDeclarator* pDeclarator,
-                                 TInitializer* _opt pInitializer,
+                                 TInitializer*  pInitializer,
                                  TVariablesMapStack* pStackNames);
 
 static void TPointer_Analise(TProgram* pProgram, TPointer* pPointer);
@@ -178,7 +178,7 @@ static void TInitializerListItem_Analise(TProgram* pProgram,
 
 
 static void TExpression_TypeOf(TProgram* pProgram,
-                               TExpression2 * _opt p,
+                               TExpression2 *  p,
                                TVariablesMapStack* pStackNames,
                                TDeclarationSpecifiers** ppSpecifiers,
                                TDeclarator**ppDeclarator);
@@ -277,15 +277,15 @@ static void CheckIfDestructorWasCalled(TProgram *pProgram,
 
   for (size_t i = 0; i < pDeclarationsMap->buckets.size; i++)
   {
-    Bucket* _opt data = pDeclarationsMap->buckets.data[i];
+    Bucket*  data = pDeclarationsMap->buckets.data[i];
 
     if (data != NULL)
     {
       for (size_t k = 0; k < data->size; k++)
       {
         BucketItem* node = data->data[k];
-        TVariable* _opt pVariable =
-          (TVariable* _opt)node->data;
+        TVariable*  pVariable =
+          (TVariable* )node->data;
 
 
 
@@ -316,7 +316,7 @@ static bool IsTypedefWithDestructor(TProgram* pProgram,
   //
   bool bResult = false;
 
-  TSingleTypeSpecifier * _opt pSingleTypeSpecifier =
+  TSingleTypeSpecifier *  pSingleTypeSpecifier =
     TTypeSpecifier_As_TSingleTypeSpecifier(pTypeSpecifier);
 
   if (pSingleTypeSpecifier != NULL &&
@@ -383,7 +383,7 @@ static bool TDeclarator_IsOwner(TProgram* pProgram,
 }
 
 static void TCompoundStatement_Analise(TProgram* pProgram,
-                                       TParameterList* _opt pParameterList,
+                                       TParameterList*  pParameterList,
                                        TCompoundStatement * p,
                                        TVariablesMapStack* pStackNames)
 {
@@ -563,14 +563,14 @@ static bool IsDestructorArgument(TPointerList* pPointerList)
 static const char* IsDestrutorOf(TProgram* pProgram, const char* functionName)
 {
   const char* typeName = NULL;
-  TDeclaration* _opt pDeclaration =
+  TDeclaration*  pDeclaration =
     TProgram_FindDeclaration(pProgram, functionName);
 
   if (pDeclaration != NULL)
   {
     if (pDeclaration->Declarators.size == 1)
     {
-      TParameterList * _opt pParameterList =
+      TParameterList *  pParameterList =
         GetParameterList(pDeclaration);
 
       if (pParameterList != NULL && pParameterList->size > 0)
@@ -623,7 +623,7 @@ static void CheckDestructorCallOnExpressionLocalVariablePointer(TProgram* pProgr
             if (pSingleTypeSpecifier &&
                 pSingleTypeSpecifier->bIsTypeDef)
             {
-              const char* _opt typeStr =
+              const char*  typeStr =
                 IsDestrutorOf(pProgram, pTPrimaryExpressionValue->lexeme);
 
               if (typeStr != NULL)
@@ -683,7 +683,7 @@ static void CheckDestructorCallOnExpressionLocalVariable(TProgram* pProgram,
                   pSingleTypeSpecifier->bIsTypeDef)
               {
 
-                const char* _opt typeStr =
+                const char*  typeStr =
                   IsDestrutorOf(pProgram, pTPrimaryExpressionValue->lexeme);
 
                 if (typeStr != NULL)
@@ -765,7 +765,7 @@ static void TIfStatement_Analise(TProgram* pProgram,
 }
 
 static void TStatement_Analise(TProgram* pProgram,
-                               TStatement * _opt p,
+                               TStatement *  p,
                                TVariablesMapStack* pStackNames)
 {
   if (p == NULL)
@@ -824,7 +824,7 @@ static void TStatement_Analise(TProgram* pProgram,
 }
 
 static void TBlockItem_Analise(TProgram* pProgram,
-                               TBlockItem * _opt p,
+                               TBlockItem *  p,
                                TVariablesMapStack* pStackNames)
 {
   if (p == NULL)
@@ -1074,7 +1074,7 @@ static TVariable* GetVariable(TExpression2 * pExpression,
 }
 
 static void TExpression_Analise(TProgram* pProgram,
-                                TExpression2 * _opt p,
+                                TExpression2 *  p,
                                 const char* name,
                                 TVariablesMapStack* pStackNames)
 {
@@ -1100,7 +1100,7 @@ static void TExpression_Analise(TProgram* pProgram,
         //Verifica se esta comparando ou setando null
         //em um ponteiro nao nulo
 
-        TVariable * _opt pVariable =
+        TVariable *  pVariable =
           GetVariable(pBinaryExpression->pExpressionLeft, pStackNames);
 
         if (pVariable != NULL)
@@ -1114,13 +1114,13 @@ static void TExpression_Analise(TProgram* pProgram,
             {
               if (pBinaryExpression->token == TK_EQUALS_SIGN)
               {
-                printf("%s(%d): warning: NULL is not assignable to '%s'.Use _opt if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
+                printf("%s(%d): warning: NULL is not assignable to '%s'.Use  if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
               }
 
               else if (pBinaryExpression->token == TK_EQUALEQUAL ||
                        pBinaryExpression->token == TK_NOTEQUAL)
               {
-                printf("%s(%d): warning: Variable '%s' is not null by definition. Use _opt if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
+                printf("%s(%d): warning: Variable '%s' is not null by definition. Use  if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
               }
             }
           }
@@ -1245,7 +1245,7 @@ static void TExpression_Analise(TProgram* pProgram,
 
 
 static void TExpression_TypeOf(TProgram* pProgram,
-                               TExpression2 * _opt p,
+                               TExpression2 *  p,
                                TVariablesMapStack* pStackNames,
                                TDeclarationSpecifiers** ppSpecifiers,
                                TDeclarator**ppDeclarator)
@@ -1278,7 +1278,7 @@ static void TExpression_TypeOf(TProgram* pProgram,
         //Verifica se esta comparando ou setando null
         //em um ponteiro nao nulo
 
-        TVariable * _opt pVariable =
+        TVariable *  pVariable =
           GetVariable(pBinaryExpression->pExpressionLeft, pStackNames);
 
         if (pVariable != NULL)
@@ -1292,13 +1292,13 @@ static void TExpression_TypeOf(TProgram* pProgram,
             {
               if (pBinaryExpression->token == TK_EQUALS_SIGN)
               {
-                printf("%s(%d): warning: NULL is not assignable to '%s'.Use _opt if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
+                printf("%s(%d): warning: NULL is not assignable to '%s'.Use  if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
               }
 
               else if (pBinaryExpression->token == TK_EQUALEQUAL ||
                        pBinaryExpression->token == TK_NOTEQUAL)
               {
-                printf("%s(%d): warning: Variable '%s' is not null by definition. Use _opt if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
+                printf("%s(%d): warning: Variable '%s' is not null by definition. Use  if it can be null.\n", pProgram->Files2.pItems[pBinaryExpression->Position.FileIndex]->FullPath, pBinaryExpression->Position.Line, pDeclarator->Name);
               }
             }
           }
@@ -1481,8 +1481,8 @@ static bool StructRequirsesDestructor(TProgram* pProgram, TStructUnionSpecifier*
 
   for (size_t i = 0; i < p->StructDeclarationList.size; i++)
   {
-    TAnyStructDeclaration * _opt pStructDeclaration = p->StructDeclarationList.pItems[i];
-    TStructDeclaration * _opt pStructDeclarationBase =
+    TAnyStructDeclaration *  pStructDeclaration = p->StructDeclarationList.pItems[i];
+    TStructDeclaration *  pStructDeclarationBase =
       TAnyStructDeclaration_As_TStructDeclaration(pStructDeclaration);
 
     if (pStructDeclaration != NULL)
@@ -1585,7 +1585,7 @@ static void TSingleTypeSpecifier_Analise(TProgram* pProgram, TSingleTypeSpecifie
 }
 
 static void TTypeSpecifier_Analise(TProgram* pProgram,
-                                   TTypeSpecifier* _opt p,
+                                   TTypeSpecifier*  p,
                                    TVariablesMapStack* pStackNames)
 {
   if (p == NULL)
@@ -1661,7 +1661,7 @@ static void TInitializerList_Analise(TProgram* pProgram,
 static void TInitializer_Analise(TProgram* pProgram,
                                  TDeclaration * pDeclaration,
                                  TDeclarator* pDeclarator,
-                                 TInitializer* _opt pInitializer,
+                                 TInitializer*  pInitializer,
                                  TVariablesMapStack* pStackNames)
 {
   if (pInitializer == NULL)
@@ -1703,7 +1703,7 @@ static void TInitializer_Analise(TProgram* pProgram,
         {
           if (bIsNullAssigment)
           {
-            printf("%s(%d): warning: NULL is not assignable to '%s'.Use _opt if it can be null.\n", pProgram->Files2.pItems[pDeclaration->FileIndex]->FullPath, pDeclaration->Line, pDeclarator->Name);
+            printf("%s(%d): warning: NULL is not assignable to '%s'.Use  if it can be null.\n", pProgram->Files2.pItems[pDeclaration->FileIndex]->FullPath, pDeclaration->Line, pDeclarator->Name);
           }
         }
 
@@ -1715,7 +1715,7 @@ static void TInitializer_Analise(TProgram* pProgram,
 
           if (bNonNullPointerLeft != bNonNullPointerRight)
           {
-            printf("%s(%d): warning: Invalid qualifiers _opt. %s\n", pProgram->Files2.pItems[pDeclaration->FileIndex]->FullPath, pDeclaration->Line, pDeclarator->Name);
+            printf("%s(%d): warning: Invalid qualifiers . %s\n", pProgram->Files2.pItems[pDeclaration->FileIndex]->FullPath, pDeclaration->Line, pDeclarator->Name);
           }
 
 
@@ -1731,7 +1731,7 @@ static void TInitializer_Analise(TProgram* pProgram,
           if (!bIsNullAssigment &&
               bIsOwner != bIsOwner2)
           {
-            printf("%s(%d): warning: Incompatible qualifiers _own. %s\n", pProgram->Files2.pItems[pDeclaration->FileIndex]->FullPath, pDeclaration->Line, pDeclarator->Name);
+            printf("%s(%d): warning: Incompatible qualifiers . %s\n", pProgram->Files2.pItems[pDeclaration->FileIndex]->FullPath, pDeclaration->Line, pDeclarator->Name);
           }
         }
       }
@@ -2046,7 +2046,7 @@ static bool CheckStructMember(TExpression2 *pExpression,
 {
   bool bResult = false;
   //varName->XXX
-  TPostfixExpressionCore * _opt pRight =
+  TPostfixExpressionCore *  pRight =
     MatchStructPointerMember(varName, pExpression);
 
   if (pRight != NULL)
@@ -2118,7 +2118,7 @@ bool CheckDestructorImplementation(TProgram* pProgram,
 
       if (pStructDeclaration)
       {
-        TStructUnionSpecifier* _opt pStructUnionSpecifier =
+        TStructUnionSpecifier*  pStructUnionSpecifier =
           TTypeSpecifier_As_TStructUnionSpecifier(pStructDeclaration->Specifiers.pTypeSpecifierOpt);
 
         if (pStructUnionSpecifier != NULL)
@@ -2127,7 +2127,7 @@ bool CheckDestructorImplementation(TProgram* pProgram,
           {
             TAnyStructDeclaration * pAnyStructDeclaration =
               pStructUnionSpecifier->StructDeclarationList.pItems[i];
-            TStructDeclaration * _opt pStructDeclaration =
+            TStructDeclaration *  pStructDeclaration =
               TAnyStructDeclaration_As_TStructDeclaration(pAnyStructDeclaration);
 
             if (pStructDeclaration != NULL)
@@ -2140,7 +2140,7 @@ bool CheckDestructorImplementation(TProgram* pProgram,
                 //Para cada declarador da struct
                 for (int j = 0; j < pStructDeclaration->DeclaratorList.size; j++)
                 {
-                  TDeclarator * _opt pDeclarator =
+                  TDeclarator *  pDeclarator =
                     pStructDeclaration->DeclaratorList.pItems[j];
 
                   if (pDeclarator != NULL &&
@@ -2159,7 +2159,7 @@ bool CheckDestructorImplementation(TProgram* pProgram,
                       TBlockItem *pBlockItem =
                         p->pCompoundStatementOpt->BlockItemList.pItems[k];
 
-                      TExpressionStatement* _opt pExpression =
+                      TExpressionStatement*  pExpression =
                         TBlockItem_As_TExpressionStatement(pBlockItem);
 
                       if (pExpression != NULL)
@@ -2220,7 +2220,7 @@ static void StructAutomaticOwn(TProgram* pProgram, TDeclaration* p)
   //tendo destructor tb
   if (p->Specifiers.StorageSpecifiers.bIsTypedef)
   {
-    TStructUnionSpecifier * _opt pStructUnionSpecifier =
+    TStructUnionSpecifier *  pStructUnionSpecifier =
       TTypeSpecifier_As_TStructUnionSpecifier(p->Specifiers.pTypeSpecifierOpt);
 
     if (pStructUnionSpecifier != NULL)
@@ -2241,7 +2241,7 @@ static void TDeclaration_Analise(TProgram* pProgram, TDeclaration* p, TVariables
   TDeclaratorList_Analise(pProgram, p, &p->Declarators, pStackNames);
 
 
-  //Faz o _own automatico para typedef da struct
+  //Faz o  automatico para typedef da struct
   StructAutomaticOwn(pProgram, p);
 
   if (p->pCompoundStatementOpt != NULL)
@@ -2287,7 +2287,7 @@ static void TParameterDeclaration_Analise(TProgram* pProgram, TParameterDeclarat
     if (pSingleTypeSpecifier &&
         pSingleTypeSpecifier->bIsTypeDef)
     {
-      TDeclaration * _opt pDeclaration =
+      TDeclaration *  pDeclaration =
         TProgram_FindDeclaration(pProgram, pSingleTypeSpecifier->TypedefName);
 
       if (pDeclaration != NULL)

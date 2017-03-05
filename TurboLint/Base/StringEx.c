@@ -12,7 +12,7 @@ void String_Reset(String* pString)
   String_Init(pString, NULL);
 }
 
-void String_Destroy(String* _opt pString)
+void String_Destroy(String*  pString)
 {
   if (pString != NULL)
   {
@@ -31,7 +31,7 @@ void String_Swap(String* pA, String* pB)
 {
   String temp_Moved = *pA;
   *pA = *pB;
-  *pB = _move temp_Moved;
+  *pB =  temp_Moved;
 }
 
 Result String_Set(String *pS1, const char* psz1)
@@ -49,12 +49,12 @@ Result String_Set(String *pS1, const char* psz1)
   return result;
 }
 
-Result String_Init(String* pString, const char* _opt sourceOpt)
+Result String_Init(String* pString, const char*  sourceOpt)
 {
   if (sourceOpt != NULL)
   {
     size_t len = strlen(sourceOpt) + 1;
-    void * _opt _own snew = Malloc(sizeof(char) * len);
+    void *   snew = Malloc(sizeof(char) * len);
 
     if (snew == NULL)
     {
@@ -62,7 +62,7 @@ Result String_Init(String* pString, const char* _opt sourceOpt)
     }
 
     memcpy(snew, sourceOpt, len);
-    *pString = (char*) _move snew;
+    *pString = (char*)  snew;
   }
 
   else
@@ -74,7 +74,7 @@ Result String_Init(String* pString, const char* _opt sourceOpt)
 }
 
 
-bool String_IsEmpty(const char* _opt psz)
+bool String_IsEmpty(const char*  psz)
 {
   return psz == NULL || psz[0] == 0;
 }

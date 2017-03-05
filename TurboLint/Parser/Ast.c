@@ -285,7 +285,7 @@ void TDeclarator_Destroy(TDeclarator* p)
   TExpression2_Delete(p->pExpression);
 }
 
-const char* TDeclarator_FindName(TDeclarator* _opt  p)
+const char* TDeclarator_FindName(TDeclarator*   p)
 {
   while (p != NULL)
   {
@@ -335,14 +335,14 @@ void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifie
   TTypeSpecifier_Delete(pDeclarationSpecifiers->pTypeSpecifierOpt);
 }
 
-TDeclarator* TDeclaration_FindDeclarator(TDeclaration* _opt p, const char* name)
+TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
 {
 	if (p == NULL)
 	{
 		return NULL;
 	}
 
-	TDeclarator* _opt pResult = NULL;
+	TDeclarator*  pResult = NULL;
 	for (int i = 0; i < p->Declarators.size; i++)
 	{
 		if (p->Declarators.pItems[i]->Name != NULL)
@@ -357,7 +357,7 @@ TDeclarator* TDeclaration_FindDeclarator(TDeclaration* _opt p, const char* name)
 	return pResult;
 }
 
-bool TDeclaration_Is_FunctionDeclaration(TDeclaration*_opt  p)
+bool TDeclaration_Is_FunctionDeclaration(TDeclaration*  p)
 {
   if (p != NULL && p->Declarators.size == 1)
   {
@@ -372,9 +372,9 @@ bool TDeclaration_Is_FunctionDeclaration(TDeclaration*_opt  p)
   return false;
 }
 
-const char* TDeclaration_GetFunctionThis(TDeclaration* _opt p)
+const char* TDeclaration_GetFunctionThis(TDeclaration*  p)
 {
-  const char* _opt thisName = NULL;
+  const char*  thisName = NULL;
   if (p != NULL && p->Declarators.size == 1)
   {
     if (p->Declarators.pItems[0]->pParametersOpt != NULL &&
@@ -386,7 +386,7 @@ const char* TDeclaration_GetFunctionThis(TDeclaration* _opt p)
   return thisName;
 }
 
-bool TDeclaration_Is_FunctionDefinition(TDeclaration* _opt p)
+bool TDeclaration_Is_FunctionDefinition(TDeclaration*  p)
 {
   return p != NULL && p->pCompoundStatementOpt != NULL;
 }
@@ -428,7 +428,7 @@ void TParameterDeclaration_Destroy(TParameterDeclaration* p)
 
 bool TAnyDeclaration_Is_StructOrUnionDeclaration(TAnyDeclaration* pAnyDeclaration)
 {
-  TDeclaration * _opt pDeclaration = TAnyDeclaration_As_TDeclaration(pAnyDeclaration);
+  TDeclaration *  pDeclaration = TAnyDeclaration_As_TDeclaration(pAnyDeclaration);
   if (pDeclaration != NULL)
   {
     return TDeclaration_Is_StructOrUnionDeclaration(pDeclaration);
@@ -524,7 +524,7 @@ Result DeclarationsMap_Add(DeclarationsMap* p, const char* name, TAnyDeclaration
 
 TDeclaration* DeclarationsMap_FindDeclaration(DeclarationsMap* p, const char* name)
 {
-	Bucket * _opt pBucket = 
+	Bucket *  pBucket = 
 		MultiMap_FindBucket(p, name);
 	if (pBucket)
 	{
@@ -546,10 +546,10 @@ TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name)
 
 TDeclaration* TProgram_FindFunctionDeclaration(TProgram* p, const char* name)
 {
-  TDeclaration* _opt pDeclaration = NULL;
+  TDeclaration*  pDeclaration = NULL;
   
 
-  Bucket * _opt pBucket =
+  Bucket *  pBucket =
 	  MultiMap_FindBucket(&p->Symbols, name);
   if (pBucket)
   {
@@ -557,7 +557,7 @@ TDeclaration* TProgram_FindFunctionDeclaration(TProgram* p, const char* name)
     {
       if (strcmp(pBucket->data[j]->key, name) == 0)
       {
-        TDeclaration* _opt pDeclaration0 = 
+        TDeclaration*  pDeclaration0 = 
 			TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
 
         if (pDeclaration0 != NULL /* &&
@@ -575,15 +575,15 @@ TDeclaration* TProgram_FindFunctionDeclaration(TProgram* p, const char* name)
 
 TDeclaration* TProgram_FindFunctionDefinition(TProgram* p, const char* name)
 {
-  TDeclaration* _opt pDeclaration = NULL;
-  Bucket * _opt pBucket = MultiMap_FindBucket(&p->Symbols, name);
+  TDeclaration*  pDeclaration = NULL;
+  Bucket *  pBucket = MultiMap_FindBucket(&p->Symbols, name);
   if (pBucket)
   {
     for (size_t j = 0; j < pBucket->size; j++)
     {
       if (strcmp(pBucket->data[j]->key, name) == 0)
       {
-        TDeclaration* _opt pDeclaration0 =
+        TDeclaration*  pDeclaration0 =
 			TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
 
         if (pDeclaration0 != NULL && 
@@ -602,14 +602,14 @@ TDeclaration* TProgram_FindFunctionDefinition(TProgram* p, const char* name)
 //Retorna a declaracao final do tipo entrando em cada typedef. 
 TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName)
 {
-  TDeclaration* _opt pDeclarationResult = NULL;
+  TDeclaration*  pDeclarationResult = NULL;
   for (;;)
   {
-    Bucket * _opt pBucket =
+    Bucket *  pBucket =
 		MultiMap_FindBucket(&p->Symbols, typeName);
     if (pBucket)
     {
-      TDeclaration* _opt pDeclaration = NULL;
+      TDeclaration*  pDeclaration = NULL;
       for (size_t j = 0; j < pBucket->size; j++)
       {
         pDeclaration = NULL;
@@ -619,7 +619,7 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
           if (pDeclaration != NULL &&
               pDeclaration->Specifiers.pTypeSpecifierOpt != NULL)
           {
-            TSingleTypeSpecifier * _opt pSingleTypeSpecifier = TTypeSpecifier_As_TSingleTypeSpecifier(pDeclaration->Specifiers.pTypeSpecifierOpt);
+            TSingleTypeSpecifier *  pSingleTypeSpecifier = TTypeSpecifier_As_TSingleTypeSpecifier(pDeclaration->Specifiers.pTypeSpecifierOpt);
             if (pSingleTypeSpecifier != NULL)
             {
               if (pSingleTypeSpecifier->bIsTypeDef)
@@ -743,7 +743,7 @@ static bool TPostfixExpressionCore_CodePrint2(TPostfixExpressionCore * p,
 
 //Criado para avaliacao do #if
 //Tem que arrumar para fazer os casts do enum
-bool EvaluateConstantExpression(TExpression2 * _opt p, int *pResult)
+bool EvaluateConstantExpression(TExpression2 *  p, int *pResult)
 {
 	int result = -987654321;
 

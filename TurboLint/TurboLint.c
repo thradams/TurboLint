@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     }
     
     //PrintPreprocessedToFile(filename, configFileName, "pre.txt");
-	const char* userpath = "C:\\Users\\thiago\\TurboLint";
+	//const char* userpath = "C:\\Users\\thiago\\TurboLint";
 	//const char* userpath = "C:\\ThiagoDevel\\MobileServer\\MobileServer";
     //PrintASTToFile(filename, configFileName, "teste.cpp", userpath);
 

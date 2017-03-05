@@ -225,7 +225,7 @@ bool TIfStatement_Print(TIfStatement * p, bool b, FILE* fp)
 	return b;
 }
 
-bool TStatement_Print(TStatement * _opt p, bool b, FILE* fp)
+bool TStatement_Print(TStatement *  p, bool b, FILE* fp)
 {
 	if (p == NULL)
 	{
@@ -282,7 +282,7 @@ bool TStatement_Print(TStatement * _opt p, bool b, FILE* fp)
 	return b;
 }
 
-bool TBlockItem_Print(TBlockItem * _opt p, bool b, FILE* fp)
+bool TBlockItem_Print(TBlockItem *  p, bool b, FILE* fp)
 {
 	if (p == NULL)
 	{
@@ -442,7 +442,7 @@ bool TPostfixExpressionCore_Print(TPostfixExpressionCore * p, bool b, FILE* fp)
 	return b;
 }
 
-bool TExpression_Print(TExpression2 * _opt p, const char* name, bool b, FILE* fp)
+bool TExpression_Print(TExpression2 *  p, const char* name, bool b, FILE* fp)
 {
 	if (p == NULL)
 	{
@@ -764,7 +764,7 @@ bool TSingleTypeSpecifier_Print(TSingleTypeSpecifier* p, bool b, FILE* fp)
 	return b;
 }
 
-bool TTypeSpecifier_Print(TTypeSpecifier* _opt p, bool b, FILE* fp)
+bool TTypeSpecifier_Print(TTypeSpecifier*  p, bool b, FILE* fp)
 {
 	if (p == NULL)
 	{

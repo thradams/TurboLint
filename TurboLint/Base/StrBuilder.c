@@ -18,7 +18,7 @@
 #endif
 #include "StringEx.h"
 
-static int IsEmptyStr(const char* _opt psz)
+static int IsEmptyStr(const char*  psz)
 {
   return psz == NULL || psz[0] == '\0';
 }
@@ -43,7 +43,7 @@ void StrBuilder_Swap(StrBuilder* str1,
 {
   StrBuilder temp_Moved = *str1;
   *str1 = *str2;
-  *str2 = _move temp_Moved;
+  *str2 =  temp_Moved;
 }
 
 void StrBuilder_Destroy(StrBuilder* p)
@@ -200,7 +200,7 @@ Result StrBuilder_AppendInt(StrBuilder* p, int i)
 }
 
 void StrBuilder_Attach(StrBuilder* pStrBuilder,
-                       char* _opt psz,
+                       char*  psz,
                        size_t nBytes)
 {
   if (psz != NULL)
@@ -293,7 +293,7 @@ void StrBuilder_Trim(StrBuilder* p)
 
 
 
-Result StrBuilder_AppendUpper(StrBuilder *p, const char* _opt s)
+Result StrBuilder_AppendUpper(StrBuilder *p, const char*  s)
 {
   if (s != NULL)
   {

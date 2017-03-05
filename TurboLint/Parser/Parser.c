@@ -12,7 +12,7 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme);
 bool DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
 {
 	bool bResult = false;
-	Bucket* _opt p = MultiMap_FindBucket(map, name);
+	Bucket*  p = MultiMap_FindBucket(map, name);
 
 	if (p != NULL)
 	{
@@ -83,7 +83,7 @@ void Parser_SetSymbol(Parser* parser,
 	const char* name,
 	TAnyDeclaration* pObject)
 {
-	Bucket* _opt pBucket = MultiMap_FindBucket(&parser->Symbols, name);
+	Bucket*  pBucket = MultiMap_FindBucket(&parser->Symbols, name);
 
 	if (pBucket)
 	{
@@ -394,7 +394,7 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 	{
 		case TK_string_literal:
 		{
-			TPrimaryExpressionValue * _own pPrimaryExpressionValue
+			TPrimaryExpressionValue *  pPrimaryExpressionValue
 				= TPrimaryExpressionValue_Create();
 
 			pPrimaryExpressionValue->token = token;
@@ -410,7 +410,7 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 			}
 			StrBuilder_Append(&adjacentStrings, "\"");
 			String_Set(&pPrimaryExpressionValue->lexeme, adjacentStrings.c_str);
-			*ppPrimaryExpression = (TExpression2*) _move pPrimaryExpressionValue;
+			*ppPrimaryExpression = (TExpression2*)  pPrimaryExpressionValue;
 
 			StrBuilder_Destroy(&adjacentStrings);
 		}
@@ -422,14 +422,14 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 		case TK_HEX_INTEGER:
 		case TK_FLOAT_NUMBER:
 		{
-			TPrimaryExpressionValue * _own  pPrimaryExpressionValue
+			TPrimaryExpressionValue *   pPrimaryExpressionValue
 				= TPrimaryExpressionValue_Create();
 
 			pPrimaryExpressionValue->token = token;
 			String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
 
 			Match(ctx);
-			*ppPrimaryExpression = (TExpression2*) _move pPrimaryExpressionValue;
+			*ppPrimaryExpression = (TExpression2*)  pPrimaryExpressionValue;
 		}
 		break;
 
@@ -440,13 +440,13 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 			Expression0(ctx, &pExpression);
 			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
-			TPrimaryExpressionValue * _own  pPrimaryExpressionValue
+			TPrimaryExpressionValue *   pPrimaryExpressionValue
 				= TPrimaryExpressionValue_Create();
 
 			pPrimaryExpressionValue->token = token;
 			String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
 			pPrimaryExpressionValue->pExpressionOpt = pExpression;
-			*ppPrimaryExpression = (TExpression2*) _move pPrimaryExpressionValue;
+			*ppPrimaryExpression = (TExpression2*)  pPrimaryExpressionValue;
 		}
 		break;
 
@@ -608,12 +608,12 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 		case TK_PLUSPLUS:
 		case TK_MINUSMINUS:
 		{
-			TPostfixExpressionCore * _own pPostfixExpressionCoreNext =
+			TPostfixExpressionCore *  pPostfixExpressionCoreNext =
 				TPostfixExpressionCore_Create();
 			PostfixExpressionCore(ctx, pPostfixExpressionCoreNext);
 			
 			ASSERT(pPostfixExpressionCore->pNext == NULL);
-			pPostfixExpressionCore->pNext = _move pPostfixExpressionCoreNext;
+			pPostfixExpressionCore->pNext =  pPostfixExpressionCoreNext;
 		}
 		break;
 	}
@@ -652,7 +652,7 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 		{
 			// ( type-name ) { initializer-list }
 
-			TPostfixExpressionCore * _own pTPostfixExpressionCore =
+			TPostfixExpressionCore *  pTPostfixExpressionCore =
 				TPostfixExpressionCore_Create();
 
 			MatchToken(ctx, TK_LEFT_PARENTHESIS);
@@ -674,7 +674,7 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 				Match(ctx);
 			}
 
-			*ppExpression = (TExpression2*)_move pTPostfixExpressionCore;
+			*ppExpression = (TExpression2*) pTPostfixExpressionCore;
 		}
 
 		else
@@ -705,11 +705,11 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 		case TK_PLUSPLUS:
 		case TK_MINUSMINUS:
 		{
-			TPostfixExpressionCore * _own pPostfixExpressionCore =
+			TPostfixExpressionCore *  pPostfixExpressionCore =
 				TPostfixExpressionCore_Create();
 			pPostfixExpressionCore->pExpressionLeft = *ppExpression;
 			PostfixExpressionCore(ctx, pPostfixExpressionCore);
-			*ppExpression = (TExpression2*) _move pPostfixExpressionCore;
+			*ppExpression = (TExpression2*)  pPostfixExpressionCore;
 		}
 		break;
 	}
@@ -734,7 +734,7 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 		TExpression2* pAssignmentExpressionRight;
 		AssignmentExpression(ctx, &pAssignmentExpressionRight);
 
-		TBinaryExpression * _own pExpr =
+		TBinaryExpression *  pExpr =
 			TBinaryExpression_Create();
 
 		GetPosition(ctx, &pExpr->Position);
@@ -744,7 +744,7 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 
 		
 
-		*ppExpression = (TExpression2*) _move pExpr;
+		*ppExpression = (TExpression2*)  pExpr;
 	}
 
 	token = Token(ctx);
@@ -752,7 +752,7 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 	if (token == TK_COMMA)
 	{
 		Match(ctx);
-		TBinaryExpression * _own pExpr =
+		TBinaryExpression *  pExpr =
 			TBinaryExpression_Create();
 
 		GetPosition(ctx, &pExpr->Position);
@@ -765,7 +765,7 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 
 		
 
-		*ppExpression = (TExpression2*) _move pExpr;
+		*ppExpression = (TExpression2*)  pExpr;
 	}
 }
 
@@ -2991,8 +2991,8 @@ void Parameter_List(Parser* ctx,
 	*/
 	Tokens token = Token(ctx);
 
-	TParameterDeclaration* _own pParameter = TParameterDeclaration_Create();
-	TParameterList_Push(pParameterList, _move pParameter);
+	TParameterDeclaration*  pParameter = TParameterDeclaration_Create();
+	TParameterList_Push(pParameterList,  pParameter);
 	Parameter_Declaration(ctx, pParameter);
 
 	//Tem mais?
@@ -3441,7 +3441,7 @@ bool Type_Specifier(Parser* ctx,
 	enum-specifier
 	typedef-name
 	*/
-	TSingleTypeSpecifier* _opt pSingleTypeSpecifier = NULL;
+	TSingleTypeSpecifier*  pSingleTypeSpecifier = NULL;
 
 	if (*ppTypeSpecifier != NULL)
 	{
@@ -4036,7 +4036,7 @@ static void TFileMapToStrArray(TFileMap* map, TFileArray* arr)
 
 	for (size_t i = 0; i < map->buckets.size; i++)
 	{
-		Bucket* _opt data = map->buckets.data[i];
+		Bucket*  data = map->buckets.data[i];
 
 		if (data != NULL)
 		{
@@ -4056,7 +4056,7 @@ static void TFileMapToStrArray(TFileMap* map, TFileArray* arr)
 	}
 }
 
-bool GetAST(const char* _opt filename,
+bool GetAST(const char*  filename,
 	const char* configFileName,
 	TProgram* pProgram)
 {

@@ -122,7 +122,7 @@ Result Bucket_Init(Bucket* p, size_t capacity)
 Result Bucket_Create(Bucket** pp)
 {
     Result result = RESULT_OUT_OF_MEM;
-    Bucket* _opt p = (Bucket*)Malloc(sizeof(Bucket) * 1);
+    Bucket*  p = (Bucket*)Malloc(sizeof(Bucket) * 1);
     if (p)
     {
         result = Bucket_Init(p, 0);
@@ -680,7 +680,7 @@ Result MultiMap_Add(MultiMap* map, const char* key, void* data)
 }
 
 
-Bucket* _opt MultiMap_FindBucket(MultiMap* map, const char* key)
+Bucket*  MultiMap_FindBucket(MultiMap* map, const char* key)
 {
   if (map->buckets.data == NULL)
   {
@@ -691,7 +691,7 @@ Bucket* _opt MultiMap_FindBucket(MultiMap* map, const char* key)
   uint32_t hash = HashFunc(key);
   size_t bucket_n = hash % map->buckets.size;
 
-  Bucket* _opt pBucket = map->buckets.data[bucket_n];
+  Bucket*  pBucket = map->buckets.data[bucket_n];
 
   if (pBucket == NULL)
   {

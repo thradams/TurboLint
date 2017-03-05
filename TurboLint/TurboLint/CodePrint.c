@@ -202,7 +202,7 @@ static bool TIfStatement_CodePrint(TIfStatement * p, bool b, FILE* fp)
   return b;
 }
 
-static bool TStatement_CodePrint(TStatement * _opt p, bool b, FILE* fp)
+static bool TStatement_CodePrint(TStatement *  p, bool b, FILE* fp)
 {
   if (p == NULL)
   {
@@ -259,7 +259,7 @@ static bool TStatement_CodePrint(TStatement * _opt p, bool b, FILE* fp)
   return b;
 }
 
-static bool TBlockItem_CodePrint(TBlockItem * _opt p, bool b, FILE* fp)
+static bool TBlockItem_CodePrint(TBlockItem *  p, bool b, FILE* fp)
 {
   if (p == NULL)
   {
@@ -411,7 +411,7 @@ static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b,
   return b;
 }
 
-static bool TExpression_CodePrint(TExpression2 * _opt p,
+static bool TExpression_CodePrint(TExpression2 *  p,
 	const char* name, 
 	bool b,
 	FILE* fp)
@@ -678,7 +678,7 @@ static bool TExpression_CodePrint(TExpression2 * _opt p,
   return b;
 }
 
-  static bool TTypeSpecifier_CodePrint(TTypeSpecifier* _opt p, bool b, FILE* fp)
+  static bool TTypeSpecifier_CodePrint(TTypeSpecifier*  p, bool b, FILE* fp)
 {
   if (p == NULL)
   {
@@ -751,7 +751,7 @@ static bool TExpression_CodePrint(TExpression2 * _opt p,
 }
 
 
-  static bool TInitializer_CodePrint(TInitializer* _opt p, bool b, FILE* fp)
+  static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
 {
 	  if (p == NULL)
 	  {

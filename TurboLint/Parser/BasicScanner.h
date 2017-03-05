@@ -154,7 +154,7 @@ typedef enum
 #define TK_DTOR_QUALIFIER  TK_PERCENT_SIGN
 #define TK_MDTOR_QUALIFIER TK_VERTICAL_LINE
 
-//_move
+//
 #define TK_MOVE TK_ANDAND
 
 

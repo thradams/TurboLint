@@ -21,7 +21,7 @@ void* Realloc(void* ptr, size_t len)
   return p;
 }
 
-void* _opt _own Malloc(size_t len)
+void*   Malloc(size_t len)
 {
   void* p = malloc(len);
 

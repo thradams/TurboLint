@@ -1,5 +1,6 @@
 #include "Scanner.h"
 #include "Parser.h"
+#include "Macro.h"
 
 BasicScanner * Scanner_Top(Scanner * pScanner);;
 
@@ -9,7 +10,7 @@ TMacro* TMacro_Create()
     if(p)
     {
         TMacro temp = TMACRO_INIT;
-        *p = _move temp;
+        *p =  temp;
     }
     return p;
 }
@@ -76,7 +77,7 @@ TFile* TFile_Create()
     if(p)
     {
         TFile temp = TFILE_INIT;
-        *p = _move temp;
+        *p =  temp;
     }
     return p;
 }
@@ -107,28 +108,19 @@ void TFileMap_Destroy(TFileMap* p)
 
 Result TFileMap_Set(TFileMap* map, const char* key, TFile* pFile)
 {
-	//tem que ser case insensitive!
+    //tem que ser case insensitive!
     ASSERT(IsFullPath(key));
-    
-	//converter
-
-
-
-		//Ajusta o file index de acordo com a entrada dele no mapa
-	pFile->FileIndex = map->Size;
-
-
-	Result result = Map_Set(map, key, pFile);
-	String_Set(&pFile->FullPath, key);
-
-	
-	
+    //converter
+    //Ajusta o file index de acordo com a entrada dele no mapa
+    pFile->FileIndex = map->Size;
+    Result result = Map_Set(map, key, pFile);
+    String_Set(&pFile->FullPath, key);
     return result;
 }
 
-TFile* _opt TFileMap_Find(TFileMap* map, const char* key)
+TFile*  TFileMap_Find(TFileMap* map, const char* key)
 {
-	//tem que ser case insensitive!
+    //tem que ser case insensitive!
     return (TFile*)Map_Find2(map, key);
 }
 
@@ -209,28 +201,24 @@ void Scanner_PrintDebug(Scanner* pScanner)
     printf("---\n");
 }
 
-static Result AddStandardMacro(Scanner* pScanner, 
-	const char* name,
-	const char* value)
+static Result AddStandardMacro(Scanner* pScanner,
+                               const char* name,
+                               const char* value)
 {
-	TMacro* pDefine1 = TMacro_Create();
-	String_Set(&pDefine1->Name, name);
-	StrBuilder_Append(&pDefine1->Content, value);
-	pDefine1->FileIndex = 0;
-	TMacroMap_Set(&pScanner->Defines, name, pDefine1);
-	return RESULT_OK;
+    TMacro* pDefine1 = TMacro_Create();
+    String_Set(&pDefine1->Name, name);
+    StrBuilder_Append(&pDefine1->Content, value);
+    pDefine1->FileIndex = 0;
+    TMacroMap_Set(&pScanner->Defines, name, pDefine1);
+    return RESULT_OK;
 }
 
 static Result Scanner_InitCore(Scanner* pScanner)
 {
-  
-
-
     TMacroMap_Init(&pScanner->Defines);
-     
-	StrBuilder_Init(&pScanner->DebugString, 100);
-	StrBuilder_Init(&pScanner->ErrorString, 100);
-
+    MacroMap2_Init(&pScanner->Defines2);
+    StrBuilder_Init(&pScanner->DebugString, 100);
+    StrBuilder_Init(&pScanner->ErrorString, 100);
     //StrBuilder_Init(&pScanner->DebugString, 100);
     //StrBuilder_Init(&pScanner->ErrorString, 100);
     pScanner->bError = false;
@@ -241,24 +229,18 @@ static Result Scanner_InitCore(Scanner* pScanner)
     Array_Init(&pScanner->stack);
     TFileMap_Init(&pScanner->FilesIncluded);
     StrArray_Init(&pScanner->IncludeDir);
-
     //Indica que foi feita uma leitura especulativa
     pScanner->bHasLookAhead = false;
-
     //Valor lido na leitura especulativa
     ScannerItem_Init(&pScanner->LookAhead);
-
-	//__FILE__ __LINE__ __DATE__ __STDC__  __STD_HOSTED__  __TIME__  __STD_VERSION__ 
-	//
-
-	AddStandardMacro(pScanner, "__LINE__", "0");
-	AddStandardMacro(pScanner, "__FILE__", "\"__FILE__\"");
-	AddStandardMacro(pScanner, "__DATE__", "\"__DATE__\"");
-	AddStandardMacro(pScanner, "__TIME__", "\"__TIME__\"");
-	AddStandardMacro(pScanner, "__STDC__", "1");
-	//AddStandardMacro(pScanner, "__STD_HOSTED__", "1");
-	
-
+    //__FILE__ __LINE__ __DATE__ __STDC__  __STD_HOSTED__  __TIME__  __STD_VERSION__
+    //
+    AddStandardMacro(pScanner, "__LINE__", "0");
+    AddStandardMacro(pScanner, "__FILE__", "\"__FILE__\"");
+    AddStandardMacro(pScanner, "__DATE__", "\"__DATE__\"");
+    AddStandardMacro(pScanner, "__TIME__", "\"__TIME__\"");
+    AddStandardMacro(pScanner, "__STDC__", "1");
+    //AddStandardMacro(pScanner, "__STD_HOSTED__", "1");
     return RESULT_OK;
 }
 
@@ -298,7 +280,6 @@ bool Scanner_GetFullPath(Scanner* pScanner,
                          bool bQuotedForm,
                          String* fullPathOut)
 {
-	
     bool bFullPathFound = false;
     //https://msdn.microsoft.com/en-us/library/36k2cdd4.aspx
     /*
@@ -336,9 +317,7 @@ bool Scanner_GetFullPath(Scanner* pScanner,
                     bool bFileExists = FileExists(path.c_str);
                     if(bFileExists)
                     {
-						
-						GetFullPath(path.c_str, fullPathOut);
-
+                        GetFullPath(path.c_str, fullPathOut);
                         //String_Set(fullPathOut, StrBuilder_Release(&path));
                         bFullPathFound = true;
                         break;
@@ -404,21 +383,21 @@ void Scanner_IncludeFile(Scanner* pScanner,
     bool bHasFullPath = false;
     switch(fileIncludeType)
     {
-        case FileIncludeTypeQuoted:
-        case FileIncludeTypeIncludes:
-            bHasFullPath = Scanner_GetFullPath(pScanner,
-                                               includeFileName,
-                                               fileIncludeType == FileIncludeTypeQuoted,
-                                               &fullPath);
-            break;
-        case FileIncludeTypeFullPath:
-            String_Set(&fullPath, includeFileName);
-            bHasFullPath = true;
-            break;
+    case FileIncludeTypeQuoted:
+    case FileIncludeTypeIncludes:
+        bHasFullPath = Scanner_GetFullPath(pScanner,
+                                           includeFileName,
+                                           fileIncludeType == FileIncludeTypeQuoted,
+                                           &fullPath);
+        break;
+    case FileIncludeTypeFullPath:
+        String_Set(&fullPath, includeFileName);
+        bHasFullPath = true;
+        break;
     };
     if(bHasFullPath)
     {
-        TFile* _opt pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
+        TFile*  pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
         if(pFile != NULL && pFile->PragmaOnce)
         {
             //foi marcado como pragma once.. nao faz nada
@@ -428,10 +407,7 @@ void Scanner_IncludeFile(Scanner* pScanner,
             if(pFile == NULL)
             {
                 pFile = TFile_Create();
-				
-				
-				pFile->FileLevel = pScanner->stack.size + 1;
-
+                pFile->FileLevel = pScanner->stack.size + 1;
                 TFileMap_Set(&pScanner->FilesIncluded, fullPath, pFile); //pfile Moved
             }
             BasicScanner* pNewScanner = NULL;
@@ -489,13 +465,13 @@ static void Delete_Scanner(void* pv)
 void Scanner_Destroy(Scanner* pScanner)
 {
     TMacroMap_Destroy(&pScanner->Defines);
+    MacroMap2_Destroy(&pScanner->Defines2);
     StrBuilder_Destroy(&pScanner->DebugString);
     StrBuilder_Destroy(&pScanner->ErrorString);
     ArrayInt_Destroy(&pScanner->StackIfDef);
     Array_Destroy(&pScanner->stack, &Delete_Scanner);
     TFileMap_Destroy(&pScanner->FilesIncluded);
     StrArray_Destroy(&pScanner->IncludeDir);
-
     //Valor lido na leitura especulativa
     ScannerItem_Destroy(&pScanner->LookAhead);
 }
@@ -503,7 +479,6 @@ void Scanner_Destroy(Scanner* pScanner)
 int Scanner_GetCurrentLine(Scanner* pScanner)
 {
     ASSERT(!pScanner->bHasLookAhead);
-
     if(pScanner->bError)
     {
         return -1;
@@ -554,32 +529,27 @@ int Scanner_GetFileIndex(Scanner* pScanner)
 
 Tokens Scanner_Token(Scanner* pScanner)
 {
-
     if(pScanner->bError)
     {
         return TK_EOF;
     }
-
     if (pScanner->bHasLookAhead)
     {
-      return pScanner->LookAhead.token;
+        return pScanner->LookAhead.token;
     }
-    
-      if (pScanner->stack.size == 0)
-      {
+    if (pScanner->stack.size == 0)
+    {
         return TK_EOF;
-      }
-      return ((BasicScanner*)Array_Top(&pScanner->stack))->currentItem.token;
-        
+    }
+    return ((BasicScanner*)Array_Top(&pScanner->stack))->currentItem.token;
 }
 
 const char* Scanner_Lexeme(Scanner* pScanner)
 {
-  if (pScanner->bHasLookAhead)
-  {
-    return pScanner->LookAhead.lexeme.c_str;
-  }
-
+    if (pScanner->bHasLookAhead)
+    {
+        return pScanner->LookAhead.lexeme.c_str;
+    }
     if(pScanner->stack.size == 0)
     {
         return "";
@@ -589,7 +559,6 @@ const char* Scanner_Lexeme(Scanner* pScanner)
 
 BasicScanner* Scanner_Top(Scanner* pScanner)
 {
-    
     if(pScanner->stack.size == 0)
     {
         return NULL;
@@ -599,13 +568,13 @@ BasicScanner* Scanner_Top(Scanner* pScanner)
 
 int Scanner_Line(Scanner* pScanner)
 {
-  ASSERT(!pScanner->bHasLookAhead);
+    ASSERT(!pScanner->bHasLookAhead);
     return Scanner_Top(pScanner)->stream.currentLine;
 }
 
 int Scanner_Col(Scanner* pScanner)
 {
-  ASSERT(!pScanner->bHasLookAhead);
+    ASSERT(!pScanner->bHasLookAhead);
     return Scanner_Top(pScanner)->stream.currentCol;
 }
 
@@ -672,10 +641,17 @@ static Tokens GetToken(Scanner* pScanner)
     return Scanner_Top(pScanner)->currentItem.token;
 }
 
-TMacro* _opt Scanner_FindPreprocessorItem(Scanner* pScanner,
-                                     const char* key)
+TMacro*  Scanner_FindPreprocessorItem(Scanner* pScanner,
+                                      const char* key)
 {
     TMacro* pMacro = TMacroMap_Find(&pScanner->Defines, key);
+    return pMacro;
+}
+
+Macro*  Scanner_FindPreprocessorItem2(Scanner* pScanner,
+                                      const char* key)
+{
+    Macro* pMacro = MacroMap2_Find(&pScanner->Defines2, key);
     return pMacro;
 }
 
@@ -687,21 +663,15 @@ bool Scanner_IsLexeme(Scanner* pScanner, const char* psz)
 
 int PreprocessorExpression(Parser* parser)
 {
-	//Faz o parser da expressão
-
-	TExpression2* pExpression = NULL;
-	ConstantExpression(parser, &pExpression);
-	
-	//..a partir da arvore da expressão 
-	//calcula o valor
-
-	//TODO pegar error
-	int r;
-	EvaluateConstantExpression(pExpression, &r);
-
-
-	TExpression2_Delete(pExpression);
-    
+    //Faz o parser da expressão
+    TExpression2* pExpression = NULL;
+    ConstantExpression(parser, &pExpression);
+    //..a partir da arvore da expressão
+    //calcula o valor
+    //TODO pegar error
+    int r;
+    EvaluateConstantExpression(pExpression, &r);
+    TExpression2_Delete(pExpression);
     return r;
 }
 
@@ -709,39 +679,27 @@ int PreprocessorExpression(Parser* parser)
 int EvalExpression(const char* s, Scanner* pScanner)
 {
     TMacroMap* pDefines = &pScanner->Defines;
-
-	//printf("%s = ", s);
-
+    //printf("%s = ", s);
     //TODO avaliador de expressoes para pre processador
     //https://gcc.gnu.org/onlinedocs/gcc-3.0.2/cpp_4.html#SEC38
-    
     Parser parser;
     Parser_InitString(&parser, "eval expression", s, true);
-    
     if(pDefines)
     {
         //usa o mapa de macros para o pre-processador
         Map_Swap(&parser.Scanner.Defines, pDefines);
     }
-
     Scanner_Next(&parser.Scanner);
-    
-	
     int iRes = PreprocessorExpression(&parser);
-
-
-	//printf(" %d\n", iRes);
-
+    //printf(" %d\n", iRes);
     if (pDefines)
     {
         Map_Swap(&parser.Scanner.Defines, pDefines);
     }
-
     if(parser.bError)
     {
         Scanner_SetError(pScanner, parser.ErrorMessage.c_str);
     }
-
     Parser_Destroy(&parser);
     return iRes;
 }
@@ -906,7 +864,7 @@ static void MacroAppend(StrBuilder* strBuilder,
 bool MacroExpandCore(Scanner* pScanner,
                      const char* strInput,
                      StrBuilder* strBuilderResult,
-                     StrMap* _opt pReplacementListOpt,
+                     StrMap*  pReplacementListOpt,
                      StrSet* pAlreadyExpandList,
                      bool bExpressionMode)
 {
@@ -1192,6 +1150,122 @@ bool MacroExpandCore(Scanner* pScanner,
     return bSomeMacroExpanded;
 }
 
+bool GetNewMacroCallString(Scanner* pScanner,
+                           Macro* pMacro,
+                           TokenArray* ppTokenArray)
+{
+    //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+
+    PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+    TokenArray2_Push(ppTokenArray, ppToken);
+
+    
+    //StrBuilder macroName;
+    //StrBuilder_Init(&macroName, 100);
+    //StrBuilder_Append(&macroName, lexeme);
+    //identificador com nome da macro
+    //BasicScanner_Next(Scanner_Top(pScanner));
+    //Pode ter espaço na hora de chamar a macro
+    Scanner_Match(pScanner);
+    //verificar se tem parametros
+    int nArgsExpected = pMacro->FormalArguments.Size;// pMacro->bIsFunction;
+    int nArgsFound = 0;
+    //fazer uma lista com os parametros
+    if (nArgsExpected > 0)
+    {
+        Tokens token = Scanner_Token(pScanner);
+        if (token == TK_LEFT_PARENTHESIS)
+        {
+            PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+            TokenArray2_Push(ppTokenArray, ppToken);
+            //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+            BasicScanner_Next(Scanner_Top(pScanner));
+            //comeca com 1
+            nArgsFound = 1;
+            int iInsideParentesis = 1;
+            for (;;)
+            {
+                token = Scanner_Token(pScanner);
+                if (token == TK_LEFT_PARENTHESIS)
+                {
+                    //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+                    PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+                    TokenArray2_Push(ppTokenArray, ppToken);
+                    BasicScanner_Next(Scanner_Top(pScanner));
+                    iInsideParentesis++;
+                }
+                else if (token == TK_RIGHT_PARENTHESIS)
+                {
+                    if (iInsideParentesis == 1)
+                    {
+                        //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+                        PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+                        TokenArray2_Push(ppTokenArray, ppToken);
+                        BasicScanner_Next(Scanner_Top(pScanner));
+                        break;
+                    }
+                    iInsideParentesis--;
+                    //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+                    PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+                    TokenArray2_Push(ppTokenArray, ppToken);
+                    BasicScanner_Next(Scanner_Top(pScanner));
+                }
+                else if (token == TK_COMMA)
+                {
+                    if (iInsideParentesis == 1)
+                    {
+                        nArgsFound++;
+                    }
+                    else
+                    {
+                        //continuar...
+                    }
+                    //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+                    PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+                    TokenArray2_Push(ppTokenArray, ppToken);
+                    BasicScanner_Next(Scanner_Top(pScanner));
+                }
+                else
+                {
+                    //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
+                    PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner));
+                    TokenArray2_Push(ppTokenArray, ppToken);
+                    BasicScanner_Next(Scanner_Top(pScanner));
+                }
+            }
+        }
+        else
+        {
+            //oops
+        }
+    }
+    else
+    {
+        //o nome eh a propria expansao
+    }
+    bool bIsMacro = true;
+    if (nArgsExpected != nArgsFound)
+    {
+        if (nArgsFound == 0 && nArgsExpected > 0)
+        {
+            bIsMacro = false;
+            //nao eh macro
+            //no header do windows por ex, tem um min como membro
+            //de struct e o mesmo min eh macro
+            //tratar como nao sendo macro
+            //JObj_PrintDebug(pMacro);
+            //Scanner_PrintDebug(pScanner);
+        }
+        else
+        {
+            ASSERT(false);
+            //JObj_PrintDebug(pMacro);
+            Scanner_PrintDebug(pScanner);
+        }
+    }
+    return bIsMacro;
+    //return false;
+}
 
 //Arranca do prscanenr os tokens que sao a chamada da macro
 //Pode nao ser macro se for verificado que nao tem parametros
@@ -1277,7 +1351,6 @@ static bool GetMacroCallString(Scanner* pScanner,
         if(nArgsFound == 0 && nArgsExpected > 0)
         {
             bIsMacro = false;
-
             //nao eh macro
             //no header do windows por ex, tem um min como membro
             //de struct e o mesmo min eh macro
@@ -1339,6 +1412,30 @@ PreTokens FindPreToken(const char* lexeme)
     return PRETK_NONE;
 }
 
+void ParsePreDefine(Scanner* pScanner)
+{
+    //objetivo eh montar a macro e colocar no mapa
+    Macro* pNewMacro = Macro_Create();
+    //const char* lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
+    //define MATCHED
+    //Scanner_Match(pScanner);
+    //nome da macro
+    const char* lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
+    String2_Set(&pNewMacro->Name, lexeme);
+    Scanner_Match(pScanner);
+    while (GetToken(pScanner) != TK_BREAKLINE)
+    {
+        lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
+        PPToken* ppToken = PPToken_Create(lexeme);
+        TokenArray2_Push(&pNewMacro->TokenSequence, ppToken);
+        BasicScanner_Next(Scanner_Top(pScanner));
+    }
+    MacroMap2_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
+//breakline
+    lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
+    BasicScanner_Next(Scanner_Top(pScanner));
+    //lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
+}
 
 void Scanner_SkipCore(Scanner* pScanner)
 {
@@ -1476,71 +1573,13 @@ void Scanner_SkipCore(Scanner* pScanner)
                 Scanner_Match(pScanner);
                 switch(state)
                 {
-                    case NONE:
-                    case I1:
-                    case E1:
-                    {
-                        int iRes = 0;
-                        if(preToken == PRETK_IF)
-                        {
-                            StrBuilder strMacroCall = STRBUILDER_INIT;
-                            //StrBuilder_Init(&strMacroCall, 100);
-                            GetDefineString(pScanner, &strMacroCall);
-                            StrBuilder strBuilderResult = STRBUILDER_INIT;
-                            //StrBuilder_Init(&strBuilderResult, 100);
-                            MacroExpandCore(pScanner,
-                                            strMacroCall.c_str,
-                                            &strBuilderResult,
-                                            NULL,
-                                            &alreadyExpandList,
-                                            true);
-                            iRes = EvalExpression(strBuilderResult.c_str, pScanner);
-                            StrBuilder_Destroy(&strMacroCall);
-                            StrBuilder_Destroy(&strBuilderResult);
-                        }
-                        else
-                        {
-                            bool bFound = Scanner_FindPreprocessorItem(pScanner, lexeme) != NULL;
-                            if(preToken == PRETK_IFDEF)
-                            {
-                                iRes = bFound ? 1 : 0;
-                            }
-                            else //if (preToken == PRETK_IFNDEF)
-                            {
-                                iRes = !bFound ? 1 : 0;
-                            }
-                        }
-                        if(iRes != 0)
-                        {
-                            StatePush(pScanner, I1);
-                        }
-                        else
-                        {
-                            StatePush(pScanner, I0);
-                        }
-                    }
-                    break;
-                    case I0:
-                        StatePush(pScanner, I0);
-                        break;
-                    case E0:
-                        StatePush(pScanner, E0);
-                        break;
-                }
-                IgnorePreProcessor(pScanner);
-            }
-            else if(preToken == PRETK_ELIF)
-            {
-                Scanner_Match(pScanner);
-                switch(state)
+                case NONE:
+                case I1:
+                case E1:
                 {
-                    case NONE:
-                    case I1:
-                        pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
-                        break;
-                    case I0:
+                    int iRes = 0;
+                    if(preToken == PRETK_IF)
                     {
-                        int iRes = 0;
                         StrBuilder strMacroCall = STRBUILDER_INIT;
                         //StrBuilder_Init(&strMacroCall, 100);
                         GetDefineString(pScanner, &strMacroCall);
@@ -1555,18 +1594,68 @@ void Scanner_SkipCore(Scanner* pScanner)
                         iRes = EvalExpression(strBuilderResult.c_str, pScanner);
                         StrBuilder_Destroy(&strMacroCall);
                         StrBuilder_Destroy(&strBuilderResult);
-                        if(pScanner->StackIfDef.size >= 2)
+                    }
+                    else
+                    {
+                        bool bFound = Scanner_FindPreprocessorItem(pScanner, lexeme) != NULL;
+                        if(preToken == PRETK_IFDEF)
                         {
-                            if((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
-                                    pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
-                            {
-                                if(iRes)
-                                {
-                                    pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = I1;
-                                }
-                            }
+                            iRes = bFound ? 1 : 0;
                         }
-                        else
+                        else //if (preToken == PRETK_IFNDEF)
+                        {
+                            iRes = !bFound ? 1 : 0;
+                        }
+                    }
+                    if(iRes != 0)
+                    {
+                        StatePush(pScanner, I1);
+                    }
+                    else
+                    {
+                        StatePush(pScanner, I0);
+                    }
+                }
+                break;
+                case I0:
+                    StatePush(pScanner, I0);
+                    break;
+                case E0:
+                    StatePush(pScanner, E0);
+                    break;
+                }
+                IgnorePreProcessor(pScanner);
+            }
+            else if(preToken == PRETK_ELIF)
+            {
+                Scanner_Match(pScanner);
+                switch(state)
+                {
+                case NONE:
+                case I1:
+                    pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
+                    break;
+                case I0:
+                {
+                    int iRes = 0;
+                    StrBuilder strMacroCall = STRBUILDER_INIT;
+                    //StrBuilder_Init(&strMacroCall, 100);
+                    GetDefineString(pScanner, &strMacroCall);
+                    StrBuilder strBuilderResult = STRBUILDER_INIT;
+                    //StrBuilder_Init(&strBuilderResult, 100);
+                    MacroExpandCore(pScanner,
+                                    strMacroCall.c_str,
+                                    &strBuilderResult,
+                                    NULL,
+                                    &alreadyExpandList,
+                                    true);
+                    iRes = EvalExpression(strBuilderResult.c_str, pScanner);
+                    StrBuilder_Destroy(&strMacroCall);
+                    StrBuilder_Destroy(&strBuilderResult);
+                    if(pScanner->StackIfDef.size >= 2)
+                    {
+                        if((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
+                                pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
                         {
                             if(iRes)
                             {
@@ -1574,12 +1663,20 @@ void Scanner_SkipCore(Scanner* pScanner)
                             }
                         }
                     }
+                    else
+                    {
+                        if(iRes)
+                        {
+                            pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = I1;
+                        }
+                    }
+                }
+                break;
+                case E0:
                     break;
-                    case E0:
-                        break;
-                    case E1:
-                        ASSERT(0);
-                        break;
+                case E1:
+                    ASSERT(0);
+                    break;
                 }
                 IgnorePreProcessor(pScanner);
             }
@@ -1593,31 +1690,31 @@ void Scanner_SkipCore(Scanner* pScanner)
                 IgnorePreProcessor(pScanner);
                 switch(state)
                 {
-                    case NONE:
-                        ASSERT(0);
-                        break;
-                    case I1:
-                        pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
-                        break;
-                    case I0:
-                        if(pScanner->StackIfDef.size >= 2)
-                        {
-                            if((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
-                                    pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
-                            {
-                                pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E1;
-                            }
-                        }
-                        else
+                case NONE:
+                    ASSERT(0);
+                    break;
+                case I1:
+                    pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
+                    break;
+                case I0:
+                    if(pScanner->StackIfDef.size >= 2)
+                    {
+                        if((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
+                                pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
                         {
                             pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E1;
                         }
-                        break;
-                    case E0:
-                        break;
-                    case E1:
-                        ASSERT(false);
-                        break;
+                    }
+                    else
+                    {
+                        pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E1;
+                    }
+                    break;
+                case E0:
+                    break;
+                case E1:
+                    ASSERT(false);
+                    break;
                 }
             }
             else if(preToken == PRETK_ERROR)
@@ -1661,22 +1758,26 @@ void Scanner_SkipCore(Scanner* pScanner)
             }
             else if(preToken == PRETK_DEFINE)
             {
+                //TODO depois apagar este fonte
                 Scanner_Match(pScanner);
-                if(!IsIncludeState(state))
+                if (!IsIncludeState(state))
                 {
                     IgnorePreProcessor(pScanner);
                     break;
                 }
+#if 1 //NEWEXPANSION
+                ParsePreDefine(pScanner);
+#else
                 lexeme = BasicScanner_Lexeme(Scanner_Top(pScanner));
                 TMacro* pDefine = Scanner_FindPreprocessorItem(pScanner, lexeme);
                 //TMacro* pArgs = NULL;
-                if(pDefine != NULL)
+                if (pDefine != NULL)
                 {
                     //warning!
                     //ja foi definido  - fontes da MS
                     /*
-                    #define __inout_ecount_z_opt(size)                               _SAL1_Source_(__inout_ecount_z_opt, (size), __inout_ecount_opt(size) __pre __nullterminated __post __nullterminated)
-                    #define __inout_ecount_z_opt(size)                               _SAL1_Source_(__inout_ecount_z_opt, (size), __inout_ecount_opt(size) __pre __nullterminated __post __nullterminated)
+#define __inout_ecount_z_opt(size)                               _SAL1_Source_(__inout_ecount_z_opt, (size), __inout_ecount_opt(size) __pre __nullterminated __post __nullterminated)
+#define __inout_ecount_z_opt(size)                               _SAL1_Source_(__inout_ecount_z_opt, (size), __inout_ecount_opt(size) __pre __nullterminated __post __nullterminated)
                     */
                     //ASSERT(false);
                     //Scanner_PrintDebug(pScanner);
@@ -1703,28 +1804,28 @@ void Scanner_SkipCore(Scanner* pScanner)
                 //AQUI NAO PODE IGNORAR ESPACOS!
                 //SE ESTA GRUADO EH MACRO COM PARAMETROS
                 /*
-                #define X 1
-                #define A(a, b) a X  b X
+#define X 1
+#define A(a, b) a X  b X
                 A(1, 2)
                 VERSUS
-                #define X 1
-                #define A (a, b) a X  b X
+#define X 1
+#define A (a, b) a X  b X
                 A(1, 2)
                 */
                 //SkipSpaces(pScanner);
                 //verificar se tem parametros
-                if(Scanner_Token(pScanner) == TK_LEFT_PARENTHESIS)
+                if (Scanner_Token(pScanner) == TK_LEFT_PARENTHESIS)
                 {
                     Scanner_Match(pScanner);
-                    for(;;)
+                    for (;;)
                     {
                         token = Scanner_Token(pScanner);
-                        if(token == TK_RIGHT_PARENTHESIS)
+                        if (token == TK_RIGHT_PARENTHESIS)
                         {
                             Scanner_Match(pScanner);
                             break;
                         }
-                        if(token == TK_BREAKLINE ||
+                        if (token == TK_BREAKLINE ||
                                 token == TK_EOF)
                         {
                             //oopss
@@ -1735,7 +1836,7 @@ void Scanner_SkipCore(Scanner* pScanner)
                         //JObj_PushString(pArgs, lexeme);
                         Scanner_Match(pScanner);
                         token = Scanner_Token(pScanner);
-                        if(token == TK_COMMA)
+                        if (token == TK_COMMA)
                         {
                             Scanner_Match(pScanner);
                             //tem mais
@@ -1748,6 +1849,7 @@ void Scanner_SkipCore(Scanner* pScanner)
                 //JObj_SetString(pDefine, "content", strBuilder.c_str);
                 StrBuilder_Swap(&pDefine->Content, &strBuilder);
                 StrBuilder_Destroy(&strBuilder);
+#endif
             }
             else
             {
@@ -1769,14 +1871,47 @@ void Scanner_SkipCore(Scanner* pScanner)
                 BasicScanner_Next(Scanner_Top(pScanner));
             }
         }
-        else if(token == TK_identifier)
+        else if (token == TK_identifier)
         {
-            if(!IsIncludeState(state))
+            if (!IsIncludeState(state))
             {
                 Scanner_Match(pScanner);
                 continue;
             }
             BasicScanner* pBasicScanner = Scanner_Top(pScanner);
+            const char* lexeme = BasicScanner_Lexeme(pBasicScanner);
+#if 1 //NEWEXPANSION
+            Macro* pMacro2 = Scanner_FindPreprocessorItem2(pScanner, lexeme);
+            if (pMacro2 != NULL)
+            {
+                StrBuilder2 strBuilder2 = STRBUILDER2_INIT;
+                TokenArray ppTokenArray = TOKENARRAY_INIT;
+                
+                //confirma realmente se eh p expandir
+                bool bIsMacro = GetNewMacroCallString(pScanner,
+                    pMacro2, 
+                    &ppTokenArray);
+
+                if (bIsMacro)
+                {
+                    ExpandMacroToText(&ppTokenArray,
+                                      &pScanner->Defines2,
+                                      false,
+                                      false,
+                                      NULL,
+                                      &strBuilder2);
+                    PushExpandedMacro(pScanner,
+                                      pMacro2->Name,
+                                      strBuilder2.c_str);
+                }
+                TokenArray2_Destroy(&ppTokenArray);
+                StrBuilder2_Destroy(&strBuilder2);
+                if (!bIsMacro)
+                {
+                    break;
+                }
+            }
+#endif
             TMacro* pMacro = NULL;
             if(pBasicScanner->bMacroExpanded)
             {
@@ -1819,12 +1954,13 @@ void Scanner_SkipCore(Scanner* pScanner)
                 //faz uma string que representa a chamada da macro
                 StrBuilder strMacroCall = STRBUILDER_INIT;
                 //StrBuilder_Init(&strMacroCall, 100);
+                ////////////////////////////////////////////////////
+                ////////////////////////////////////////////////////
                 bool bIsMacro = GetMacroCallString(pScanner, pMacro, &strMacroCall);
                 if(bIsMacro)
                 {
                     StrBuilder strBuilderResult;// = STRBUILDER_INIT;
                     StrBuilder_Init(&strBuilderResult, 100);
-                    
                     bool bExpressionMode =
                         pScanner->bExpressionMode;
                     //expanda a chamda da macro
@@ -1966,19 +2102,19 @@ void Scanner_Next(Scanner* pScanner)
 {
     if(!pScanner->bError)
     {
-      if (pScanner->bHasLookAhead)
-      {
-        ScannerItem_Reset(&pScanner->LookAhead);
-        pScanner->bHasLookAhead = false;
-        //Na verdade ja esta apontando para o proximo
-        //so nao esta usando
-        //agora vai usar
-      }
-      else
-      {
-        BasicScanner_Next(Scanner_Top(pScanner));
-        Scanner_Skip(pScanner);
-      }
+        if (pScanner->bHasLookAhead)
+        {
+            ScannerItem_Reset(&pScanner->LookAhead);
+            pScanner->bHasLookAhead = false;
+            //Na verdade ja esta apontando para o proximo
+            //so nao esta usando
+            //agora vai usar
+        }
+        else
+        {
+            BasicScanner_Next(Scanner_Top(pScanner));
+            Scanner_Skip(pScanner);
+        }
     }
 }
 
@@ -2034,43 +2170,33 @@ void PrintPreprocessedToFile(const char* fileIn,
 
 void Scanner_GetScannerItemCopy(Scanner* pScanner, ScannerItem* scannerItem)
 {
-  if (pScanner->bHasLookAhead)
-  {
-    ScannerItem_Copy(scannerItem, &pScanner->LookAhead);
-  }
-  else
-  {
-    ScannerItem_Copy(scannerItem, &Scanner_Top(pScanner)->currentItem);
-  }
+    if (pScanner->bHasLookAhead)
+    {
+        ScannerItem_Copy(scannerItem, &pScanner->LookAhead);
+    }
+    else
+    {
+        ScannerItem_Copy(scannerItem, &Scanner_Top(pScanner)->currentItem);
+    }
 }
 
 
 ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
 {
-  if (!pScanner->bHasLookAhead)
-  {
-    //Fabricar o lookahead
-    
-    //copia o atual para o loakahead
-    
+    if (!pScanner->bHasLookAhead)
+    {
+        //Fabricar o lookahead
+        //copia o atual para o loakahead
+        ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
+        ScannerItem_Copy(&pScanner->LookAhead,
+                         &Scanner_Top(pScanner)->currentItem);
+        //Mover scanner p proximo
+        BasicScanner_Next(Scanner_Top(pScanner));
+        Scanner_Skip(pScanner);
+        //So no fim para que o mover seja normal
+        pScanner->bHasLookAhead = true;
+        ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
+    }
     ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
-
-    ScannerItem_Copy(&pScanner->LookAhead,
-                     &Scanner_Top(pScanner)->currentItem);
-    
-    
-
-    //Mover scanner p proximo
-    BasicScanner_Next(Scanner_Top(pScanner));
-    Scanner_Skip(pScanner);    
-
-    //So no fim para que o mover seja normal
-    pScanner->bHasLookAhead = true;
-
-    ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
-  }
-
-  ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
-
-  return &Scanner_Top(pScanner)->currentItem;
+    return &Scanner_Top(pScanner)->currentItem;
 }

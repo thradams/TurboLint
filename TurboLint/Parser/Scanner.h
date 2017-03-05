@@ -4,6 +4,8 @@
 #include "..\Base\Array.h"
 #include "BasicScanner.h"
 #include "..\Base\Map.h"
+#include "Macro.h"
+
 
 typedef struct
 {
@@ -40,7 +42,7 @@ typedef Map TFileMap;
 
 void TFileMap_Destroy(TFileMap* p);
 Result TFileMap_Set(TFileMap *map, const char*key, TFile *data);
-TFile* _opt TFileMap_Find(TFileMap* map, const char* key);
+TFile*  TFileMap_Find(TFileMap* map, const char* key);
 Result TFileMap_DeleteItem(TFileMap *map, const char* key);
 void TFile_DeleteVoid(void* p);
 
@@ -60,6 +62,7 @@ typedef struct
 
     //Mapa dos defines
     TMacroMap Defines;
+    MacroMap  Defines2;
 
     //Stack usado para #if #else etc
     ArrayInt StackIfDef;

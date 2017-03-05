@@ -6,3 +6,8 @@
 /TurboLint/Debug
 /TurboLint.VC.VC.opendb
 /TurboLint.VC.db
+/.vs/TurboLint/v14/.suo
+*.orig
+/TurboLint/x64/Debug
+/TurboLint/pre.txt
+/TurboLint/TurboLint.vcxproj.user

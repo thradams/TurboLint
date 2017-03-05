@@ -27,7 +27,7 @@ bool IsInPath(const char * filePath, const char* path)
   return true;
 }
 
-bool IsFullPath(const char* _opt path)
+bool IsFullPath(const char*  path)
 {
   if (path != NULL)
   {
@@ -78,14 +78,14 @@ Result LoadFile(const char* filename, const char** out, size_t* szOut)
 {
   Result result = RESULT_FAIL;
   size_t lSize = 0;
-  FILE* _opt fp = (FILE* _opt) fopen(filename, "rb");
+  FILE*  fp = (FILE* ) fopen(filename, "rb");
 
   if (fp)
   {
     fseek(fp, 0L, SEEK_END);
     lSize = ftell(fp);
     rewind(fp);
-    char* _opt buffer = (char*)malloc(lSize + 1);
+    char*  buffer = (char*)malloc(lSize + 1);
 
     if (buffer)
     {
@@ -195,7 +195,7 @@ Result SStream_InitFile(SStream* pStream,
   return result;
 }
 
-Result SStream_Init(SStream* pStream, const char* name, const char* _opt text)
+Result SStream_Init(SStream* pStream, const char* name, const char*  text)
 {
   pStream->currentLine = 1;
   pStream->currentCol = 1;

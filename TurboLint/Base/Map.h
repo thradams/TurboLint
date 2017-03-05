@@ -96,7 +96,7 @@ Result MultiMap_Add(MultiMap *map, const char*key, void *data);
 //Retorna todo bucket que tem o mesm hash
 //Ainda é preciso percorrer para saber se sao da mesma key
 //Varias entradas para mesma key
-Bucket* _opt MultiMap_FindBucket(MultiMap* map, const char* key);
+Bucket* MultiMap_FindBucket(MultiMap* map, const char* key);
 void MultiMap_Swap(MultiMap* map, MultiMap* map2);
 
 

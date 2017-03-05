@@ -145,16 +145,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Base\Array.c" />
+    <ClCompile Include="Base\Array2.c" />
     <ClCompile Include="Base\dmalloc.c" />
     <ClCompile Include="Base\Map.c" />
+    <ClCompile Include="Base\Map2.c" />
     <ClCompile Include="Base\StrBuilder.c" />
     <ClCompile Include="Base\Stream.c" />
+    <ClCompile Include="Base\String2.c" />
     <ClCompile Include="Base\StringEx.c" />
     <ClCompile Include="Parser\Ast.c" />
     <ClCompile Include="Parser\AstPrint.c" />
     <ClCompile Include="Parser\BasicScanner.c" />
+    <ClCompile Include="Parser\Macro.cpp" />
     <ClCompile Include="Parser\Parser.c" />
+    <ClCompile Include="Parser\PPToken.cpp" />
     <ClCompile Include="Parser\Scanner.c" />
+    <ClCompile Include="Parser\TokenArray.cpp" />
     <ClCompile Include="TurboLint.c" />
     <ClCompile Include="TurboLint\AstMatch.c" />
     <ClCompile Include="TurboLint\CodePrint.c" />
@@ -162,18 +168,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base\Array.h" />
+    <ClInclude Include="Base\Array2.h" />
     <ClInclude Include="Base\config.h" />
     <ClInclude Include="Base\dmalloc.h" />
     <ClInclude Include="Base\Map.h" />
+    <ClInclude Include="Base\Map2.h" />
     <ClInclude Include="Base\Result.h" />
     <ClInclude Include="Base\StrBuilder.h" />
     <ClInclude Include="Base\Stream.h" />
+    <ClInclude Include="Base\String2.h" />
     <ClInclude Include="Base\StringEx.h" />
     <ClInclude Include="Parser\Ast.h" />
     <ClInclude Include="Parser\AstPrint.h" />
     <ClInclude Include="Parser\BasicScanner.h" />
+    <ClInclude Include="Parser\Macro.h" />
     <ClInclude Include="Parser\Parser.h" />
+    <ClInclude Include="Parser\PPToken.h" />
     <ClInclude Include="Parser\Scanner.h" />
+    <ClInclude Include="Parser\TokenArray.h" />
     <ClInclude Include="TurboLint\AstMatch.h" />
     <ClInclude Include="TurboLint\CodePrint.h" />
     <ClInclude Include="TurboLint\TCLint2.h" />
