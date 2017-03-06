@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
         }
     }
 	
-    if(bPrintPreprocessed)
+    //if(bPrintPreprocessed)
     {
         PrintPreprocessedToFile(filename, configFileName, "pre.txt");
     }
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     //Aqui poderia ir uma lista de folders
     //que sera convertida array de indices..
     //de arquivos que estao naquele folder
-    RunLint(configFileName, filename);
+    //RunLint(configFileName, filename);
     return 0;
 }
 

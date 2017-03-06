@@ -10,9 +10,10 @@ typedef struct
 	bool bIsFunction;
 	TokenArray TokenSequence;
 	TokenArray FormalArguments;
+	int FileIndex;
 } Macro;
 
-#define MACRO_INIT { STRING2_INIT, false , TOKENARRAY_INIT, TOKENARRAY_INIT}
+#define MACRO_INIT { STRING2_INIT, false , TOKENARRAY_INIT, TOKENARRAY_INIT, -1}
 Macro* Macro_Create();
 
 

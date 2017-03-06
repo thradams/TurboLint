@@ -2,18 +2,29 @@
 #include "String.h"
 #include  "TokenArray.h"
 
+typedef enum
+{
+	PPTokenType_Identifier,
+	PPTokenType_Number,
+	PPTokenType_CharConstant,
+	PPTokenType_StringLiteral,
+	PPTokenType_Punctuator,
+	PPTokenType_Other,
+} PPTokenType;
+
 typedef struct PPToken
 {
+	PPTokenType Token;
 	String2 Lexeme;
 	TokenSet HiddenSet;
 } PPToken;
 
-#define TOKEN_INIT { STRING2_INIT }
+#define TOKEN_INIT { PPTokenType_Other, STRING2_INIT, TOKENSET_INIT }
 
 void PPToken_Init(PPToken* p);
 void PPToken_Destroy(PPToken* p);
 
-PPToken*  PPToken_Create(const char* s);
+PPToken*  PPToken_Create(const char* s, PPTokenType token);
 PPToken*  PPToken_Clone(PPToken* p);
 void PPToken_Delete(PPToken * p);
 void PPToken_Swap(PPToken * pA, PPToken * pB);
@@ -28,3 +39,4 @@ bool PPToken_IsCharLit(PPToken* pHead);
 bool PPToken_IsOpenPar(PPToken* pHead);
 bool PPToken_IsClosePar(PPToken* pHead);
 bool PPToken_IsChar(PPToken* pHead, char ch);
+bool PPToken_IsLexeme(PPToken* pHead, const char* ch);

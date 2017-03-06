@@ -4081,7 +4081,7 @@ bool GetAST(const char*  filename,
 	printf("%s\n", GetCompletationMessage(&parser));
 	MultiMap_Swap(&parser.Symbols, &pProgram->Symbols);
 
-	TMacroMap_Swap(&parser.Scanner.Defines, &pProgram->Defines);
+	MacroMap2_Swap(&parser.Scanner.Defines2, &pProgram->Defines);
 	Map_Swap(&parser.EnumMap, &pProgram->EnumMap);
 
 	bResult = !parser.bError;

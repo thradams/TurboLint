@@ -23,12 +23,12 @@ void PPToken_Swap(PPToken * pA, PPToken * pB)
 
 PPToken*  PPToken_Clone(PPToken* p)
 {
-	PPToken* pNew = PPToken_Create(p->Lexeme);
+	PPToken* pNew = PPToken_Create(p->Lexeme, p->Token);
 	TokenSetAppendCopy(&pNew->HiddenSet, &p->HiddenSet);
 	return pNew;
 }
 
-PPToken* PPToken_Create(const char* s)
+PPToken* PPToken_Create(const char* s, PPTokenType token)
 {
 	PPToken* p = (PPToken*)malloc(sizeof(PPToken));
 
@@ -37,6 +37,7 @@ PPToken* PPToken_Create(const char* s)
 		PPToken t = TOKEN_INIT;
 		*p = t;
 		String2_Set(&p->Lexeme, s);
+		p->Token = token;
 	}
 
 	return p;
@@ -53,18 +54,7 @@ void PPToken_Delete(PPToken * p)
 
 bool PPToken_IsIdentifier(PPToken* pHead)
 {
-	if (pHead->Lexeme[0] >= 'A' && 
-		pHead->Lexeme[0] <= 'Z')
-	{
-		return true;
-	}
-
-	if (pHead->Lexeme[0] >= 'a' &&
-		pHead->Lexeme[0] <= 'z')
-	{
-		return true;
-	}
-	return false;
+	return pHead->Token == PPTokenType_Identifier;
 }
 
 bool PPToken_IsSpace(PPToken* pHead)
@@ -91,25 +81,32 @@ bool PPToken_IsConcatOp(PPToken* pHead)
 
 bool PPToken_IsStringLit(PPToken* pHead)
 {
-	return pHead->Lexeme[0] == '"';
+	return pHead->Token == PPTokenType_StringLiteral;
 }
 
 bool PPToken_IsCharLit(PPToken* pHead)
 {
-	return pHead->Lexeme[0] == '\'';
+	return pHead->Token == PPTokenType_CharConstant;	
 }
 
 bool PPToken_IsOpenPar(PPToken* pHead)
 {
-	return pHead->Lexeme[0] == '(';
+	return pHead->Lexeme[0] == '('&&
+		   pHead->Lexeme[1] == '\0';
 }
 bool PPToken_IsClosePar(PPToken* pHead)
 {
-	return pHead->Lexeme[0] == '(';
+	return pHead->Lexeme[0] == '(' &&
+		pHead->Lexeme[1] == '\0';
 }
 
 bool PPToken_IsChar(PPToken* pHead, char ch)
 {
 	return pHead->Lexeme[0] == ch &&
 		   pHead->Lexeme[1] == '\0';
+}
+
+bool PPToken_IsLexeme(PPToken* pHead, const char* lexeme)
+{
+	return strcmp(pHead->Lexeme, lexeme) == 0;
 }

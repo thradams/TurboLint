@@ -5,6 +5,7 @@
 #include "..\Base\Array.h"
 #include "..\Base\StringEx.h"
 #include "Scanner.h"
+#include "Macro.h"
 
 #define CAST(FROM, TO) \
 inline TO *  FROM##_As_##TO(FROM*  p)\
@@ -717,13 +718,13 @@ typedef struct
   DeclarationsMap Symbols;
 
   //Defines
-  TMacroMap Defines;
+  MacroMap Defines;
 
   Map EnumMap;
 
 } TProgram;
 
-#define TPROGRAM_INIT {TDECLARATIONS_INIT, STRARRAY_INIT, DECLARATIONSMAP_INIT, TMACRP_MAP_INIT, MAP_INIT}
+#define TPROGRAM_INIT {TDECLARATIONS_INIT, STRARRAY_INIT, DECLARATIONSMAP_INIT, MACROMAP_INIT, MAP_INIT}
 void TProgram_Destroy(TProgram* p);
 TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName);
 TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name);

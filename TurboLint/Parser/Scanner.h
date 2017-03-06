@@ -9,28 +9,6 @@
 
 typedef struct
 {
-    String Name;
-    StrArray Args;
-    StrBuilder Content;
-    int FileIndex;
-} TMacro;
-#define TMACRO_INIT { STRING_INIT, STRARRAY_INIT, STRBUILDER_INIT , -1}
-
-TMacro* TMacro_Create();
-void TMacro_Delete(TMacro*);
-
-typedef Map TMacroMap;
-#define TMACRP_MAP_INIT MAP_INIT
-
-void TMacroMap_Init(TMacroMap* p);
-void TMacroMap_Destroy(TMacroMap* p);
-Result TMacroMap_Set(TMacroMap *map, const char*key, TMacro *data);
-TMacro* TMacroMap_Find(TMacroMap* map, const char* key);
-Result TMacroMap_DeleteItem(TMacroMap *map, const char* key);
-void TMacroMap_Swap(TMacroMap *a, TMacroMap *b);
-
-typedef struct
-{
     String FullPath;
     int FileIndex;
     bool PragmaOnce;
@@ -61,7 +39,6 @@ typedef struct
     Array stack;
 
     //Mapa dos defines
-    TMacroMap Defines;
     MacroMap  Defines2;
 
     //Stack usado para #if #else etc

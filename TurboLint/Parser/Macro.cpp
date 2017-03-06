@@ -75,9 +75,9 @@ void HidenSetAdd(const TokenSet* hs,
     TokenArray2_Push(pOut, PPToken_Clone(t));
   }
 
-  printf("hsadd returns: ");
+  //printf("hsadd returns: ");
   TokenArray2_Print(pOut);
-  printf("\n");
+  //printf("\n");
 }
 
 void ExpandMacro(const TokenArray* pTokenSequence,
@@ -221,11 +221,11 @@ void SubstituteArgs(Macro *pMacro,
   while (is.Size > 0)
   {
 
-    printf("subst: is=");
+    //printf("subst: is=");
     TokenArray2_Print(&is);
-    printf(" os=");
+    //printf(" os=");
     TokenArray2_Print(&os);
-    printf("\n");
+    //printf("\n");
 
     PPToken* head = TokenArray2_PopFront(&is);
 
@@ -255,7 +255,9 @@ void SubstituteArgs(Macro *pMacro,
         StrBuilder2 strBuilder = STRBUILDER2_INIT;
         AppendStringize(&strBuilder, aseq);
         TokenArray2_Erase(&is, 0, idx + 1);
-        TokenArray2_Push(&os, PPToken_Create(strBuilder.c_str));
+		
+		//TODO token tipo?
+        TokenArray2_Push(&os, PPToken_Create(strBuilder.c_str, PPTokenType_Other));
         StrBuilder2_Destroy(&strBuilder);
         continue;
       }
@@ -372,10 +374,10 @@ void SubstituteArgs(Macro *pMacro,
           {
             // Erase up to ##
             TokenArray2_Print(&is);
-            printf("-\n");
+            //printf("-\n");
             TokenArray2_Erase(&is, 0, idx);
             TokenArray2_Print(&is);
-            printf("-\n");
+            //printf("-\n");
             TokenArray2_AppendCopy(&os, aseq);
           }
         }
@@ -540,9 +542,9 @@ bool GatherArgs(const char* name,
     for (;;)
     {
       ArgToken(tokens, get_more, true, &t);
-      printf("tokens=");
+      //printf("tokens=");
       TokenArray2_Print(tokens);
-      printf("\n");
+      //printf("\n");
 
       if (bracket == 0 && (
             (terminate == '.' && (PPToken_IsChar(&t, ',') || PPToken_IsChar(&t, ')'))) ||
@@ -568,7 +570,7 @@ bool GatherArgs(const char* name,
         * The end of file was reached while
         * gathering a macro's arguments
         */
-        printf("macro [%s] EOF while reading function macro arguments", name);
+        //printf("macro [%s] EOF while reading function macro arguments", name);
         return (false);
       }
 
@@ -580,9 +582,9 @@ bool GatherArgs(const char* name,
       TokenArray2_Push(pV, PPToken_Clone(&t));
     }
 
-    printf("Gather args returns: ");
+    //printf("Gather args returns: ");
     TokenArray2_Print(pV);
-    printf("\n");
+    //printf("\n");
 
     // Check if varargs last optional argument was not supplied
     if (terminate == '.' && PPToken_IsChar(&t, ')'))
@@ -614,7 +616,7 @@ bool GatherArgs(const char* name,
       * The arguments to a function-like macro did
       * not terminate with a closing bracket
       */
-      printf("macro [%s] close bracket expected for function-like macro", name);
+      //printf("macro [%s] close bracket expected for function-like macro", name);
       return (false);
     }
   }
@@ -622,6 +624,103 @@ bool GatherArgs(const char* name,
   //#endif
   return (true);
 }
+
+/*
+* Remove from tokens and return the elements comprising the arguments to the defined
+* operator, * such as "defined X" or "defined(X)"
+* This is the rule when processing #if #elif expressions
+*/
+void GatherDefinedOperator(TokenArray* tokens,	
+	const MacroMap* macros,
+	TokenArray* result)
+{
+	//TokenArray tokens = TOKENARRAY_INIT;
+	//TokenArray2_AppendCopy(&tokens, tokensIn);
+
+	// Skip leading space
+	while (PPToken_IsSpace(tokens->pItems[0])) 
+	{
+		PPToken* pp = TokenArray2_PopFront(tokens);
+		TokenArray2_Push(result, pp);
+	}
+
+	if ((PPToken_IsIdentifier(tokens->pItems[0])))
+	{
+		// defined X form
+		if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
+		{
+			PPToken* pp0 = TokenArray2_PopFront(tokens);
+			String2_Set(&pp0->Lexeme, "1");
+			TokenArray2_Push(result, pp0);
+		}
+		else
+		{
+			PPToken* pp0 = TokenArray2_PopFront(tokens);
+			String2_Set(&pp0->Lexeme, "0");
+			TokenArray2_Push(result, pp0);
+		}		
+		return;
+	}
+	else if ((PPToken_IsChar(tokens->pItems[0], '(')))
+	{
+		// defined (X) form
+
+		
+		PPToken_Delete(TokenArray2_PopFront(tokens));
+
+		
+
+		
+		// Skip spaces
+		while (PPToken_IsSpace(tokens->pItems[0]))
+		{
+			PPToken* pp = TokenArray2_PopFront(tokens);
+			TokenArray2_Push(result, pp);
+		}
+
+		if (!PPToken_IsIdentifier(tokens->pItems[0]))
+		{
+			//goto error;
+		}
+
+		if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
+		{
+			PPToken* pp0 = TokenArray2_PopFront(tokens);
+			String2_Set(&pp0->Lexeme, "1");
+			TokenArray2_Push(result, pp0);
+		}
+		else
+		{
+			PPToken* pp0 = TokenArray2_PopFront(tokens);
+			String2_Set(&pp0->Lexeme, "0");
+			TokenArray2_Push(result, pp0);
+		}
+
+		//PPToken* pp = TokenArray2_PopFront(&tokens);
+		//TokenArray2_Push(result, pp);
+
+		// Skip spaces
+		while (PPToken_IsSpace(tokens->pItems[0]))
+		{
+			PPToken* pp = TokenArray2_PopFront(tokens);
+			TokenArray2_Push(result, pp);
+		}
+
+		if (!PPToken_IsChar(tokens->pItems[0], ')'))
+		{
+			//goto error;
+		}
+
+		PPToken_Delete(TokenArray2_PopFront(tokens));
+		//TokenArray2_Push(result, pp);
+
+		return;
+	}
+	else
+	{
+	}
+}
+
 
 void ExpandMacro(const TokenArray* tsOriginal,
 	const MacroMap* macros,
@@ -637,15 +736,15 @@ void ExpandMacro(const TokenArray* tsOriginal,
   TokenArray ts = TOKENARRAY_INIT;
   TokenArray2_AppendCopy(&ts, tsOriginal);
 
-  printf("Expanding: ");
+  //printf("Expanding: ");
   TokenArray2_Print(&ts);
-  printf("\n");
+  //printf("\n");
 
   while (ts.Size > 0)
   {
-    printf("r = ");
+    //printf("r = ");
     TokenArray2_Print(&r);
-    printf("\n");
+    //printf("\n");
 
     PPToken* pHead =
       TokenArray2_PopFront(&ts);
@@ -656,6 +755,18 @@ void ExpandMacro(const TokenArray* tsOriginal,
       pHead = NULL; //moved
       continue;
     }
+
+	if (skip_defined && 
+		PPToken_IsIdentifier(pHead) && 
+		PPToken_IsLexeme(pHead, "defined"))
+	{
+		TokenArray result = TOKENARRAY_INIT;
+		GatherDefinedOperator(&ts, macros, &result);
+		TokenArray2_AppendMove(&r, &result);
+
+		TokenArray2_Destroy(&result);
+		continue;
+	}
 
     Macro * pMacro = MacroMap2_Find(macros, pHead->Lexeme);
 
@@ -673,7 +784,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
     if (pFound)
     {
       // Skip the head token if it is in the hideset
-      printf("Skipping (head is in HS)\n");
+      //printf("Skipping (head is in HS)\n");
       TokenArray2_Push(&r, pHead);
       pHead = NULL;
       continue;
@@ -681,18 +792,18 @@ void ExpandMacro(const TokenArray* tsOriginal,
 
     TokenArray removed_spaces = TOKENARRAY_INIT;
 
-    printf("replacing for %s tokens=", pMacro->Name);
+    //printf("replacing for %s tokens=", pMacro->Name);
     TokenArray2_Print(&ts);
-    printf("\n");
+    //printf("\n");
 
     if (!pMacro->bIsFunction)
     {
       // Object-like macro
-      printf("Object-like macro\n");
+      //printf("Object-like macro\n");
 
       TokenSet hiddenSet = TOKENSET_INIT;
       TokenSetAppendCopy(&hiddenSet, &pHead->HiddenSet);
-      TokenSet_Add(&hiddenSet, PPToken_Create(pHead->Lexeme));
+      TokenSet_Add(&hiddenSet, PPToken_Create(pHead->Lexeme, pHead->Token));
 
       TokenArray s = TOKENARRAY_INIT;
 
@@ -717,7 +828,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
     else if (FillIn(&ts, get_more, &removed_spaces) &&
              PPToken_IsOpenPar(ts.pItems[0]))
     {
-      printf("Application of a function-like macro\n");
+      //printf("Application of a function-like macro\n");
 
       // Map from formal name to value
       TokenArrayMap args = TOKENARRAYMAP_INIT;
@@ -747,7 +858,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
       SetIntersection(&pHead->HiddenSet,
                       &close.HiddenSet,
                       &hs);
-      TokenSet_Add(&hs, PPToken_Create(pMacro->Name));
+      TokenSet_Add(&hs, PPToken_Create(pMacro->Name, PPTokenType_Identifier));
 
       TokenArray s = TOKENARRAY_INIT;
 
@@ -773,9 +884,9 @@ void ExpandMacro(const TokenArray* tsOriginal,
     else
     {
       // Function-like macro name lacking a (
-      printf("splicing: [");
+      //printf("splicing: [");
       TokenArray2_Print(&removed_spaces);
-      printf("]\n");
+      //printf("]\n");
       TokenArray2_AppendMove(&removed_spaces, &ts);
       TokenArray2_Swap(&removed_spaces, &ts);
       TokenArray2_Push(&r, pHead);
@@ -888,9 +999,9 @@ void Glue(const TokenArray* lsI,
 
       if (ls.Size > 0)
       {
-        printf("glue LS: ");
-        printf("%s", ls.pItems[ls.Size - 1]->Lexeme);
-        printf("\n");
+        //printf("glue LS: ");
+        //printf("%s", ls.pItems[ls.Size - 1]->Lexeme);
+        //printf("\n");
 
         StrBuilder2_Append(&strNewLexeme, ls.pItems[ls.Size - 1]->Lexeme);
         TokenArray2_Pop(&ls);
@@ -898,14 +1009,15 @@ void Glue(const TokenArray* lsI,
 
       if (rs.Size > 0)
       {
-        printf("glue RS: ");
-        printf("%s", rs.pItems[0]->Lexeme);
-        printf("\n");
+        //printf("glue RS: ");
+        //printf("%s", rs.pItems[0]->Lexeme);
+        //printf("\n");
         StrBuilder2_Append(&strNewLexeme, rs.pItems[0]->Lexeme);
         TokenArray2_Pop(&rs);
       }
 
-      TokenArray2_Push(&ls, PPToken_Create(strNewLexeme.c_str));
+	  //tipo?
+      TokenArray2_Push(&ls, PPToken_Create(strNewLexeme.c_str, PPTokenType_Other));
       StrBuilder2_Destroy(&strNewLexeme);
 
       TokenArray2_AppendMove(&ls, &rs);
@@ -913,9 +1025,9 @@ void Glue(const TokenArray* lsI,
     }
   }
 
-  printf("glue returns: ");
+  //printf("glue returns: ");
   TokenArray2_Print(out);
-  printf("\n");
+  //printf("\n");
 
   TokenArray2_Destroy(&ls);
   TokenArray2_Destroy(&rs);
@@ -1018,7 +1130,7 @@ void MacroMap2_Delete(MacroMap * p)
 
 void MacroMap2_Swap(MacroMap * pA, MacroMap * pB)
 {
-	MacroMap t = MACROMAP_INIT;
+	MacroMap t = *pA;
 	*pA = *pB;
 	*pB = t;
 }
