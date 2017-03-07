@@ -1,4 +1,6 @@
 #pragma once
+#include <string.h>
+#include <stdbool.h>
 
 typedef char * String2;
 #define STRING2_INIT 0

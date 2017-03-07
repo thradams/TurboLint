@@ -1,49 +1,6 @@
 
-//#include <stdio.h>
-
-#define NULL ((void*)0)
-typedef struct 
+#include <stdio.h>
+int main()
 {
-  int i;
-} X;
-
-int main(void) {
-	
-	X* _opt p = NULL;
-	return 0;
+ return 1;
 }
-
-
-
-#if 0
-
-#pragma dir "C:\Users\thiago\TurboLint\TurboLint\Base"
-#pragma dir "C:\Users\thiago\TurboLint\TurboLint\Parser"
-#pragma dir "C:\Users\thiago\TurboLint\TurboLint\TurboLint"
-
-
-#include "C:\Users\thiago\TurboLint\TurboLint\Base\Array.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Base\dmalloc.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Base\Map.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Base\StrBuilder.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Base\Stream.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Base\StringEx.c"
-
-
-
-#include "C:\Users\thiago\TurboLint\TurboLint\Parser\Ast.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Parser\AstPrint.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Parser\BasicScanner.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Parser\Scanner.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\Parser\Parser.c"
-
-
-#include "C:\Users\thiago\TurboLint\TurboLint\TurboLint\TCLint.c"
-#include "C:\Users\thiago\TurboLint\TurboLint\TurboLint\CodePrint.c"
-
-#include "C:\Users\thiago\TurboLint\TurboLint\TurboLint.c"
-
-
-#else
-
-#endif

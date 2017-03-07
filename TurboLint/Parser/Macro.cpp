@@ -19,37 +19,37 @@
 
 Macro* Macro_Create()
 {
-	Macro* p = (Macro*)malloc(sizeof(Macro));
+  Macro* p = (Macro*)malloc(sizeof(Macro));
 
-	if (p != 0)
-	{
-		Macro t = MACRO_INIT;
-		*p = t;
-	}
+  if (p != 0)
+  {
+    Macro t = MACRO_INIT;
+    *p = t;
+  }
 
-	return p;
+  return p;
 }
 
 void Macro_Destroy(Macro * p)
 {
-	TokenArray2_Destroy(&p->FormalArguments);
-	String2_Destroy(&p->Name);
-	TokenArray2_Destroy(&p->TokenSequence);
+  TokenArray2_Destroy(&p->FormalArguments);
+  String2_Destroy(&p->Name);
+  TokenArray2_Destroy(&p->TokenSequence);
 }
 
 void Macro_Delete(Macro * p)
 {
-	if (p != 0)
-	{
-		Macro_Destroy(p);
-		free(p);
-	}
+  if (p != 0)
+  {
+    Macro_Destroy(p);
+    free(p);
+  }
 }
 
 
 bool FillIn(TokenArray* ts,
-	bool get_more,
-	TokenArray* removed);
+            bool get_more,
+            TokenArray* removed);
 
 void Glue(const TokenArray* lsI,
           const TokenArray* rsI,
@@ -81,11 +81,11 @@ void HidenSetAdd(const TokenSet* hs,
 }
 
 void ExpandMacro(const TokenArray* pTokenSequence,
-	        const MacroMap* macros,
-            bool get_more,
-            bool skip_defined,
-            Macro* caller,
-            TokenArray* pOutputSequence);
+                 const MacroMap* macros,
+                 bool get_more,
+                 bool skip_defined,
+                 Macro* caller,
+                 TokenArray* pOutputSequence);
 
 /*
 Retorna o indice do primeiro token que não for espaço
@@ -192,7 +192,7 @@ void AppendStringize(StrBuilder2* strBuilder, const TokenArray* ts)
   StrBuilder2_Append(strBuilder, "\"");
 
   // Remove trailing spaces
-  StrBuilder2_Trim(strBuilder);    
+  StrBuilder2_Trim(strBuilder);
 }
 
 
@@ -202,7 +202,7 @@ void AppendStringize(StrBuilder2* strBuilder, const TokenArray* ts)
 * hide set added to it, before getting returned.
 */
 void SubstituteArgs(Macro *pMacro,
-	                const MacroMap* macros,
+                    const MacroMap* macros,
                     const TokenArray* isOriginal,   //macro
                     const TokenArrayMap *args,
                     TokenSet* hs,
@@ -255,8 +255,8 @@ void SubstituteArgs(Macro *pMacro,
         StrBuilder2 strBuilder = STRBUILDER2_INIT;
         AppendStringize(&strBuilder, aseq);
         TokenArray2_Erase(&is, 0, idx + 1);
-		
-		//TODO token tipo?
+
+        //TODO token tipo?
         TokenArray2_Push(&os, PPToken_Create(strBuilder.c_str, PPTokenType_Other));
         StrBuilder2_Destroy(&strBuilder);
         continue;
@@ -515,8 +515,8 @@ bool GatherArgs(const char* name,
     TokenArray* pV = TokenArray2_Create();
 
     TokenArrayMap2_SetAt(args,
-                        formal_args->pItems[i]->Lexeme,
-                        pV);
+                         formal_args->pItems[i]->Lexeme,
+                         pV);
 
     char terminate;
 
@@ -593,8 +593,8 @@ bool GatherArgs(const char* name,
       TokenArray* pV2 = TokenArray2_Create();
 
       TokenArrayMap2_SetAt(args,
-                          formal_args->pItems[i]->Lexeme,
-                          pV2);
+                           formal_args->pItems[i]->Lexeme,
+                           pV2);
 
       // Instantiate argument with an empty value list
       //args[(*i).get_val()];
@@ -630,104 +630,109 @@ bool GatherArgs(const char* name,
 * operator, * such as "defined X" or "defined(X)"
 * This is the rule when processing #if #elif expressions
 */
-void GatherDefinedOperator(TokenArray* tokens,	
-	const MacroMap* macros,
-	TokenArray* result)
+void GatherDefinedOperator(TokenArray* tokens,
+                           const MacroMap* macros,
+                           TokenArray* result)
 {
-	//TokenArray tokens = TOKENARRAY_INIT;
-	//TokenArray2_AppendCopy(&tokens, tokensIn);
+  //TokenArray tokens = TOKENARRAY_INIT;
+  //TokenArray2_AppendCopy(&tokens, tokensIn);
 
-	// Skip leading space
-	while (PPToken_IsSpace(tokens->pItems[0])) 
-	{
-		PPToken* pp = TokenArray2_PopFront(tokens);
-		TokenArray2_Push(result, pp);
-	}
+  // Skip leading space
+  while (PPToken_IsSpace(tokens->pItems[0]))
+  {
+    PPToken* pp = TokenArray2_PopFront(tokens);
+    TokenArray2_Push(result, pp);
+  }
 
-	if ((PPToken_IsIdentifier(tokens->pItems[0])))
-	{
-		// defined X form
-		if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
-		{
-			PPToken* pp0 = TokenArray2_PopFront(tokens);
-			String2_Set(&pp0->Lexeme, "1");
-			TokenArray2_Push(result, pp0);
-		}
-		else
-		{
-			PPToken* pp0 = TokenArray2_PopFront(tokens);
-			String2_Set(&pp0->Lexeme, "0");
-			TokenArray2_Push(result, pp0);
-		}		
-		return;
-	}
-	else if ((PPToken_IsChar(tokens->pItems[0], '(')))
-	{
-		// defined (X) form
+  if ((PPToken_IsIdentifier(tokens->pItems[0])))
+  {
+    // defined X form
+    if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
+    {
+      PPToken* pp0 = TokenArray2_PopFront(tokens);
+      String2_Set(&pp0->Lexeme, "1");
+      TokenArray2_Push(result, pp0);
+    }
 
-		
-		PPToken_Delete(TokenArray2_PopFront(tokens));
+    else
+    {
+      PPToken* pp0 = TokenArray2_PopFront(tokens);
+      String2_Set(&pp0->Lexeme, "0");
+      TokenArray2_Push(result, pp0);
+    }
 
-		
+    return;
+  }
 
-		
-		// Skip spaces
-		while (PPToken_IsSpace(tokens->pItems[0]))
-		{
-			PPToken* pp = TokenArray2_PopFront(tokens);
-			TokenArray2_Push(result, pp);
-		}
+  else if ((PPToken_IsChar(tokens->pItems[0], '(')))
+  {
+    // defined (X) form
 
-		if (!PPToken_IsIdentifier(tokens->pItems[0]))
-		{
-			//goto error;
-		}
 
-		if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
-		{
-			PPToken* pp0 = TokenArray2_PopFront(tokens);
-			String2_Set(&pp0->Lexeme, "1");
-			TokenArray2_Push(result, pp0);
-		}
-		else
-		{
-			PPToken* pp0 = TokenArray2_PopFront(tokens);
-			String2_Set(&pp0->Lexeme, "0");
-			TokenArray2_Push(result, pp0);
-		}
+    PPToken_Delete(TokenArray2_PopFront(tokens));
 
-		//PPToken* pp = TokenArray2_PopFront(&tokens);
-		//TokenArray2_Push(result, pp);
 
-		// Skip spaces
-		while (PPToken_IsSpace(tokens->pItems[0]))
-		{
-			PPToken* pp = TokenArray2_PopFront(tokens);
-			TokenArray2_Push(result, pp);
-		}
 
-		if (!PPToken_IsChar(tokens->pItems[0], ')'))
-		{
-			//goto error;
-		}
 
-		PPToken_Delete(TokenArray2_PopFront(tokens));
-		//TokenArray2_Push(result, pp);
+    // Skip spaces
+    while (PPToken_IsSpace(tokens->pItems[0]))
+    {
+      PPToken* pp = TokenArray2_PopFront(tokens);
+      TokenArray2_Push(result, pp);
+    }
 
-		return;
-	}
-	else
-	{
-	}
+    if (!PPToken_IsIdentifier(tokens->pItems[0]))
+    {
+      //goto error;
+    }
+
+    if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
+    {
+      PPToken* pp0 = TokenArray2_PopFront(tokens);
+      String2_Set(&pp0->Lexeme, "1");
+      TokenArray2_Push(result, pp0);
+    }
+
+    else
+    {
+      PPToken* pp0 = TokenArray2_PopFront(tokens);
+      String2_Set(&pp0->Lexeme, "0");
+      TokenArray2_Push(result, pp0);
+    }
+
+    //PPToken* pp = TokenArray2_PopFront(&tokens);
+    //TokenArray2_Push(result, pp);
+
+    // Skip spaces
+    while (PPToken_IsSpace(tokens->pItems[0]))
+    {
+      PPToken* pp = TokenArray2_PopFront(tokens);
+      TokenArray2_Push(result, pp);
+    }
+
+    if (!PPToken_IsChar(tokens->pItems[0], ')'))
+    {
+      //goto error;
+    }
+
+    PPToken_Delete(TokenArray2_PopFront(tokens));
+    //TokenArray2_Push(result, pp);
+
+    return;
+  }
+
+  else
+  {
+  }
 }
 
 
 void ExpandMacro(const TokenArray* tsOriginal,
-	const MacroMap* macros,
-            bool get_more,
-            bool skip_defined,
-            Macro* caller,
-            TokenArray* pOutputSequence2)
+                 const MacroMap* macros,
+                 bool get_more,
+                 bool skip_defined,
+                 Macro* caller,
+                 TokenArray* pOutputSequence2)
 {
   TokenArray2_Clear(pOutputSequence2);
 
@@ -756,17 +761,17 @@ void ExpandMacro(const TokenArray* tsOriginal,
       continue;
     }
 
-	if (skip_defined && 
-		PPToken_IsIdentifier(pHead) && 
-		PPToken_IsLexeme(pHead, "defined"))
-	{
-		TokenArray result = TOKENARRAY_INIT;
-		GatherDefinedOperator(&ts, macros, &result);
-		TokenArray2_AppendMove(&r, &result);
+    if (skip_defined &&
+        PPToken_IsIdentifier(pHead) &&
+        PPToken_IsLexeme(pHead, "defined"))
+    {
+      TokenArray result = TOKENARRAY_INIT;
+      GatherDefinedOperator(&ts, macros, &result);
+      TokenArray2_AppendMove(&r, &result);
 
-		TokenArray2_Destroy(&result);
-		continue;
-	}
+      TokenArray2_Destroy(&result);
+      continue;
+    }
 
     Macro * pMacro = MacroMap2_Find(macros, pHead->Lexeme);
 
@@ -808,7 +813,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
       TokenArray s = TOKENARRAY_INIT;
 
       SubstituteArgs(pMacro,
-		             macros,
+                     macros,
                      &pMacro->TokenSequence,
                      NULL, //empty args
                      &hiddenSet,
@@ -863,7 +868,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
       TokenArray s = TOKENARRAY_INIT;
 
       SubstituteArgs(pMacro,
-		             macros,
+                     macros,
                      &pMacro->TokenSequence,
                      &args,
                      &hs,
@@ -1016,7 +1021,7 @@ void Glue(const TokenArray* lsI,
         TokenArray2_Pop(&rs);
       }
 
-	  //tipo?
+      //tipo?
       TokenArray2_Push(&ls, PPToken_Create(strNewLexeme.c_str, PPTokenType_Other));
       StrBuilder2_Destroy(&strNewLexeme);
 
@@ -1034,103 +1039,109 @@ void Glue(const TokenArray* lsI,
 }
 
 void ExpandMacroToText(const TokenArray* pTokenSequence,
-	const MacroMap* macros,
-	bool get_more,
-	bool skip_defined,
-	Macro* caller,
-	StrBuilder2* strBuilder)
+                       const MacroMap* macros,
+                       bool get_more,
+                       bool skip_defined,
+                       Macro* caller,
+                       StrBuilder2* strBuilder)
 {
-	StrBuilder2_Clear(strBuilder);
-	TokenArray tks = TOKENARRAY_INIT;
-	ExpandMacro(pTokenSequence,
-		macros,
-		get_more,
-		skip_defined,
-		caller,
-		&tks);
-	for (int i = 0; i < tks.Size; i++)
-	{
-		StrBuilder2_Append(strBuilder, tks.pItems[i]->Lexeme);
-	}
-	TokenArray2_Destroy(&tks);
+  StrBuilder2_Clear(strBuilder);
+  TokenArray tks = TOKENARRAY_INIT;
+  ExpandMacro(pTokenSequence,
+              macros,
+              get_more,
+              skip_defined,
+              caller,
+              &tks);
+
+  for (int i = 0; i < tks.Size; i++)
+  {
+    StrBuilder2_Append(strBuilder, tks.pItems[i]->Lexeme);
+  }
+
+  TokenArray2_Destroy(&tks);
 }
 
 
 
 
 int MacroMap2_SetAt(MacroMap* pMap,
-	const char* Key,
-	Macro* newValue)
+                    const char* Key,
+                    Macro* newValue)
 {
-	void *pPrevious;
-	int r = Map2_SetAt((Map2*)pMap, Key, newValue, &pPrevious);
-	Macro_Delete((Macro*)pPrevious);
-	return r;
+  void *pPrevious;
+  int r = Map2_SetAt((Map2*)pMap, Key, newValue, &pPrevious);
+  Macro_Delete((Macro*)pPrevious);
+  return r;
 }
 
 bool MacroMap2_Lookup(const MacroMap* pMap,
-	const char*  Key,
-	Macro** rValue)
+                      const char*  Key,
+                      Macro** rValue)
 {
-	return Map2_Lookup((Map2*)pMap,
-		Key,
-		(void**)rValue);
+  return Map2_Lookup((Map2*)pMap,
+                     Key,
+                     (void**)rValue);
 }
 
 Macro* MacroMap2_Find(const MacroMap* pMap, const char*  Key)
 {
-	void* p = NULL;
-	Map2_Lookup((Map2*)pMap,
-		Key,
-		&p);
-	return (Macro*)p;
+  void* p = NULL;
+  Map2_Lookup((Map2*)pMap,
+              Key,
+              &p);
+  return (Macro*)p;
 }
 
 
 bool MacroMap2_RemoveKey(MacroMap* pMap, const char*  Key)
 {
-	Macro *pItem;
-	bool r = Map2_RemoveKey((Map2*)pMap, Key, (void**)&pItem);
-	if (r)
-	{
-		Macro_Delete(pItem);
-	}
-	return r;
+  Macro *pItem;
+  bool r = Map2_RemoveKey((Map2*)pMap, Key, (void**)&pItem);
+
+  if (r)
+  {
+    Macro_Delete(pItem);
+  }
+
+  return r;
 }
 
 void MacroMap2_Init(MacroMap* p)
 {
-	MacroMap t = MACROMAP_INIT;
-	*p = t;
+  MacroMap t = MACROMAP_INIT;
+  *p = t;
 }
 
 void MacroMap2_Destroy(MacroMap* p)
 {
-	Map2_Destroy((Map2*)p);
+  Map2_Destroy((Map2*)p);
 }
 
 MacroMap* MacroMap2_Create()
 {
-	MacroMap* p = (MacroMap*)malloc(sizeof * p);
-	if (p)
-	{
-		MacroMap2_Init(p);
-	}
-	return p;
+  MacroMap* p = (MacroMap*)malloc(sizeof * p);
+
+  if (p)
+  {
+    MacroMap2_Init(p);
+  }
+
+  return p;
 }
 
 void MacroMap2_Delete(MacroMap * p)
 {
-	if (p != NULL)
-	{
-		MacroMap2_Destroy(p);
-		free(p);
-	}
+  if (p != NULL)
+  {
+    MacroMap2_Destroy(p);
+    free(p);
+  }
 }
 
 void MacroMap2_Swap(MacroMap * pA, MacroMap * pB)
 {
-	MacroMap t = *pA;
-	*pA = *pB;
-	*pB = t;
+  MacroMap t = *pA;
+  *pA = *pB;
+  *pB = t;
 }

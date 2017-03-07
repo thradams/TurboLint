@@ -12,21 +12,21 @@
 
 typedef struct
 {
-    //indica presenca de erro no parser
-    bool bError;
+  //indica presenca de erro no parser
+  bool bError;
 
-    //mensagem de erro
-    StrBuilder ErrorMessage;
+  //mensagem de erro
+  StrBuilder ErrorMessage;
 
-    //scanner ja pré-processado
-    Scanner Scanner;
+  //scanner ja pré-processado
+  Scanner Scanner;
 
-    //struct, union, or enum;
-    //typedef estao no mesmo mapa mas da p achar 
-    //a diferenca se preciso
-    DeclarationsMap  Symbols;
+  //struct, union, or enum;
+  //typedef estao no mesmo mapa mas da p achar
+  //a diferenca se preciso
+  DeclarationsMap  Symbols;
 
-	Map EnumMap;
+  Map EnumMap;
 
 } Parser;
 

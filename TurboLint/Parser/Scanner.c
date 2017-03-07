@@ -771,13 +771,6 @@ bool GetNewMacroCallString(Scanner* pScanner,
 	                                TokenToPPToken(GetToken(pScanner)));
   TokenArray2_Push(ppTokenArray, ppToken);
 
-
-  //StrBuilder macroName;
-  //StrBuilder_Init(&macroName, 100);
-  //StrBuilder_Append(&macroName, lexeme);
-  //identificador com nome da macro
-  //BasicScanner_Next(Scanner_Top(pScanner));
-  //Pode ter espaço na hora de chamar a macro
   Scanner_Match(pScanner);
   //verificar se tem parametros
   int nArgsExpected = pMacro->FormalArguments.Size;// pMacro->bIsFunction;
@@ -1017,10 +1010,8 @@ void ParsePreDefine(Scanner* pScanner)
   GetPPTokens(pScanner, &pNewMacro->TokenSequence);
 
   MacroMap2_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
-  //breakline
-  //lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
-  //BasicScanner_Next(Scanner_Top(pScanner));
-  //lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
+  
+  //breakline ficou...
 }
 
 
@@ -1439,13 +1430,6 @@ void Scanner_SkipCore(Scanner* pScanner)
 
       Macro* pMacro2 = Scanner_FindPreprocessorItem2(pScanner, lexeme);
 
-      if (strcmp(lexeme, "__ANNOTATION") == 0)
-      {
-        pMacro2 = Scanner_FindPreprocessorItem2(pScanner, lexeme);
-      }
-
-
-
       if (pMacro2 != NULL)
       {
         StrBuilder2 strBuilder2 = STRBUILDER2_INIT;
@@ -1482,7 +1466,6 @@ void Scanner_SkipCore(Scanner* pScanner)
           break;
         }
       }
-
       else
       {
 
@@ -1490,10 +1473,8 @@ void Scanner_SkipCore(Scanner* pScanner)
         break;
 
       }
-
       break;
     }
-
     else if (token == TK_EOF)
     {
       if (pScanner->stack.size == 1)
@@ -1503,7 +1484,6 @@ void Scanner_SkipCore(Scanner* pScanner)
         //bResult = false;
         break;
       }
-
       else if (pScanner->stack.size > 0)
       {
         Array_Pop(&pScanner->stack, &Delete_Scanner);

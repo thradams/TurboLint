@@ -58,23 +58,6 @@ Result Map_DeleteItemOpt(Map* map, const char* key, void(*pfDestroyData)(void*))
 void Map_Print(Map *map);
 
 
-typedef Map StrSet;
-
-Result StrSet_Init(StrSet* p, size_t nBuckets);
-void StrSet_Destroy(StrSet* p);
-void StrSet_SetKey(StrSet* p, const char* str);
-void StrSet_DeleteKey(StrSet* p, const char* str);
-bool StrSet_HasKey(StrSet* p, const char* key);
-
-
-typedef Map StrMap;
-Result StrMap_Init(StrMap* StrMap, size_t nBuckets);
-
-void StrMap_Destroy(StrMap *StrMap);
-Result StrMap_Set(StrMap *StrMap, const char*key, const char *value);
-const char* StrMap_Find2(StrMap* StrMap, const char* key);
-Result StrMap_DeleteItem(StrMap *StrMap, const char* key);
-
 
 
 

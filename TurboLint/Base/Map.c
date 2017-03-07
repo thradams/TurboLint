@@ -549,69 +549,6 @@ void Map_Swap(Map* map, Map* map2)
 }
 
 
-Result StrSet_Init(StrSet* p, size_t nBuckets)
-{
-    return Map_Init(p, nBuckets);
-}
-
-void StrSet_Destroy(StrSet* p)
-{
-    Map_Destroy(p, NULL);
-}
-
-void StrSet_SetKey(StrSet* p, const char* key)
-{
-    Map_Set(p, key, NULL);
-}
-
-void StrSet_DeleteKey(StrSet* p, const char* key)
-{
-    Map_DeleteItem(p, key, NULL);
-}
-
-bool StrSet_HasKey(StrSet* p, const char* key)
-{
-    void* pv;
-    Result result = Map_Find(p, key, &pv);
-    return result == RESULT_OK;
-}
-
-
-
-Result StrMap_Init(StrMap* p, size_t nBuckets)
-{
-    return Map_Init(p, nBuckets);
-}
-
-static void DeleteStrVoid(void* p)
-{
-    free(p);
-}
-
-void StrMap_Destroy(StrMap* p)
-{
-    Map_Destroy(p, DeleteStrVoid);
-}
-
-Result StrMap_Set(StrMap* p, const char* key, const char* value)
-{
-    ASSERT(key != NULL);
-    //ASSERT(value != NULL);
-    String temp;
-    String_Init(&temp, value);
-    return Map_Set(p, key, (void*)temp);//temp moved
-}
-
-const char* StrMap_Find2(StrMap* p, const char* key)
-{
-    return (const char*) Map_Find2(p, key);
-}
-
-Result StrMap_DeleteItem(StrMap* p, const char* key)
-{
-    return Map_DeleteItem(p, key, DeleteStrVoid);
-}
-
 ////
 
 Result MultiMap_Init(MultiMap* map, size_t nBuckets)

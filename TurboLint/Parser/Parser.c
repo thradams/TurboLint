@@ -4013,14 +4013,21 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
 	while (!ErrorOrEof(ctx))
 	{
 		TAnyDeclaration* pDeclarationOut = NULL;
-		Declaration(ctx, &pDeclarationOut);
-		TDeclarations_Push(declarations, pDeclarationOut);
-		declarationIndex++;
+		bool bHasDecl = Declaration(ctx, &pDeclarationOut);
+		if (bHasDecl)
+		{
+			TDeclarations_Push(declarations, pDeclarationOut);
+			declarationIndex++;
+			SetSymbolsFromDeclaration(ctx, pDeclarationOut);		
+		}
+		else
+		{
+			break;
+		}
 
 		if (HasErrors(ctx))
 			break;
 
-		SetSymbolsFromDeclaration(ctx, pDeclarationOut);
 	}
 }
 
