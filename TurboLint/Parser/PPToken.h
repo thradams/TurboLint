@@ -9,6 +9,7 @@ typedef enum
 	PPTokenType_CharConstant,
 	PPTokenType_StringLiteral,
 	PPTokenType_Punctuator,
+  PPTokenType_Spaces,
 	PPTokenType_Other,
 } PPTokenType;
 

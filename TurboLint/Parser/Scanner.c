@@ -14,6 +14,10 @@ PPTokenType TokenToPPToken(Tokens token)
     result = PPTokenType_Identifier;
     break;
 
+  case TK_SPACES:
+    result = PPTokenType_Spaces;
+    break;
+
   case TK_HEX_INTEGER:
   case TK_DECIMAL_INTEGER:
   case TK_FLOAT_NUMBER:

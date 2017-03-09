@@ -1056,7 +1056,15 @@ void ExpandMacroToText(const TokenArray* pTokenSequence,
 
   for (int i = 0; i < tks.Size; i++)
   {
-    StrBuilder2_Append(strBuilder, tks.pItems[i]->Lexeme);
+    if (tks.pItems[i]->Token == PPTokenType_Spaces)
+    {
+      StrBuilder2_Append(strBuilder, " ");
+    }
+    else
+    {
+      StrBuilder2_Append(strBuilder, tks.pItems[i]->Lexeme);
+    }
+    
   }
 
   TokenArray2_Destroy(&tks);
