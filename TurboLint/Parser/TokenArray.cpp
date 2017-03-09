@@ -176,10 +176,10 @@ void TokenArray2_Print(const TokenArray* tokens)
     //printf("(empty)");
   }
 
-  for (int i = 0; i < tokens->Size; i++)
+  //for (int i = 0; i < tokens->Size; i++)
   {
 
-    //printf("%s", tokens->pItems[i]->Lexeme);
+   // printf("%s", tokens->pItems[i]->Lexeme);
 
   }
 

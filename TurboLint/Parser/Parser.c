@@ -34,8 +34,7 @@ bool DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
 
 Result Parser_InitString(Parser* parser,
 	const char* name,
-	const char* text,
-	bool bExpressionMode)
+	const char* text)
 {
 	MultiMap_Init(&parser->Symbols, SYMBOL_BUCKETS_SIZE);
 	Map_Init(&parser->EnumMap, SYMBOL_BUCKETS_SIZE);
@@ -48,7 +47,7 @@ Result Parser_InitString(Parser* parser,
 
 
 	/////////
-	Scanner_InitString(&parser->Scanner, name, text, bExpressionMode);
+	Scanner_InitString(&parser->Scanner, name, text);
 
 	return RESULT_OK;
 }
@@ -253,7 +252,13 @@ Tokens Token(Parser* parser)
 		return TK_ERROR;
 	}
 
-	return Scanner_Token(&parser->Scanner);
+	Tokens token = Scanner_Token(&parser->Scanner);
+	if (token == TK_SPACES)
+	{
+		SetError(parser, "!");
+		ASSERT(false);
+	}
+	return token;
 }
 
 Tokens Match(Parser* parser)
@@ -4022,6 +4027,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
 		}
 		else
 		{
+			SetError(ctx, "");
 			break;
 		}
 

@@ -50,9 +50,6 @@ typedef struct
     //Lista de diretorios de include
     StrArray IncludeDir;
 
-    //Expandindo dentro de um #if para considerar o defined
-    bool bExpressionMode;
-
     //string para debug
     StrBuilder DebugString;
 
@@ -81,8 +78,7 @@ void Scanner_SetError(Scanner* pScanner, const char* message);
 const char* Scanner_GetStreamName(Scanner* pScanner);
 Result Scanner_InitString(Scanner* pScanner,
                           const char* name,
-                          const char* text,
-                          bool bExpressionMode);
+                          const char* text);
 
 const char* Scanner_TokenString(Scanner* pScanner);
 Tokens Scanner_Token(Scanner* pScanner);

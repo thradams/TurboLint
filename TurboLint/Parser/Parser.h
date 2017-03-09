@@ -34,8 +34,7 @@ Result Parser_InitFile(Parser* parser, const char* fileName);
 
 Result Parser_InitString(Parser* parser,
                          const char* name,
-                         const char* text,
-                         bool bExpressionMode);
+                         const char* text);
 
 void Parser_Destroy(Parser* parser);
 

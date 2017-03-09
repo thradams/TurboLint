@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
         }
     }
 	
-    if(bPrintPreprocessed)
+    //if(bPrintPreprocessed)
     {
         PrintPreprocessedToFile(filename, configFileName, "pre.txt");
     }

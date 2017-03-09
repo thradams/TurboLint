@@ -10,58 +10,58 @@ PPTokenType TokenToPPToken(Tokens token)
 
   switch (token)
   {
-    case TK_identifier:
-      result = PPTokenType_Identifier;
-      break;
+  case TK_identifier:
+    result = PPTokenType_Identifier;
+    break;
 
-    case TK_HEX_INTEGER:
-    case TK_DECIMAL_INTEGER:
-    case TK_FLOAT_NUMBER:
-      result = PPTokenType_Number;
-      break;
+  case TK_HEX_INTEGER:
+  case TK_DECIMAL_INTEGER:
+  case TK_FLOAT_NUMBER:
+    result = PPTokenType_Number;
+    break;
 
-    case TK_char_literal:
-      result = PPTokenType_CharConstant;
-      break;
+  case TK_char_literal:
+    result = PPTokenType_CharConstant;
+    break;
 
-    case TK_string_literal:
-      result =  PPTokenType_StringLiteral;
-      break;
+  case TK_string_literal:
+    result = PPTokenType_StringLiteral;
+    break;
 
-    case TK_ARROW:
-    case TK_PLUSPLUS:
-    case TK_MINUSMINUS:
-    case TK_LESSLESS:
-    case TK_GREATERGREATER:
-    case TK_LESSEQUAL:
-    case TK_GREATEREQUAL:
-    case TK_EQUALEQUAL:
-    case TK_NOTEQUAL:
-    case TK_ANDAND:
-    case TK_OROR:
-    case TK_MULTIEQUAL:
-    case TK_DIVEQUAL:
-    case TK_PERCENT_EQUAL:
-    case TK_PLUSEQUAL:
-    case TK_MINUS_EQUAL:
-    case TK_ANDEQUAL:
-    case TK_CARETEQUAL:
-    case TK_OREQUAL:
-    case TK_NUMBERNUMBER:
-    case TK_LESSCOLON:
-    case TK_COLONGREATER:
-    case TK_LESSPERCENT:
-    case TK_PERCENTGREATER:
-    case TK_PERCENTCOLON:
-    case TK_DOTDOTDOT:
-    case TK_GREATERGREATEREQUAL:
-    case TK_LESSLESSEQUAL:
-    case TK_PERCENTCOLONPERCENTCOLON:
+  case TK_ARROW:
+  case TK_PLUSPLUS:
+  case TK_MINUSMINUS:
+  case TK_LESSLESS:
+  case TK_GREATERGREATER:
+  case TK_LESSEQUAL:
+  case TK_GREATEREQUAL:
+  case TK_EQUALEQUAL:
+  case TK_NOTEQUAL:
+  case TK_ANDAND:
+  case TK_OROR:
+  case TK_MULTIEQUAL:
+  case TK_DIVEQUAL:
+  case TK_PERCENT_EQUAL:
+  case TK_PLUSEQUAL:
+  case TK_MINUS_EQUAL:
+  case TK_ANDEQUAL:
+  case TK_CARETEQUAL:
+  case TK_OREQUAL:
+  case TK_NUMBERNUMBER:
+  case TK_LESSCOLON:
+  case TK_COLONGREATER:
+  case TK_LESSPERCENT:
+  case TK_PERCENTGREATER:
+  case TK_PERCENTCOLON:
+  case TK_DOTDOTDOT:
+  case TK_GREATERGREATEREQUAL:
+  case TK_LESSLESSEQUAL:
+  case TK_PERCENTCOLONPERCENTCOLON:
 
 
-    case TK_NUMBER_SIGN:
-      result =  PPTokenType_Punctuator;
-      break;
+  case TK_NUMBER_SIGN:
+    result = PPTokenType_Punctuator;
+    break;
 
   }
 
@@ -75,7 +75,7 @@ TFile* TFile_Create()
   if (p)
   {
     TFile temp = TFILE_INIT;
-    *p =  temp;
+    *p = temp;
   }
 
   return p;
@@ -182,7 +182,7 @@ void Scanner_SetError(Scanner* pScanner, const char* message)
   {
     pScanner->bError = true;
     StrBuilder_Set(&pScanner->ErrorString,
-                   Scanner_Top(pScanner)->stream.NameOrFullPath);
+      Scanner_Top(pScanner)->stream.NameOrFullPath);
     StrBuilder_Append(&pScanner->ErrorString, "(");
     StrBuilder_AppendInt(&pScanner->ErrorString, Scanner_Top(pScanner)->stream.currentLine);
     StrBuilder_Append(&pScanner->ErrorString, ")");
@@ -205,8 +205,8 @@ void Scanner_PrintDebug(Scanner* pScanner)
 }
 
 static Result AddStandardMacro(Scanner* pScanner,
-                               const char* name,
-                               const char* value)
+  const char* name,
+  const char* value)
 {
   Macro* pDefine1 = Macro_Create();
   String_Set(&pDefine1->Name, name);
@@ -230,7 +230,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
   pScanner->bError = false;
   ArrayInt_Init(&pScanner->StackIfDef);
   pScanner->bPrintIncludes = false;
-  pScanner->bExpressionMode = false;
+
   pScanner->bIncludeSpaces = false;
   Array_Init(&pScanner->stack);
 
@@ -251,12 +251,11 @@ static Result Scanner_InitCore(Scanner* pScanner)
 }
 
 Result Scanner_InitString(Scanner* pScanner,
-                          const char* name,
-                          const char* text,
-                          bool bExpressionMode)
+  const char* name,
+  const char* text)
 {
   Scanner_InitCore(pScanner);
-  pScanner->bExpressionMode = bExpressionMode;
+
   BasicScanner* pNewScanner;
   Result result = BasicScanner_Create(&pNewScanner, name, text);
   Array_Push(&pScanner->stack, pNewScanner);
@@ -265,13 +264,13 @@ Result Scanner_InitString(Scanner* pScanner,
 
 
 static Result PushExpandedMacro(Scanner* pScanner,
-                                const char* defineName,
-                                const char* defineContent)
+  const char* defineName,
+  const char* defineContent)
 {
   BasicScanner* pNewScanner;
   Result result = BasicScanner_Create(&pNewScanner,
-                                      defineName,
-                                      defineContent);
+    defineName,
+    defineContent);
 
   if (result == RESULT_OK)
   {
@@ -284,9 +283,9 @@ static Result PushExpandedMacro(Scanner* pScanner,
 }
 
 bool Scanner_GetFullPath(Scanner* pScanner,
-                         const char* fileName,
-                         bool bQuotedForm,
-                         String* fullPathOut)
+  const char* fileName,
+  bool bQuotedForm,
+  String* fullPathOut)
 {
   bool bFullPathFound = false;
 
@@ -393,8 +392,8 @@ bool Scanner_GetFullPath(Scanner* pScanner,
 
 
 void Scanner_IncludeFile(Scanner* pScanner,
-                         const char* includeFileName,
-                         FileIncludeType fileIncludeType)
+  const char* includeFileName,
+  FileIncludeType fileIncludeType)
 {
   String fullPath = STRING_INIT;
   String_Init(&fullPath, "");
@@ -405,18 +404,18 @@ void Scanner_IncludeFile(Scanner* pScanner,
 
   switch (fileIncludeType)
   {
-    case FileIncludeTypeQuoted:
-    case FileIncludeTypeIncludes:
-      bHasFullPath = Scanner_GetFullPath(pScanner,
-                                         includeFileName,
-                                         fileIncludeType == FileIncludeTypeQuoted,
-                                         &fullPath);
-      break;
+  case FileIncludeTypeQuoted:
+  case FileIncludeTypeIncludes:
+    bHasFullPath = Scanner_GetFullPath(pScanner,
+      includeFileName,
+      fileIncludeType == FileIncludeTypeQuoted,
+      &fullPath);
+    break;
 
-    case FileIncludeTypeFullPath:
-      String_Set(&fullPath, includeFileName);
-      bHasFullPath = true;
-      break;
+  case FileIncludeTypeFullPath:
+    String_Set(&fullPath, includeFileName);
+    bHasFullPath = true;
+    break;
   };
 
   if (bHasFullPath)
@@ -587,7 +586,9 @@ Tokens Scanner_Token(Scanner* pScanner)
     return TK_EOF;
   }
 
-  return ((BasicScanner*)Array_Top(&pScanner->stack))->currentItem.token;
+  Tokens token = ((BasicScanner*)Array_Top(&pScanner->stack))->currentItem.token;
+
+  return token;
 }
 
 const char* Scanner_Lexeme(Scanner* pScanner)
@@ -677,7 +678,7 @@ void GetDefineString(Scanner* pScanner, StrBuilder* strBuilder)
     }
 
     if (token == TK_COMMENT ||
-        token == TK_LINE_COMMENT)
+      token == TK_LINE_COMMENT)
     {
       //transforma em espaços
       StrBuilder_Append(strBuilder, " ");
@@ -699,7 +700,7 @@ static Tokens GetToken(Scanner* pScanner)
 
 
 Macro*  Scanner_FindPreprocessorItem2(Scanner* pScanner,
-                                      const char* key)
+  const char* key)
 {
   Macro* pMacro = MacroMap2_Find(&pScanner->Defines2, key);
   return pMacro;
@@ -733,7 +734,7 @@ int EvalExpression(const char* s, Scanner* pScanner)
   //TODO avaliador de expressoes para pre processador
   //https://gcc.gnu.org/onlinedocs/gcc-3.0.2/cpp_4.html#SEC38
   Parser parser;
-  Parser_InitString(&parser, "eval expression", s, true);
+  Parser_InitString(&parser, "eval expression", s);
 
   if (pDefines)
   {
@@ -762,13 +763,14 @@ int EvalExpression(const char* s, Scanner* pScanner)
 
 
 bool GetNewMacroCallString(Scanner* pScanner,
-                           Macro* pMacro,
-                           TokenArray* ppTokenArray)
+  Macro* pMacro,
+  TokenArray* ppTokenArray)
 {
   //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
 
-  PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner),
-	                                TokenToPPToken(GetToken(pScanner)));
+  const char* lexeme = Scanner_Lexeme(pScanner);
+  PPToken *ppToken = PPToken_Create(lexeme,
+    TokenToPPToken(GetToken(pScanner)));
   TokenArray2_Push(ppTokenArray, ppToken);
 
   Scanner_Match(pScanner);
@@ -985,7 +987,7 @@ void ParsePreDefine(Scanner* pScanner)
       }
 
       if (token == TK_BREAKLINE ||
-          token == TK_EOF)
+        token == TK_EOF)
       {
         //oopss
         break;
@@ -1010,7 +1012,7 @@ void ParsePreDefine(Scanner* pScanner)
   GetPPTokens(pScanner, &pNewMacro->TokenSequence);
 
   MacroMap2_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
-  
+
   //breakline ficou...
 }
 
@@ -1025,11 +1027,11 @@ int EvalPre(Scanner* pScanner)
   GetPPTokens(pScanner, &pptokens);
   StrBuilder2 strBuilder2 = STRBUILDER2_INIT;
   ExpandMacroToText(&pptokens,
-                    &pScanner->Defines2,
-                    false,
-                    true,
-                    NULL,
-                    &strBuilder2);
+    &pScanner->Defines2,
+    false,
+    true,
+    NULL,
+    &strBuilder2);
 
   int iRes = EvalExpression(strBuilder2.c_str, pScanner);
 
@@ -1190,58 +1192,58 @@ void Scanner_SkipCore(Scanner* pScanner)
       }
 
       else if (preToken == PRETK_IF ||
-               preToken == PRETK_IFDEF ||
-               preToken == PRETK_IFNDEF)
+        preToken == PRETK_IFDEF ||
+        preToken == PRETK_IFNDEF)
       {
         Scanner_Match(pScanner);
 
         switch (state)
         {
-          case NONE:
-          case I1:
-          case E1:
+        case NONE:
+        case I1:
+        case E1:
+        {
+          int iRes = 0;
+
+          if (preToken == PRETK_IF)
           {
-            int iRes = 0;
+            iRes = EvalPre(pScanner);
+          }
 
-            if (preToken == PRETK_IF)
+          else
+          {
+            bool bFound = Scanner_FindPreprocessorItem2(pScanner, lexeme) != NULL;
+
+            if (preToken == PRETK_IFDEF)
             {
-              iRes = EvalPre(pScanner);
+              iRes = bFound ? 1 : 0;
             }
 
-            else
+            else //if (preToken == PRETK_IFNDEF)
             {
-              bool bFound = Scanner_FindPreprocessorItem2(pScanner, lexeme) != NULL;
-
-              if (preToken == PRETK_IFDEF)
-              {
-                iRes = bFound ? 1 : 0;
-              }
-
-              else //if (preToken == PRETK_IFNDEF)
-              {
-                iRes = !bFound ? 1 : 0;
-              }
-            }
-
-            if (iRes != 0)
-            {
-              StatePush(pScanner, I1);
-            }
-
-            else
-            {
-              StatePush(pScanner, I0);
+              iRes = !bFound ? 1 : 0;
             }
           }
+
+          if (iRes != 0)
+          {
+            StatePush(pScanner, I1);
+          }
+
+          else
+          {
+            StatePush(pScanner, I0);
+          }
+        }
+        break;
+
+        case I0:
+          StatePush(pScanner, I0);
           break;
 
-          case I0:
-            StatePush(pScanner, I0);
-            break;
-
-          case E0:
-            StatePush(pScanner, E0);
-            break;
+        case E0:
+          StatePush(pScanner, E0);
+          break;
         }
 
         IgnorePreProcessor(pScanner);
@@ -1253,28 +1255,19 @@ void Scanner_SkipCore(Scanner* pScanner)
 
         switch (state)
         {
-          case NONE:
-          case I1:
-            pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
-            break;
+        case NONE:
+        case I1:
+          pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
+          break;
 
-          case I0:
+        case I0:
+        {
+          int iRes = EvalPre(pScanner);
+
+          if (pScanner->StackIfDef.size >= 2)
           {
-            int iRes = EvalPre(pScanner);
-
-            if (pScanner->StackIfDef.size >= 2)
-            {
-              if ((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
-                   pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
-              {
-                if (iRes)
-                {
-                  pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = I1;
-                }
-              }
-            }
-
-            else
+            if ((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
+              pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
             {
               if (iRes)
               {
@@ -1282,14 +1275,23 @@ void Scanner_SkipCore(Scanner* pScanner)
               }
             }
           }
+
+          else
+          {
+            if (iRes)
+            {
+              pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = I1;
+            }
+          }
+        }
+        break;
+
+        case E0:
           break;
 
-          case E0:
-            break;
-
-          case E1:
-            ASSERT(0);
-            break;
+        case E1:
+          ASSERT(0);
+          break;
         }
 
         IgnorePreProcessor(pScanner);
@@ -1307,37 +1309,37 @@ void Scanner_SkipCore(Scanner* pScanner)
 
         switch (state)
         {
-          case NONE:
-            ASSERT(0);
-            break;
+        case NONE:
+          ASSERT(0);
+          break;
 
-          case I1:
-            pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
-            break;
+        case I1:
+          pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E0;
+          break;
 
-          case I0:
-            if (pScanner->StackIfDef.size >= 2)
-            {
-              if ((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
-                   pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
-              {
-                pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E1;
-              }
-            }
-
-            else
+        case I0:
+          if (pScanner->StackIfDef.size >= 2)
+          {
+            if ((pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == I1 ||
+              pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 2] == E1))
             {
               pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E1;
             }
+          }
 
-            break;
+          else
+          {
+            pScanner->StackIfDef.pItems[pScanner->StackIfDef.size - 1] = E1;
+          }
 
-          case E0:
-            break;
+          break;
 
-          case E1:
-            ASSERT(false);
-            break;
+        case E0:
+          break;
+
+        case E1:
+          ASSERT(false);
+          break;
         }
       }
 
@@ -1432,25 +1434,41 @@ void Scanner_SkipCore(Scanner* pScanner)
 
       if (pMacro2 != NULL)
       {
+        if (strcmp(pMacro2->Name, "__declspec") == 0)
+        {
+          pMacro2 = pMacro2;
+        }
         StrBuilder2 strBuilder2 = STRBUILDER2_INIT;
         TokenArray ppTokenArray = TOKENARRAY_INIT;
 
         //confirma realmente se eh p expandir
         bool bIsMacro = GetNewMacroCallString(pScanner,
-                                              pMacro2,
-                                              &ppTokenArray);
+          pMacro2,
+          &ppTokenArray);
 
         if (bIsMacro)
         {
           ExpandMacroToText(&ppTokenArray,
-                            &pScanner->Defines2,
-                            false,
-                            false,
-                            NULL,
-                            &strBuilder2);
+            &pScanner->Defines2,
+            false,
+            false,
+            NULL,
+            &strBuilder2);
+
+          if (strBuilder2.size == 0)
+          {
+            //esta com bug quando expande para nada 
+            //so em algum casos
+            //enquanto nao debugar melhor
+            //este espaco resolve
+            StrBuilder2_Append(&strBuilder2, " ");
+          }
+
+
           PushExpandedMacro(pScanner,
-                            pMacro2->Name,
-                            strBuilder2.c_str);
+            pMacro2->Name,
+            strBuilder2.c_str);
+
         }
 
         else
@@ -1523,9 +1541,9 @@ void Scanner_Skip(Scanner* pScanner)
     Tokens token = Scanner_Token(pScanner);
 
     if (token == TK_SPACES ||
-        token == TK_BREAKLINE ||
-        token == TK_COMMENT ||
-        token == TK_LINE_COMMENT)
+      token == TK_BREAKLINE ||
+      token == TK_COMMENT ||
+      token == TK_LINE_COMMENT)
     {
       if (token == TK_BREAKLINE)
       {
@@ -1596,19 +1614,22 @@ const char* Scanner_TokenString(Scanner* pScanner)
 
 
 void PrintPreprocessedToFile(const char* fileIn,
-                             const char* configFileName,
-                             const char* fileNameOut)
+  const char* configFileName,
+  const char* fileNameOut)
 {
   String fullFileNamePath = STRING_INIT;
   GetFullPath(fileIn, &fullFileNamePath);
   String configFullPath = STRING_INIT;
   GetFullPath(configFileName, &configFullPath);
+
   Scanner scanner;
   Scanner_Init(&scanner);
   scanner.bIncludeSpaces = true;
   Scanner_IncludeFile(&scanner, fullFileNamePath, FileIncludeTypeFullPath);
   Scanner_IncludeFile(&scanner, configFullPath, FileIncludeTypeFullPath);
   Scanner_Skip(&scanner);
+  
+  
   FILE* fp = fopen(fileNameOut, "w");
 
   while (Scanner_Token(&scanner) != TK_EOF)
@@ -1623,7 +1644,7 @@ void PrintPreprocessedToFile(const char* fileIn,
     }
 
     if (token == TK_LINE_COMMENT ||
-        token == TK_COMMENT)
+      token == TK_COMMENT)
     {
       //fprintf(fp, "%s", lexeme);
     }
@@ -1636,8 +1657,6 @@ void PrintPreprocessedToFile(const char* fileIn,
   }
 
   fclose(fp);
-  //  JObj_PrintToFile(scanner.Defines2, "defines.json");
-  //  JObj_PrintToFile(scanner.IncludedWithPragmaOnce2, "once.json");
   Scanner_Destroy(&scanner);
   String_Destroy(&fullFileNamePath);
   String_Destroy(&configFullPath);
@@ -1665,7 +1684,7 @@ ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
     //copia o atual para o loakahead
     ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
     ScannerItem_Copy(&pScanner->LookAhead,
-                     &Scanner_Top(pScanner)->currentItem);
+      &Scanner_Top(pScanner)->currentItem);
     //Mover scanner p proximo
     BasicScanner_Next(Scanner_Top(pScanner));
     Scanner_Skip(pScanner);

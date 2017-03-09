@@ -1,6 +1,18 @@
 
 #include <stdio.h>
+
+typedef struct 
+{
+  int i;
+} X;
+
+void X_Destroy( X* _dtor p)
+{
+}
+
 int main()
 {
+  X x;
+
  return 1;
 }
