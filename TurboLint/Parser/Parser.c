@@ -536,6 +536,8 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 	{
 		case TK_LEFT_PARENTHESIS:
 		{
+      //aqui eu posso marcar a funcao como usada.
+
 			pPostfixExpressionCore->token = token;
 
 			//  postfix-expression ( argument-expression-listopt )
@@ -996,7 +998,9 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 			break;
 
 		default:
-			ASSERT(false);
+      //ASSERT(false);
+      SetError(ctx, "Assert");
+			
 			break;
 	}
 
@@ -3139,8 +3143,16 @@ void Direct_DeclaratorCore(Parser* ctx, TDeclarator* pDeclarator2)
 			}
 			else
 			{
-				ASSERT(pDeclarator2->pExpression == NULL);
-				AssignmentExpression(ctx, &pDeclarator2->pExpression);
+        if (token != TK_RIGHT_SQUARE_BRACKET)
+        {
+          ASSERT(pDeclarator2->pExpression == NULL);
+          AssignmentExpression(ctx, &pDeclarator2->pExpression);
+        }
+        else
+        {
+          //array vazio é permitido se for o ultimo cara da struct          
+          //struct X { int ElementCount;  int Elements[]; };           
+        }
 			}
 
 			MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
@@ -4027,8 +4039,9 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
 		}
 		else
 		{
-			SetError(ctx, "");
-			break;
+      //nao ter mais declaracao nao eh erro
+			
+			//break;
 		}
 
 		if (HasErrors(ctx))

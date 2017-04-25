@@ -1,18 +1,44 @@
+/*
+TODO 
 
-#include <stdio.h>
 
-typedef struct 
-{
-  int i;
-} X;
+Todo arquivo que não estiver no path "MyCode"
+sera marcado como externo.
+Além disso, o arquivo incluido diretamente por um .c
+sera marcado como "direct".
 
-void X_Destroy( X* _dtor p)
-{
-}
+Na geracao de codigo toda declaracao externa nao sera colocada
+e todo arquivo direct sera incluido.
 
-int main()
-{
-  X x;
 
- return 1;
-}
+*/
+
+#pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Parser"
+#pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Base"
+#pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\TurboLint"
+
+
+#include "StringEx.c"
+#include "String2.c"
+#include "Stream.c"
+#include "StrBuilder.c"
+#include "Array.c"
+#include "Array2.c"
+#include "dmalloc.c"
+#include "Map.c"
+#include "Map2.c"
+
+#include "Ast.c"
+#include "AstPrint.c"
+#include "BasicScanner.c"
+#include "Macro.cpp"
+#include "Parser.c"
+#include "PPToken.cpp"
+#include "Scanner.c"
+#include "TokenArray.cpp"
+
+#include "AstMatch.c"
+#include "CodePrint.c"
+#include "TCLint2.c"
+
+#include "TurboLint.c"

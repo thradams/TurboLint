@@ -1477,7 +1477,7 @@ void Scanner_SkipCore(Scanner* pScanner)
 
         else
         {
-          ASSERT(false);
+          //ASSERT(false);
         }
 
         TokenArray2_Destroy(&ppTokenArray);

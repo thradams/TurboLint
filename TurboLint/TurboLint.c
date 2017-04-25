@@ -38,9 +38,14 @@ void RunLint(const char* configFileName,
         printf("Running Code Analysis...\n");
 
 		
-		 TProgram_Analize(&program,
-			1,
-			"");
+        TProgram_PrintCodeToFile(&program,
+          "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\teste.c", 
+          100, 
+          "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\");
+		 
+        //TProgram_Analize(&program,
+			//1,
+			//"");
 
         //RunStaticAnalysis(&program);
         //RunStaticAnalysis2(&program);
@@ -93,6 +98,7 @@ int main(int argc, char* argv[])
 	//const char* userpath = "C:\\ThiagoDevel\\MobileServer\\MobileServer";
     //PrintASTToFile(filename, configFileName, "teste.cpp", userpath);
 
+    
     //Aqui poderia ir uma lista de folders
     //que sera convertida array de indices..
     //de arquivos que estao naquele folder

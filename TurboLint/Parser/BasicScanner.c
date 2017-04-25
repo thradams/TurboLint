@@ -100,6 +100,10 @@ const char* TokenToString(Tokens tk)
             return "|";//,// = '|';
         case TK_RIGHT_CURLY_BRACKET:
             return "}";//,// = '}';
+
+        case TK_TILDE:
+          return "~";//,// = '~';
+          break;
         case TK_auto:
             return "auto";
         case TK_BREAK:

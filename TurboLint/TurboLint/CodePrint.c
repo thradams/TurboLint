@@ -1195,8 +1195,8 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     const char * path = pFile->FullPath;
 	
 		
-    if (IsInPath(pFile->FullPath, userpath) && 
-		pFile->FileLevel > 1)
+    //if (IsInPath(pFile->FullPath, userpath) && 
+		//pFile->FileLevel > 1)
     {
       b = TAnyDeclaration_CodePrint(pItem, b, fp);
 	  fprintf(fp, "\n\n");
