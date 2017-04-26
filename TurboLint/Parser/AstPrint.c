@@ -1358,52 +1358,6 @@ void TProgram_PrintToFile(TProgram* pProgram,
 }
 
 
-void TProgram_PrintFiles(TProgram* pProgram)
-{
-	for (int i = 0; i < pProgram->Files2.size; i++)
-	{
-		TFile *pFile = pProgram->Files2.pItems[i];
-		if (pFile->FileLevel >= 4 && pFile->FileLevel <= 4)
-		{
-			printf("%d  %s\n", pFile->FileLevel, pFile->FullPath);
-		}
-	}
-}
-
-/*
- *  pathUser = NULL, imprime as declaracoes de todos includes
- *           != NULL imprime as declaracoes dos arquivos dentro
- *                   do folder pathUser
- */
-void TProgram_PrintLocalsToFile(TProgram* pProgram,
-	const char* fileName,
-	int includeLevel)
-{
-	FILE * fp = fopen(fileName, "w");
-	bool b = false;
-	fprintf(fp, "[");
-	int k = 0;
-
-	for (size_t i = 0; i < pProgram->Declarations.size; i++)
-	{
-		TAnyDeclaration* pItem = pProgram->Declarations.pItems[i];
-		int fileIndex = TAnyDeclaration_GetFileIndex(pItem);
-		TFile *pFile = pProgram->Files2.pItems[fileIndex];
-		const char * path = pFile->FullPath;
-
-		if (pFile->FileLevel == includeLevel)
-		{
-			if (k > 0)
-				fprintf(fp, ",");
-
-			b = TAnyDeclaration_Print(pItem, b, fp);
-			k++;
-		}
-	}
-
-	fprintf(fp, "]");
-	fclose(fp);
-}
 
 
 

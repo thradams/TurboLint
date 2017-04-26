@@ -8,7 +8,7 @@
 
 #define _M_IX86 400
 #define WIN32
-
+#define __STDC__ 0
 #define _WIN32
 #define _RELEASE
 #define _CONSOLE

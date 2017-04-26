@@ -532,7 +532,7 @@ static struct TkPair doubleoperators[] =
     { "...", TK_DOTDOTDOT },//50
     { "%:%:", TK_PERCENTCOLONPERCENTCOLON },
     { "<<=", TK_LESSLESSEQUAL },
-    { ">>=", TK_GREATERGREATEREQUAL },
+    { ">>=", TK_GREATERGREATEREQUAL }
 };
 
 static struct TkPair keywords[] =

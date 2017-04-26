@@ -177,11 +177,11 @@ void TokenArray2_Print(const TokenArray* tokens)
   }
 
   //for (int i = 0; i < tokens->Size; i++)
-  {
+  //{
 
-   // printf("%s", tokens->pItems[i]->Lexeme);
+    //printf("%s", tokens->pItems[i]->Lexeme);
 
-  }
+  //}
 
 }
 

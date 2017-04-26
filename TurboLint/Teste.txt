@@ -1,18 +1,31 @@
-/*
-TODO 
 
 
-Todo arquivo que não estiver no path "MyCode"
-sera marcado como externo.
-Além disso, o arquivo incluido diretamente por um .c
-sera marcado como "direct".
-
-Na geracao de codigo toda declaracao externa nao sera colocada
-e todo arquivo direct sera incluido.
+//Define o que é meu dir
+#pragma mydir "C:\Users\thiago\Source\Repos\TurboLint"
 
 
-*/
+typedef struct Point
+{
+ int x;
+} Point;
 
+void Destroy(Point* pt)
+{
+}
+
+typedef struct Line
+{
+ int x;
+} Line;
+
+void Destroy(Line* pt)
+{
+}
+
+
+#ifdef 0
+
+//Define da onde pegar .c
 #pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Parser"
 #pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Base"
 #pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\TurboLint"
@@ -42,3 +55,4 @@ e todo arquivo direct sera incluido.
 #include "TCLint2.c"
 
 #include "TurboLint.c"
+#endif

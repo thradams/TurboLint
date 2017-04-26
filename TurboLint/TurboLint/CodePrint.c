@@ -1153,9 +1153,9 @@ static bool TExpression_CodePrint(TExpression2 *  p,
 	for (int i = 0; i < pProgram->Files2.size; i++)
 	{
 		TFile *pFile = pProgram->Files2.pItems[i];
-		if (!IsInPath(pFile->FullPath, userpath) )
+		if (pFile->bDirectInclude)
 		{
-			fprintf(fp, "#include \"%s\"\n", pFile->FullPath);
+			fprintf(fp, "#include <%s>\n", pFile->FullPath);
 		}
 	}
 	fprintf(fp, "\n");
@@ -1184,8 +1184,7 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
 	  
   }
 
-
- TProgram_PrintFiles(pProgram, includeLevel +1 , fp, userpath);
+  TProgram_PrintFiles(pProgram, includeLevel +1 , fp, userpath);
 
   for (size_t i = 0; i < pProgram->Declarations.size; i++)
   {
@@ -1195,8 +1194,7 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     const char * path = pFile->FullPath;
 	
 		
-    //if (IsInPath(pFile->FullPath, userpath) && 
-		//pFile->FileLevel > 1)
+    if (IsInPath(pFile->FullPath, userpath))
     {
       b = TAnyDeclaration_CodePrint(pItem, b, fp);
 	  fprintf(fp, "\n\n");

@@ -239,6 +239,8 @@ static Result Scanner_InitCore(Scanner* pScanner)
   Array_Init(&pScanner->stack);
 
   StrArray_Init(&pScanner->IncludeDir);
+  StrArray_Init(&pScanner->MySourceDir);
+
   //Indica que foi feita uma leitura especulativa
   pScanner->bHasLookAhead = false;
   //Valor lido na leitura especulativa
@@ -399,6 +401,8 @@ void Scanner_IncludeFile(Scanner* pScanner,
   const char* includeFileName,
   FileIncludeType fileIncludeType)
 {
+  bool bDirectInclude = false;
+
   String fullPath = STRING_INIT;
   String_Init(&fullPath, "");
   //Faz a procura nos diretorios como se tivesse adicinando o include
@@ -424,6 +428,27 @@ void Scanner_IncludeFile(Scanner* pScanner,
 
   if (bHasFullPath)
   {
+    //Se o arquivo esta sendo incluído de um arquivo
+    //que é do usuário e este arquivo não é do usuário
+    //então ele é marcado para ser incluído para fazer 
+    //os includes lah do almagamations
+
+    const char* fName = Scanner_GetStreamName(pScanner);
+
+    for (int k = 0; k < pScanner->MySourceDir.size; k++)
+    {
+      if (fName && IsInPath(fName, pScanner->MySourceDir.pItems[k]))
+      {
+        if (!IsInPath(fullPath, pScanner->MySourceDir.pItems[k]))
+        {
+          bDirectInclude = true;
+        }
+      }
+      if (bDirectInclude)
+        break;
+    }
+
+
     TFile*  pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
 
     if (pFile != NULL && pFile->PragmaOnce)
@@ -435,7 +460,7 @@ void Scanner_IncludeFile(Scanner* pScanner,
       if (pFile == NULL)
       {
         pFile = TFile_Create();
-        pFile->FileLevel = pScanner->stack.size + 1;
+        pFile->bDirectInclude = bDirectInclude;
         TFileMap_Set(&pScanner->FilesIncluded, fullPath, pFile); //pfile Moved
       }
 
@@ -484,7 +509,8 @@ void Scanner_IncludeFile(Scanner* pScanner,
 
 const char* Scanner_GetStreamName(Scanner* pScanner)
 {
-  return Scanner_Top(pScanner)->stream.NameOrFullPath;
+  BasicScanner* p = Scanner_Top(pScanner);
+  return p ?  p->stream.NameOrFullPath : NULL;
 }
 
 Result Scanner_Init(Scanner* pScanner)
@@ -507,6 +533,7 @@ void Scanner_Destroy(Scanner* pScanner)
   Array_Destroy(&pScanner->stack, &Delete_Scanner);
   TFileMap_Destroy(&pScanner->FilesIncluded);
   StrArray_Destroy(&pScanner->IncludeDir);
+  StrArray_Destroy(&pScanner->MySourceDir);
   //Valor lido na leitura especulativa
   ScannerItem_Destroy(&pScanner->LookAhead);
 }
@@ -637,6 +664,21 @@ void SkipSpaces(Scanner* pScanner)
   while (Scanner_Top(pScanner)->currentItem.token == TK_SPACES)
   {
     BasicScanner_Next(Scanner_Top(pScanner));
+  }
+
+  /*  
+   #define A(x) M(x) 
+   #define B A 
+   B(10) 
+  */
+  //Arranca também o EOF se nao for o ultimo
+  while (Scanner_Top(pScanner) != NULL && 
+         Scanner_Top(pScanner)->currentItem.token == TK_EOF)
+  {
+    if (pScanner->stack.size > 1)
+    {
+      Array_Pop(&pScanner->stack, &Delete_Scanner);
+    }
   }
 }
 
@@ -1159,6 +1201,17 @@ void Scanner_SkipCore(Scanner* pScanner)
           Scanner_Match(pScanner);
           fileName[strlen(fileName) - 1] = 0;
           StrArray_Push(&pScanner->IncludeDir, fileName);
+          String_Destroy(&fileName);
+        }
+
+        else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "mydir"))
+        {
+          Scanner_Match(pScanner);
+          String fileName;
+          String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
+          Scanner_Match(pScanner);
+          fileName[strlen(fileName) - 1] = 0;
+          StrArray_Push(&pScanner->MySourceDir, fileName);
           String_Destroy(&fileName);
         }
 

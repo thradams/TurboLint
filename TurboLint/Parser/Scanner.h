@@ -11,10 +11,11 @@ typedef struct
 {
     String FullPath;
     int FileIndex;
-    bool PragmaOnce;
-	int FileLevel;
+    bool PragmaOnce;    
+	  //int FileLevel;
+    bool bDirectInclude;
 } TFile;
-#define TFILE_INIT {STRING_INIT, 0, false, 0}
+#define TFILE_INIT {STRING_INIT, 0, false, false}
 
 typedef Map TFileMap;
 
@@ -49,6 +50,8 @@ typedef struct
 
     //Lista de diretorios de include
     StrArray IncludeDir;
+
+    StrArray MySourceDir;
 
     //string para debug
     StrBuilder DebugString;
