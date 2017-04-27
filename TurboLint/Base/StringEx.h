@@ -14,10 +14,10 @@ void   String_Destroy(String* pString);
 void   String_Reset(String* pString);
 void   String_Attach(String* pString, char* psz);
 void   String_Swap(String* pA, String* pB);
-bool   String_IsEmpty(const char* psz);
+
 Result String_Set(String *pS1, const char* psz1);
 
-
+int IsEmptyStr(const char*  psz);
 
 
 

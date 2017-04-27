@@ -74,9 +74,7 @@ Result String_Init(String* pString, const char*  sourceOpt)
 }
 
 
-bool String_IsEmpty(const char*  psz)
+int IsEmptyStr(const char*  psz)
 {
-  return psz == NULL || psz[0] == 0;
+  return psz == NULL || psz[0] == '\0';
 }
-
-

@@ -148,7 +148,7 @@ void* Array2_PopFront(Array2* p)
 		pItem = p->pItems[0];
 		if (p->size > 1)
 		{
-			memmove(p->pItems, p->pItems + 1, sizeof(void*) * p->size - 1);			
+			memmove(p->pItems, p->pItems + 1, sizeof(void*) * (p->size - 1));			
 		}
 		p->size--;
 	}

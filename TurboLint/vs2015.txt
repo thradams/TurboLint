@@ -23,10 +23,12 @@
 #define  __cdecl  
 #define __declspec(x)  
 
-typedef long long __int64;
-typedef short wchar_t;
 
-typedef char* va_list;
+#define __int64 long long
+//typedef long long __int64;
+//typedef short wchar_t;
+
+//typedef char* va_list;
 
 #define ASSERT(x)
 

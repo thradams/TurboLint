@@ -88,7 +88,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_dtor=;_move=;_own=;_opt=;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +118,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_dtor=;_move=;_own=;_opt=;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,11 +157,11 @@
     <ClCompile Include="Parser\Ast.c" />
     <ClCompile Include="Parser\AstPrint.c" />
     <ClCompile Include="Parser\BasicScanner.c" />
-    <ClCompile Include="Parser\Macro.cpp" />
+    <ClCompile Include="Parser\Macro.c" />
     <ClCompile Include="Parser\Parser.c" />
-    <ClCompile Include="Parser\PPToken.cpp" />
+    <ClCompile Include="Parser\PPToken.c" />
     <ClCompile Include="Parser\Scanner.c" />
-    <ClCompile Include="Parser\TokenArray.cpp" />
+    <ClCompile Include="Parser\TokenArray.c" />
     <ClCompile Include="TurboLint.c" />
     <ClCompile Include="TurboLint\AstMatch.c" />
     <ClCompile Include="TurboLint\CodePrint.c" />

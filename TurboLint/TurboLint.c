@@ -15,14 +15,13 @@ void PrintASTToFile(const char* filename,
 {
     TProgram program = TPROGRAM_INIT;
     GetAST(filename, configFileName, &program);
-   // TProgram_PrintLocalsToFile(&program,
-     //                          outFileName,
-       //                        2);
+    TProgram_PrintToFile(&program,
+                               outFileName);
 
-	TProgram_PrintCodeToFile(&program,
-		outFileName,
-		2,
-		userpath);
+	//TProgram_PrintCodeToFile(&program,
+//		outFileName,
+		//2,
+		//userpath);
 
     TProgram_Destroy(&program);
 }
@@ -88,15 +87,15 @@ int main(int argc, char* argv[])
         }
     }
 	
-    //if(bPrintPreprocessed)
+    if(bPrintPreprocessed)
     {
         PrintPreprocessedToFile(filename, configFileName, "pre.txt");
     }
     
     //PrintPreprocessedToFile(filename, configFileName, "pre.txt");
-	//const char* userpath = "C:\\Users\\thiago\\TurboLint";
+	//const char* userpath = "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\";
 	//const char* userpath = "C:\\ThiagoDevel\\MobileServer\\MobileServer";
-    //PrintASTToFile(filename, configFileName, "teste.cpp", userpath);
+   // PrintASTToFile(filename, configFileName, "teste.json", userpath);
 
     
     //Aqui poderia ir uma lista de folders

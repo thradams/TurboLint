@@ -70,13 +70,13 @@
     <ClCompile Include="Base\String2.c">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Parser\Macro.cpp">
+    <ClCompile Include="Parser\TokenArray.c">
       <Filter>Source Files\Parser</Filter>
     </ClCompile>
-    <ClCompile Include="Parser\PPToken.cpp">
+    <ClCompile Include="Parser\PPToken.c">
       <Filter>Source Files\Parser</Filter>
     </ClCompile>
-    <ClCompile Include="Parser\TokenArray.cpp">
+    <ClCompile Include="Parser\Macro.c">
       <Filter>Source Files\Parser</Filter>
     </ClCompile>
   </ItemGroup>

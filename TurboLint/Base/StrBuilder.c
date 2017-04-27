@@ -18,10 +18,7 @@
 #endif
 #include "StringEx.h"
 
-static int IsEmptyStr(const char*  psz)
-{
-  return psz == NULL || psz[0] == '\0';
-}
+
 
 Result StrBuilder_Init(StrBuilder* p, size_t capacity)
 {

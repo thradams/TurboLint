@@ -1,29 +1,7 @@
 
-
 //Define o que é meu dir
 #pragma mydir "C:\Users\thiago\Source\Repos\TurboLint"
 
-
-typedef struct Point
-{
- int x;
-} Point;
-
-void Destroy(Point* pt)
-{
-}
-
-typedef struct Line
-{
- int x;
-} Line;
-
-void Destroy(Line* pt)
-{
-}
-
-
-#ifdef 0
 
 //Define da onde pegar .c
 #pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Parser"
@@ -44,15 +22,15 @@ void Destroy(Line* pt)
 #include "Ast.c"
 #include "AstPrint.c"
 #include "BasicScanner.c"
-#include "Macro.cpp"
+#include "Macro.c"
 #include "Parser.c"
-#include "PPToken.cpp"
+#include "PPToken.c"
 #include "Scanner.c"
-#include "TokenArray.cpp"
+#include "TokenArray.c"
 
 #include "AstMatch.c"
 #include "CodePrint.c"
 #include "TCLint2.c"
 
 #include "TurboLint.c"
-#endif
+

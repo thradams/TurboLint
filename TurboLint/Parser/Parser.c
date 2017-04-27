@@ -3469,7 +3469,13 @@ bool Type_Specifier(Parser* ctx,
 
 		else
 		{
-			//      ASSERT(false);
+      //ver caso a caso
+      /*
+      //exemplo
+      typedef struct X X;
+      typedef struct X {  int i; } X;
+      */
+			//long long long int
 		}
 	}
 
@@ -3660,20 +3666,55 @@ bool Type_Specifier(Parser* ctx,
 		{
 			bool bIsTypedef = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
 
-			if (bIsTypedef && *typedefCount == 0)
+			if (bIsTypedef)
 			{
-				*typedefCount = 1;
+        if (*typedefCount == 0 /*&&
+            ppTypeSpecifier == NULL*/)
+        {
 
-				if (pSingleTypeSpecifier == NULL)
-				{
-					pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-				}
+          if (*ppTypeSpecifier == NULL)
+          {
+            *typedefCount = 1;
 
-				pSingleTypeSpecifier->bIsTypeDef = true;
-				String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
-				bResult = true;
-				Match(ctx);
-				*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+            pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+            pSingleTypeSpecifier->bIsTypeDef = true;
+            String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
+            bResult = true;
+            Match(ctx);
+            *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+          }
+          else
+          {
+            bResult = false;
+            //ERROR
+            //typedef int INT;
+            //typedef  double INT;
+            
+
+            //OK
+            //typedef int INT;
+            //typedef  int INT;
+
+            //if ((*ppTypeSpecifier)->type)
+            //daria este problema se wchar_t ja tivesse sido definido
+            //typedef unsigned short wchar_t;
+
+            //typedef int INT;
+          // SetError(ctx, "??");
+            //*typedefCount = 1;
+
+            //pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+            //pSingleTypeSpecifier->bIsTypeDef = true;
+            //String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
+            //bResult = true;
+            //Match(ctx);
+            //*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+          }
+        }
+        else
+        {
+          bResult = false;
+        }
 			}
 
 			else
@@ -3942,9 +3983,9 @@ bool  Declaration(Parser* ctx,
 
 		if (token == TK_SEMICOLON)
 		{
-			//nao tem declaracao
-			bHasDeclaration = false;
-			Match(ctx);
+			//declaracao vazia como ;
+			bHasDeclaration = true;
+			//Match(ctx);
 		}
 
 		else
@@ -4039,9 +4080,16 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
 		}
 		else
 		{
-      //nao ter mais declaracao nao eh erro
-			
-			//break;
+      if (Token(ctx) == TK_EOF)
+      {
+        //ok
+      }
+      else
+      {
+        //nao ter mais declaracao nao eh erro
+        SetError(ctx, "declaration expected");
+      }      
+			break;
 		}
 
 		if (HasErrors(ctx))

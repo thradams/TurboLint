@@ -56,9 +56,7 @@ int String2_Set(String2 *pS1, const char* psz1)
 	return i;
 }
 
-
-
-static int IsEmptyStr(const char*  psz)
+static int IsEmptyStr_RemoveThis(const char*  psz)
 {
 	return psz == NULL || psz[0] == '\0';
 }
@@ -152,7 +150,7 @@ int StrBuilder2_AppendN(StrBuilder2* p,
                        const char* source,
 	                   size_t nelements)
 {
-	if (IsEmptyStr(source))
+	if (IsEmptyStr_RemoveThis(source))
 	{
 		return 0;
 	}
@@ -175,7 +173,7 @@ int StrBuilder2_AppendN(StrBuilder2* p,
 int StrBuilder2_Append(StrBuilder2* p,
 	const char* source)
 {
-	if (IsEmptyStr(source))
+	if (IsEmptyStr_RemoveThis(source))
 	{
 		return 0;
 	}
