@@ -1,6 +1,5 @@
 # C language extensions
 
-Operator new, delete and destroy.
 
 ## Operator new
 
@@ -107,4 +106,28 @@ void delete Type_Deallocator(Type* p)
 Obs:
 I tried to use the same keyword (whaterer it is) to define the operator and 
 the especial function modifiers. But i am not sure the best position to put for "especial" functions.
+
+
+## Auto destroy
+
+This will call ```void destroy Type_OperatorDestroy(Type* p)```  at end of scope;
+
+```c
+int main(0
+{
+  auto Type obj;
+}
+```
+
+
+This will call ```void destroy Type_OperatorDestroyOther(Type** p)```  at end of scope is existent or 
+if not it will call delete p;
+
+```c
+int main(0
+{
+  auto Type * p;
+}
+```
+
 
