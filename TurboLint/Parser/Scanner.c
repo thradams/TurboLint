@@ -1005,11 +1005,11 @@ void ParsePreDefine(Scanner* pScanner)
 
   if (strcmp(lexeme, "__ANNOTATION") == 0)
   {
-    String2_Set(&pNewMacro->Name, lexeme);
+    String_Set(&pNewMacro->Name, lexeme);
   }
 
   else
-    String2_Set(&pNewMacro->Name, lexeme);
+    String_Set(&pNewMacro->Name, lexeme);
 
 
   //AQUI NAO PODE IGNORAR ESPACOS
@@ -1071,17 +1071,17 @@ int EvalPre(Scanner* pScanner)
 
   TokenArray pptokens = TOKENARRAY_INIT;
   GetPPTokens(pScanner, &pptokens);
-  StrBuilder2 strBuilder2 = STRBUILDER2_INIT;
+  StrBuilder strBuilder = STRBUILDER_INIT;
   ExpandMacroToText(&pptokens,
     &pScanner->Defines2,
     false,
     true,
     NULL,
-    &strBuilder2);
+    &strBuilder);
 
-  int iRes = EvalExpression(strBuilder2.c_str, pScanner);
+  int iRes = EvalExpression(strBuilder.c_str, pScanner);
 
-  StrBuilder2_Destroy(&strBuilder2);
+  StrBuilder_Destroy(&strBuilder);
   TokenArray2_Destroy(&pptokens);
   return iRes;
 }
@@ -1495,7 +1495,7 @@ void Scanner_SkipCore(Scanner* pScanner)
         {
           pMacro2 = pMacro2;
         }
-        StrBuilder2 strBuilder2 = STRBUILDER2_INIT;
+        StrBuilder StrBuilder = STRBUILDER_INIT;
         TokenArray ppTokenArray = TOKENARRAY_INIT;
 
         //confirma realmente se eh p expandir
@@ -1510,21 +1510,21 @@ void Scanner_SkipCore(Scanner* pScanner)
             false,
             false,
             NULL,
-            &strBuilder2);
+            &StrBuilder);
 
-          if (strBuilder2.size == 0)
+          if (StrBuilder.size == 0)
           {
             //esta com bug quando expande para nada 
             //so em algum casos
             //enquanto nao debugar melhor
             //este espaco resolve
-            StrBuilder2_Append(&strBuilder2, " ");
+            StrBuilder_Append(&StrBuilder, " ");
           }
 
 
           PushExpandedMacro(pScanner,
             pMacro2->Name,
-            strBuilder2.c_str);
+            StrBuilder.c_str);
 
         }
 
@@ -1534,7 +1534,7 @@ void Scanner_SkipCore(Scanner* pScanner)
         }
 
         TokenArray2_Destroy(&ppTokenArray);
-        StrBuilder2_Destroy(&strBuilder2);
+        StrBuilder_Destroy(&StrBuilder);
 
         if (!bIsMacro)
         {

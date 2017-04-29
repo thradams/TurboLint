@@ -1,12 +1,13 @@
 #pragma once
-#include "String2.h"
+
 #include <stdbool.h>
+#include "StringEx.h"
 
 typedef struct MapItem2
 {
 	struct MapItem2* pNext;
 	unsigned int HashValue;
-	String2 Key;
+	String Key;
 	void* pValue;
 } MapItem2;
 

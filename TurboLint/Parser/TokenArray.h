@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\Base\String2.h"
+#include "..\Base\StringEx.h"
 
 typedef struct PPToken PPToken;
 
@@ -55,7 +55,7 @@ typedef struct TokenArrayMapItem
 {
   struct MapItem2* pNext;
   unsigned int HashValue;
-  String2 Key;
+  String Key;
   TokenArray* pValue;
 } TokenArrayMapItem;
 

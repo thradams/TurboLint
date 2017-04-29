@@ -4,7 +4,6 @@
 //#include "stdafx.h"
 #include "Map2.h"
 #include <string.h>
-#define ASSERT(X)
 #include <stdlib.h>
 
 
@@ -13,7 +12,7 @@ void KeyValue_Delete(MapItem2* p)
 {
   if (p)
   {
-    String2_Destroy(&p->Key);
+    String_Destroy(&p->Key);
     free(p);
   }
 }
@@ -225,7 +224,7 @@ int Map2_SetAt(Map2* pMap,
       pKeyValue = (MapItem2*)malloc(sizeof(MapItem2) * 1);
       pKeyValue->HashValue = HashValue;
       pKeyValue->pValue = newValue;
-      String2_Init(&pKeyValue->Key, Key);
+      String_Init(&pKeyValue->Key, Key);
       pKeyValue->pNext = pMap->pHashTable[nHashBucket];
       pMap->pHashTable[nHashBucket] = pKeyValue;
       pMap->nCount++;
@@ -237,7 +236,7 @@ int Map2_SetAt(Map2* pMap,
       result = 1;
       *ppPreviousValue = pKeyValue->pValue;
       pKeyValue->pValue = newValue;
-      String2_Set(&pKeyValue->Key, Key);
+      String_Set(&pKeyValue->Key, Key);
     }
   }
 

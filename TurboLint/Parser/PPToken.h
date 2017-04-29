@@ -16,11 +16,11 @@ typedef enum
 typedef struct PPToken
 {
 	PPTokenType Token;
-	String2 Lexeme;
+	String Lexeme;
 	TokenSet HiddenSet;
 } PPToken;
 
-#define TOKEN_INIT { PPTokenType_Other, STRING2_INIT, TOKENSET_INIT }
+#define TOKEN_INIT { PPTokenType_Other, STRING_INIT, TOKENSET_INIT }
 
 void PPToken_Init(PPToken* p);
 void PPToken_Destroy(PPToken* p);

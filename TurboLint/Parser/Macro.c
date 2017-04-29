@@ -33,7 +33,7 @@ Macro* Macro_Create()
 void Macro_Destroy(Macro * p)
 {
   TokenArray2_Destroy(&p->FormalArguments);
-  String2_Destroy(&p->Name);
+  String_Destroy(&p->Name);
   TokenArray2_Destroy(&p->TokenSequence);
 }
 
@@ -109,7 +109,7 @@ int FindNoSpaceIndex(const TokenArray* pArray, int start)
 }
 
 // Return s with all \ and " characters \ escaped
-void AppendEscaped(StrBuilder2* strBuilder,
+void AppendEscaped(StrBuilder* strBuilder,
                    const char* source)
 {
   while (*source)
@@ -118,11 +118,11 @@ void AppendEscaped(StrBuilder2* strBuilder,
     {
       case '\\':
       case '"':
-        StrBuilder2_AppendChar(strBuilder, '\\');
+        StrBuilder_AppendChar(strBuilder, '\\');
 
       // FALTHROUGH
       default:
-        StrBuilder2_AppendChar(strBuilder, *source);
+        StrBuilder_AppendChar(strBuilder, *source);
     }
 
     source++;
@@ -134,7 +134,7 @@ void AppendEscaped(StrBuilder2* strBuilder,
 * Multiple spaces are converted to a single space, \ and " are
 * escaped
 */
-void AppendStringize(StrBuilder2* strBuilder, const TokenArray* ts)
+void AppendStringize(StrBuilder* strBuilder, const TokenArray* ts)
 {
   /*
   Each occurrence of white space between the argument’s
@@ -147,7 +147,7 @@ void AppendStringize(StrBuilder2* strBuilder, const TokenArray* ts)
   last preprocessing token composing the argument is deleted.
   */
 
-  StrBuilder2_Append(strBuilder, "\"");
+  StrBuilder_Append(strBuilder, "\"");
 
   bool seen_space = true;   // To delete leading spaces
 
@@ -163,36 +163,36 @@ void AppendStringize(StrBuilder2* strBuilder, const TokenArray* ts)
       else
         seen_space = true;
 
-      StrBuilder2_Append(strBuilder, " ");
+      StrBuilder_Append(strBuilder, " ");
     }
 
     else if (PPToken_IsStringLit(pToken))
     {
       seen_space = false;
-      StrBuilder2_Append(strBuilder, "\\\"");
+      StrBuilder_Append(strBuilder, "\\\"");
       AppendEscaped(strBuilder, pToken->Lexeme);
-      StrBuilder2_Append(strBuilder, "\\\"");
+      StrBuilder_Append(strBuilder, "\\\"");
     }
 
     else if (PPToken_IsCharLit(pToken))
     {
       seen_space = false;
-      StrBuilder2_AppendChar(strBuilder, '\'');
+      StrBuilder_AppendChar(strBuilder, '\'');
       AppendEscaped(strBuilder, pToken->Lexeme);
-      StrBuilder2_AppendChar(strBuilder, '\'');
+      StrBuilder_AppendChar(strBuilder, '\'');
     }
 
     else
     {
       seen_space = false;
-      StrBuilder2_Append(strBuilder, pToken->Lexeme);
+      StrBuilder_Append(strBuilder, pToken->Lexeme);
     }
   }
 
-  StrBuilder2_Append(strBuilder, "\"");
+  StrBuilder_Append(strBuilder, "\"");
 
   // Remove trailing spaces
-  StrBuilder2_Trim(strBuilder);
+  StrBuilder_Trim(strBuilder);
 }
 
 
@@ -252,13 +252,13 @@ void SubstituteArgs(Macro *pMacro,
         contains the spelling of the preprocessing token sequence
         for the corresponding argument.
         */
-        StrBuilder2 strBuilder = STRBUILDER2_INIT;
+        StrBuilder strBuilder = STRBUILDER_INIT;
         AppendStringize(&strBuilder, aseq);
         TokenArray2_Erase(&is, 0, idx + 1);
 
         //TODO token tipo?
         TokenArray2_Push(&os, PPToken_Create(strBuilder.c_str, PPTokenType_Other));
-        StrBuilder2_Destroy(&strBuilder);
+        StrBuilder_Destroy(&strBuilder);
         continue;
       }
 
@@ -601,7 +601,7 @@ bool GatherArgs(const char* name,
       break;
     }
 
-    String2_Set(&close->Lexeme, t.Lexeme);
+    String_Set(&close->Lexeme, t.Lexeme);
     //close = t;
   }
 
@@ -650,14 +650,14 @@ void GatherDefinedOperator(TokenArray* tokens,
     if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
     {
       PPToken* pp0 = TokenArray2_PopFront(tokens);
-      String2_Set(&pp0->Lexeme, "1");
+      String_Set(&pp0->Lexeme, "1");
       TokenArray2_Push(result, pp0);
     }
 
     else
     {
       PPToken* pp0 = TokenArray2_PopFront(tokens);
-      String2_Set(&pp0->Lexeme, "0");
+      String_Set(&pp0->Lexeme, "0");
       TokenArray2_Push(result, pp0);
     }
 
@@ -689,14 +689,14 @@ void GatherDefinedOperator(TokenArray* tokens,
     if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
     {
       PPToken* pp0 = TokenArray2_PopFront(tokens);
-      String2_Set(&pp0->Lexeme, "1");
+      String_Set(&pp0->Lexeme, "1");
       TokenArray2_Push(result, pp0);
     }
 
     else
     {
       PPToken* pp0 = TokenArray2_PopFront(tokens);
-      String2_Set(&pp0->Lexeme, "0");
+      String_Set(&pp0->Lexeme, "0");
       TokenArray2_Push(result, pp0);
     }
 
@@ -1000,7 +1000,7 @@ void Glue(const TokenArray* lsI,
       //Junta o ultimo token do lado esquerdo
       //com o primeiro do lado direito
 
-      StrBuilder2 strNewLexeme = STRBUILDER2_INIT;
+      StrBuilder strNewLexeme = STRBUILDER_INIT;
 
       if (ls.Size > 0)
       {
@@ -1008,7 +1008,7 @@ void Glue(const TokenArray* lsI,
         //printf("%s", ls.pItems[ls.Size - 1]->Lexeme);
         //printf("\n");
 
-        StrBuilder2_Append(&strNewLexeme, ls.pItems[ls.Size - 1]->Lexeme);
+        StrBuilder_Append(&strNewLexeme, ls.pItems[ls.Size - 1]->Lexeme);
         TokenArray2_Pop(&ls);
       }
 
@@ -1017,13 +1017,13 @@ void Glue(const TokenArray* lsI,
         //printf("glue RS: ");
         //printf("%s", rs.pItems[0]->Lexeme);
         //printf("\n");
-        StrBuilder2_Append(&strNewLexeme, rs.pItems[0]->Lexeme);
+        StrBuilder_Append(&strNewLexeme, rs.pItems[0]->Lexeme);
         TokenArray2_Pop(&rs);
       }
 
       //tipo?
       TokenArray2_Push(&ls, PPToken_Create(strNewLexeme.c_str, PPTokenType_Other));
-      StrBuilder2_Destroy(&strNewLexeme);
+      StrBuilder_Destroy(&strNewLexeme);
 
       TokenArray2_AppendMove(&ls, &rs);
       TokenArray2_Swap(out, &ls);
@@ -1043,9 +1043,9 @@ void ExpandMacroToText(const TokenArray* pTokenSequence,
                        bool get_more,
                        bool skip_defined,
                        Macro* caller,
-                       StrBuilder2* strBuilder)
+                       StrBuilder* strBuilder)
 {
-  StrBuilder2_Clear(strBuilder);
+  StrBuilder_Clear(strBuilder);
   TokenArray tks = TOKENARRAY_INIT;
   ExpandMacro(pTokenSequence,
               macros,
@@ -1058,11 +1058,11 @@ void ExpandMacroToText(const TokenArray* pTokenSequence,
   {
     if (tks.pItems[i]->Token == PPTokenType_Spaces)
     {
-      StrBuilder2_Append(strBuilder, " ");
+      StrBuilder_Append(strBuilder, " ");
     }
     else
     {
-      StrBuilder2_Append(strBuilder, tks.pItems[i]->Lexeme);
+      StrBuilder_Append(strBuilder, tks.pItems[i]->Lexeme);
     }
     
   }

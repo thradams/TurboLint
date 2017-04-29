@@ -11,7 +11,7 @@ void PPToken_Init(PPToken * p)
 
 void PPToken_Destroy(PPToken * p)
 {
-	String2_Destroy(&p->Lexeme);
+	String_Destroy(&p->Lexeme);
 }
 
 void PPToken_Swap(PPToken * pA, PPToken * pB)
@@ -36,7 +36,7 @@ PPToken* PPToken_Create(const char* s, PPTokenType token)
 	{
 		PPToken t = TOKEN_INIT;
 		*p = t;
-		String2_Set(&p->Lexeme, s);
+		String_Set(&p->Lexeme, s);
 		p->Token = token;
 	}
 

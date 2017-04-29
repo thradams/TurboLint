@@ -2,18 +2,19 @@
 #include <stdbool.h>
 #include "PPToken.h"
 #include "TokenArray.h"
+#include "..\Base\StrBuilder.h"
 #include "..\Base\Map2.h"
 
 typedef struct
 {
-  String2 Name;
+  String Name;
   bool bIsFunction;
   TokenArray TokenSequence;
   TokenArray FormalArguments;
   int FileIndex;
 } Macro;
 
-#define MACRO_INIT { STRING2_INIT, false , TOKENARRAY_INIT, TOKENARRAY_INIT, -1}
+#define MACRO_INIT { STRING_INIT, false , TOKENARRAY_INIT, TOKENARRAY_INIT, -1}
 Macro* Macro_Create();
 
 
@@ -21,7 +22,7 @@ typedef struct MacroMapItem
 {
   struct MapItem2* pNext;
   unsigned int HashValue;
-  String2 Key;
+  String Key;
   Macro* pValue;
 } MacroMapItem;
 
@@ -70,5 +71,5 @@ void ExpandMacroToText(const TokenArray* pTokenSequence,
                        bool get_more,
                        bool skip_defined,
                        Macro* caller,
-                       StrBuilder2* strBuilder);
+                       StrBuilder* strBuilder);
 
