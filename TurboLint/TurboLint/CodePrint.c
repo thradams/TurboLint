@@ -1032,6 +1032,21 @@ static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclaratio
 
 static bool TDeclaration_CodePrint(TDeclaration* p, bool b, FILE* fp)
 {
+    //Isso aqui coloca o "static" nas funcoes geradas
+	//mesmo que elas nao sejam static
+	//eh interessante pq eh possivel ver um monte de coisas nao usadas
+	//ou declaradas e nao implementadas
+	if (p->Declarators.size > 0 &&
+		p->Declarators.pItems[0]->pDeclaratorOpt != NULL &&		
+		p->Declarators.pItems[0]->pDeclaratorOpt->token == TK_LEFT_PARENTHESIS)
+	{
+		if (!p->Specifiers.StorageSpecifiers.bIsStatic)
+		{
+			p->Specifiers.StorageSpecifiers.bIsStatic = true;
+		}
+	}
+	
+
   b = TDeclarationSpecifiers_CodePrint(&p->Specifiers, false, fp);
 
   b = TDeclaratorList_CodePrint(&p->Declarators, b, fp);
