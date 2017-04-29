@@ -37,14 +37,16 @@ void RunLint(const char* configFileName,
         printf("Running Code Analysis...\n");
 
 		
+		TProgram_Analize(&program,
+			1,
+			"");
+
         TProgram_PrintCodeToFile(&program,
-          "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\teste.c", 
+          "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\teste.c",  /*out*/
           100, 
-          "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\");
+          "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\");
 		 
-        //TProgram_Analize(&program,
-			//1,
-			//"");
+        
 
         //RunStaticAnalysis(&program);
         //RunStaticAnalysis2(&program);
@@ -91,8 +93,8 @@ int main(int argc, char* argv[])
     {
         PrintPreprocessedToFile(filename, configFileName, "pre.txt");
     }
-    
-    //PrintPreprocessedToFile(filename, configFileName, "pre.txt");
+      
+    //PrintPreprocessedTpoFile(filename, configFileName, "pre.txt");
 	//const char* userpath = "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\";
 	//const char* userpath = "C:\\ThiagoDevel\\MobileServer\\MobileServer";
    // PrintASTToFile(filename, configFileName, "teste.json", userpath);

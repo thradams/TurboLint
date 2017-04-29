@@ -1,20 +1,22 @@
 
+
+
 //Define o que é meu dir
-#pragma mydir "C:\Users\thiago\Source\Repos\TurboLint"
+#pragma mydir "C:\Users\kiki\Source\Repos\TurboLint"
 
 
 //Define da onde pegar .c
-#pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Parser"
-#pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\Base"
-#pragma dir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint\TurboLint"
+#pragma dir "C:\Users\kiki\Source\Repos\TurboLint\TurboLint\Parser"
+#pragma dir "C:\Users\kiki\Source\Repos\TurboLint\TurboLint\Base"
+#pragma dir "C:\Users\kiki\Source\Repos\TurboLint\TurboLint\TurboLint"
 
 
 #include "StringEx.c"
-#include "String2.c"
+
 #include "Stream.c"
 #include "StrBuilder.c"
 #include "Array.c"
-#include "Array2.c"
+
 #include "dmalloc.c"
 #include "Map.c"
 #include "Map2.c"
@@ -33,4 +35,5 @@
 #include "TCLint2.c"
 
 #include "TurboLint.c"
+
 
