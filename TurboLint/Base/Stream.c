@@ -5,6 +5,71 @@
 #include <stdlib.h>
 #include "StrBuilder.h"
 #include <Shlwapi.h>
+#include <ctype.h>
+
+
+typedef wchar_t WCHAR;
+
+#define _MAX_DRIVE 255
+#define _MAX_DIR 255
+#define _MAX_FNAME 255
+#define _MAX_EXT 255
+#define MAX_PATH 260
+
+static void _splitpath2(const char* path, char* drv, char* dir, char* name, char* ext)
+{
+	const char* end; /* end of processed string */
+	const char* p;      /* search pointer */
+	const char* s;      /* copy pointer */
+
+						 /* extract drive name */
+	if (path[0] && path[1] == ':') {
+		if (drv) {
+			*drv++ = *path++;
+			*drv++ = *path++;
+			*drv = '\0';
+		}
+	}
+	else if (drv)
+		*drv = '\0';
+
+	/* search for end of string or stream separator */
+	for (end = path; *end && *end != ':'; )
+		end++;
+
+	/* search for begin of file extension */
+	for (p = end; p>path && *--p != '\\' && *p != '/'; )
+		if (*p == '.') {
+			end = p;
+			break;
+		}
+
+	if (ext)
+		for (s = end; (*ext = *s++); )
+			ext++;
+
+	/* search for end of directory name */
+	for (p = end; p>path; )
+		if (*--p == '\\' || *p == '/') {
+			p++;
+			break;
+		}
+
+	if (name) {
+		for (s = p; s<end; )
+			*name++ = *s++;
+
+		*name = '\0';
+	}
+
+	if (dir) {
+		for (s = path; s<p; )
+			*dir++ = *s++;
+
+		*dir = '\0';
+	}
+}
+
 
 
 
@@ -128,7 +193,7 @@ void GetFullDir(const char* fileName, String* out)
   char dir[_MAX_DIR];
   char fname[_MAX_FNAME];
   char ext[_MAX_EXT];
-  _splitpath(buffer, drive, dir, fname, ext); // C4996
+  _splitpath2(buffer, drive, dir, fname, ext); // C4996
   StrBuilder s;// = STRBUILDER_INIT;
   StrBuilder_Init(&s, 100);
   StrBuilder_Append(&s, drive);
@@ -151,7 +216,7 @@ void GetFullPath(const char* fileName, String* out)
   char dir[_MAX_DIR];
   char fname[_MAX_FNAME];
   char ext[_MAX_EXT];
-  _splitpath(buffer, drive, dir, fname, ext); // C4996
+  _splitpath2(buffer, drive, dir, fname, ext); // C4996
   StrBuilder s = STRBUILDER_INIT;
   // StrBuilder_Init(&s, 100);
   StrBuilder_Append(&s, drive);
