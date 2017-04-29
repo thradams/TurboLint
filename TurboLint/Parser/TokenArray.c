@@ -199,7 +199,7 @@ void TokenArray2_Erase(TokenArray *pArray, int begin, int end)
 }
 
 
-int TokenArrayMap2_SetAt(TokenArrayMap* pMap,
+int TokenArrayMap_SetAt(TokenArrayMap* pMap,
                         const char* Key,
                         TokenArray* newValue)
 {
@@ -209,7 +209,7 @@ int TokenArrayMap2_SetAt(TokenArrayMap* pMap,
   return r;
 }
 
-bool TokenArrayMap2_Lookup(const TokenArrayMap* pMap,
+bool TokenArrayMap_Lookup(const TokenArrayMap* pMap,
                           const char*  Key,
                           TokenArray** rValue)
 {
@@ -223,7 +223,7 @@ bool TokenArrayMap2_Lookup(const TokenArrayMap* pMap,
                     (void**)rValue);
 }
 
-bool TokenArrayMap2_RemoveKey(TokenArrayMap* pMap, const char*  Key)
+bool TokenArrayMap_RemoveKey(TokenArrayMap* pMap, const char*  Key)
 {
   TokenArray *pItem;
   bool r = Map2_RemoveKey((Map2*)pMap, Key, (void**)&pItem);
@@ -236,39 +236,39 @@ bool TokenArrayMap2_RemoveKey(TokenArrayMap* pMap, const char*  Key)
   return r;
 }
 
-void TokenArrayMap2_Init(TokenArrayMap* p)
+void TokenArrayMap_Init(TokenArrayMap* p)
 {
   TokenArrayMap t = TOKENARRAY_INIT;
   *p = t;
 }
 
-void TokenArrayMap2_Destroy(TokenArrayMap* p)
+void TokenArrayMap_Destroy(TokenArrayMap* p)
 {
   Map2_Destroy((Map2*)p);
 }
 
-TokenArrayMap* TokenArrayMap2_Create()
+TokenArrayMap* TokenArrayMap_Create()
 {
   TokenArrayMap* p = (TokenArrayMap*)malloc(sizeof * p);
 
   if (p)
   {
-    TokenArrayMap2_Init(p);
+    TokenArrayMap_Init(p);
   }
 
   return p;
 }
 
-void TokenArrayMap2_Delete(TokenArrayMap * p)
+void TokenArrayMap_Delete(TokenArrayMap * p)
 {
   if (p != NULL)
   {
-    TokenArrayMap2_Destroy(p);
+    TokenArrayMap_Destroy(p);
     free(p);
   }
 }
 
-void TokenArrayMap2_Swap(TokenArrayMap * pA, TokenArrayMap * pB)
+void TokenArrayMap_Swap(TokenArrayMap * pA, TokenArrayMap * pB)
 {
   TokenArrayMap t = TOKENARRAYMAP_INIT;
   *pA = *pB;

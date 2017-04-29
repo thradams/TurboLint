@@ -69,24 +69,24 @@ typedef struct
 
 #define TOKENARRAYMAP_INIT { NULL, 0, 0 }
 
-int TokenArrayMap2_SetAt(TokenArrayMap* pMap,
+int TokenArrayMap_SetAt(TokenArrayMap* pMap,
                         const char* Key,
                         TokenArray* newValue);
 
-bool TokenArrayMap2_Lookup(const TokenArrayMap* pMap,
+bool TokenArrayMap_Lookup(const TokenArrayMap* pMap,
                           const char*  Key,
                           TokenArray** rValue);
 
-bool TokenArrayMap2_RemoveKey(TokenArrayMap* pMap,
+bool TokenArrayMap_RemoveKey(TokenArrayMap* pMap,
                              const char*  Key);
 
-void TokenArrayMap2_Init(TokenArrayMap* p);
-void TokenArrayMap2_Destroy(TokenArrayMap* p);
+void TokenArrayMap_Init(TokenArrayMap* p);
+void TokenArrayMap_Destroy(TokenArrayMap* p);
 
-TokenArrayMap*  TokenArrayMap2_Create();
-void TokenArrayMap2_Delete(TokenArrayMap * p);
+TokenArrayMap*  TokenArrayMap_Create();
+void TokenArrayMap_Delete(TokenArrayMap * p);
 
-void TokenArrayMap2_Swap(TokenArrayMap * pA, TokenArrayMap * pB);
+void TokenArrayMap_Swap(TokenArrayMap * pA, TokenArrayMap * pB);
 
 
 typedef struct

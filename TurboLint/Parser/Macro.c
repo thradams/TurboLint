@@ -243,7 +243,7 @@ void SubstituteArgs(Macro *pMacro,
 
       if (idx != -1 &&
           args != NULL &&
-          TokenArrayMap2_Lookup(args, is.pItems[idx]->Lexeme, &aseq))
+          TokenArrayMap_Lookup(args, is.pItems[idx]->Lexeme, &aseq))
       {
         /*
         If, in the replacement list, a parameter is immediately
@@ -279,7 +279,7 @@ void SubstituteArgs(Macro *pMacro,
       {
         TokenArray* aseq;
 
-        if (TokenArrayMap2_Lookup(args, is.pItems[idx]->Lexeme, &aseq))
+        if (TokenArrayMap_Lookup(args, is.pItems[idx]->Lexeme, &aseq))
         {
           TokenArray2_Erase(&is, 0, idx + 1);
 
@@ -327,7 +327,7 @@ void SubstituteArgs(Macro *pMacro,
         */
         TokenArray* aseq;
 
-        if (!TokenArrayMap2_Lookup(args, head->Lexeme, &aseq))
+        if (!TokenArrayMap_Lookup(args, head->Lexeme, &aseq))
         {
           /*
           if (m.get_is_vararg())
@@ -361,7 +361,7 @@ void SubstituteArgs(Macro *pMacro,
             {
               TokenArray* aseq2;
 
-              if (!TokenArrayMap2_Lookup(args, is.pItems[idx2]->Lexeme, &aseq2))
+              if (!TokenArrayMap_Lookup(args, is.pItems[idx2]->Lexeme, &aseq2))
               {
                 // Erase the ## RHS
                 TokenArray2_Erase(&is, 0, idx + 1);
@@ -388,7 +388,7 @@ void SubstituteArgs(Macro *pMacro,
       TokenArray* argseq = NULL;
 
       if (args != NULL &&
-          TokenArrayMap2_Lookup(args, head->Lexeme, &argseq))
+          TokenArrayMap_Lookup(args, head->Lexeme, &argseq))
       {
         //expand head
         TokenArray expanded = TOKENARRAY_INIT;
@@ -514,7 +514,7 @@ bool GatherArgs(const char* name,
   {
     TokenArray* pV = TokenArray2_Create();
 
-    TokenArrayMap2_SetAt(args,
+    TokenArrayMap_SetAt(args,
                          formal_args->pItems[i]->Lexeme,
                          pV);
 
@@ -592,7 +592,7 @@ bool GatherArgs(const char* name,
       i++;
       TokenArray* pV2 = TokenArray2_Create();
 
-      TokenArrayMap2_SetAt(args,
+      TokenArrayMap_SetAt(args,
                            formal_args->pItems[i]->Lexeme,
                            pV2);
 
@@ -647,7 +647,7 @@ void GatherDefinedOperator(TokenArray* tokens,
   if ((PPToken_IsIdentifier(tokens->pItems[0])))
   {
     // defined X form
-    if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
+    if (MacroMap_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
     {
       PPToken* pp0 = TokenArray2_PopFront(tokens);
       String_Set(&pp0->Lexeme, "1");
@@ -686,7 +686,7 @@ void GatherDefinedOperator(TokenArray* tokens,
       //goto error;
     }
 
-    if (MacroMap2_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
+    if (MacroMap_Find(macros, tokens->pItems[0]->Lexeme) != NULL)
     {
       PPToken* pp0 = TokenArray2_PopFront(tokens);
       String_Set(&pp0->Lexeme, "1");
@@ -773,7 +773,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
       continue;
     }
 
-    Macro * pMacro = MacroMap2_Find(macros, pHead->Lexeme);
+    Macro * pMacro = MacroMap_Find(macros, pHead->Lexeme);
 
     if (pMacro == NULL)
     {
@@ -883,7 +883,7 @@ void ExpandMacro(const TokenArray* tsOriginal,
       TokenSet_Destroy(&hs);
       TokenArray2_Destroy(&s);
 
-      TokenArrayMap2_Destroy(&args);
+      TokenArrayMap_Destroy(&args);
     }
 
     else
@@ -1073,7 +1073,7 @@ void ExpandMacroToText(const TokenArray* pTokenSequence,
 
 
 
-int MacroMap2_SetAt(MacroMap* pMap,
+int MacroMap_SetAt(MacroMap* pMap,
                     const char* Key,
                     Macro* newValue)
 {
@@ -1083,7 +1083,7 @@ int MacroMap2_SetAt(MacroMap* pMap,
   return r;
 }
 
-bool MacroMap2_Lookup(const MacroMap* pMap,
+bool MacroMap_Lookup(const MacroMap* pMap,
                       const char*  Key,
                       Macro** rValue)
 {
@@ -1092,7 +1092,7 @@ bool MacroMap2_Lookup(const MacroMap* pMap,
                      (void**)rValue);
 }
 
-Macro* MacroMap2_Find(const MacroMap* pMap, const char*  Key)
+Macro* MacroMap_Find(const MacroMap* pMap, const char*  Key)
 {
   void* p = NULL;
   Map2_Lookup((Map2*)pMap,
@@ -1102,7 +1102,7 @@ Macro* MacroMap2_Find(const MacroMap* pMap, const char*  Key)
 }
 
 
-bool MacroMap2_RemoveKey(MacroMap* pMap, const char*  Key)
+bool MacroMap_RemoveKey(MacroMap* pMap, const char*  Key)
 {
   Macro *pItem;
   bool r = Map2_RemoveKey((Map2*)pMap, Key, (void**)&pItem);
@@ -1115,39 +1115,39 @@ bool MacroMap2_RemoveKey(MacroMap* pMap, const char*  Key)
   return r;
 }
 
-void MacroMap2_Init(MacroMap* p)
+void MacroMap_Init(MacroMap* p)
 {
   MacroMap t = MACROMAP_INIT;
   *p = t;
 }
 
-void MacroMap2_Destroy(MacroMap* p)
+void MacroMap_Destroy(MacroMap* p)
 {
   Map2_Destroy((Map2*)p);
 }
 
-MacroMap* MacroMap2_Create()
+MacroMap* MacroMap_Create()
 {
   MacroMap* p = (MacroMap*)malloc(sizeof * p);
 
   if (p)
   {
-    MacroMap2_Init(p);
+    MacroMap_Init(p);
   }
 
   return p;
 }
 
-void MacroMap2_Delete(MacroMap * p)
+void MacroMap_Delete(MacroMap * p)
 {
   if (p != NULL)
   {
-    MacroMap2_Destroy(p);
+    MacroMap_Destroy(p);
     free(p);
   }
 }
 
-void MacroMap2_Swap(MacroMap * pA, MacroMap * pB)
+void MacroMap_Swap(MacroMap * pA, MacroMap * pB)
 {
   MacroMap t = *pA;
   *pA = *pB;

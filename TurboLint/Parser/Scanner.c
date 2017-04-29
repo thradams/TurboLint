@@ -217,7 +217,7 @@ static Result AddStandardMacro(Scanner* pScanner,
   //TODO tipo do token
   TokenArray2_Push(&pDefine1->TokenSequence, PPToken_Create(value, PPTokenType_Other));
   pDefine1->FileIndex = 0;
-  MacroMap2_SetAt(&pScanner->Defines2, name, pDefine1);
+  MacroMap_SetAt(&pScanner->Defines2, name, pDefine1);
   return RESULT_OK;
 }
 
@@ -226,7 +226,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
   //TFileMap_init
   //pScanner->IncludeDir
   Map_Init(&pScanner->FilesIncluded, 100);
-  MacroMap2_Init(&pScanner->Defines2);
+  MacroMap_Init(&pScanner->Defines2);
   StrBuilder_Init(&pScanner->DebugString, 100);
   StrBuilder_Init(&pScanner->ErrorString, 100);
   //StrBuilder_Init(&pScanner->DebugString, 100);
@@ -526,7 +526,7 @@ static void Delete_Scanner(void* pv)
 void Scanner_Destroy(Scanner* pScanner)
 {
 
-  MacroMap2_Destroy(&pScanner->Defines2);
+  MacroMap_Destroy(&pScanner->Defines2);
   StrBuilder_Destroy(&pScanner->DebugString);
   StrBuilder_Destroy(&pScanner->ErrorString);
   ArrayInt_Destroy(&pScanner->StackIfDef);
@@ -748,7 +748,7 @@ static Tokens GetToken(Scanner* pScanner)
 Macro*  Scanner_FindPreprocessorItem2(Scanner* pScanner,
   const char* key)
 {
-  Macro* pMacro = MacroMap2_Find(&pScanner->Defines2, key);
+  Macro* pMacro = MacroMap_Find(&pScanner->Defines2, key);
   return pMacro;
 }
 
@@ -785,7 +785,7 @@ int EvalExpression(const char* s, Scanner* pScanner)
   if (pDefines)
   {
     //usa o mapa de macros para o pre-processador
-    MacroMap2_Swap(&parser.Scanner.Defines2, pDefines);
+    MacroMap_Swap(&parser.Scanner.Defines2, pDefines);
   }
 
   Scanner_Next(&parser.Scanner);
@@ -794,7 +794,7 @@ int EvalExpression(const char* s, Scanner* pScanner)
   //printf(" %d\n", iRes);
   if (pDefines)
   {
-    MacroMap2_Swap(&parser.Scanner.Defines2, pDefines);
+    MacroMap_Swap(&parser.Scanner.Defines2, pDefines);
   }
 
   if (parser.bError)
@@ -1057,7 +1057,7 @@ void ParsePreDefine(Scanner* pScanner)
 
   GetPPTokens(pScanner, &pNewMacro->TokenSequence);
 
-  MacroMap2_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
+  MacroMap_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
 
   //breakline ficou...
 }
@@ -1434,7 +1434,7 @@ void Scanner_SkipCore(Scanner* pScanner)
         Scanner_Match(pScanner);
         lexeme = BasicScanner_Lexeme(Scanner_Top(pScanner));
 
-        MacroMap2_RemoveKey(&pScanner->Defines2, lexeme);
+        MacroMap_RemoveKey(&pScanner->Defines2, lexeme);
 
         IgnorePreProcessor(pScanner);
       }

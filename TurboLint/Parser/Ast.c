@@ -667,7 +667,7 @@ void TProgram_Destroy(TProgram * p)
   TDeclarations_Destroy(&p->Declarations);
   TFileArray_Destroy(&p->Files2);
   DeclarationsMap_Destroy(&p->Symbols);
-  MacroMap2_Destroy(&p->Defines);
+  MacroMap_Destroy(&p->Defines);
 }
 
 

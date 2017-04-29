@@ -36,26 +36,26 @@ typedef struct
 
 #define MACROMAP_INIT { NULL, 0, 0 }
 
-int MacroMap2_SetAt(MacroMap* pMap,
+int MacroMap_SetAt(MacroMap* pMap,
                     const char* Key,
                     Macro* newValue);
 
-bool MacroMap2_Lookup(const MacroMap* pMap,
+bool MacroMap_Lookup(const MacroMap* pMap,
                       const char*  Key,
                       Macro** rValue);
 
-bool MacroMap2_RemoveKey(MacroMap* pMap,
+bool MacroMap_RemoveKey(MacroMap* pMap,
                          const char*  Key);
 
-void MacroMap2_Init(MacroMap* p);
-void MacroMap2_Destroy(MacroMap* p);
+void MacroMap_Init(MacroMap* p);
+void MacroMap_Destroy(MacroMap* p);
 
-MacroMap*  MacroMap2_Create();
-void MacroMap2_Delete(MacroMap * p);
+MacroMap*  MacroMap_Create();
+void MacroMap_Delete(MacroMap * p);
 
-void MacroMap2_Swap(MacroMap * pA, MacroMap * pB);
+void MacroMap_Swap(MacroMap * pA, MacroMap * pB);
 
-Macro* MacroMap2_Find(const MacroMap* pMap, const char*  Key);
+Macro* MacroMap_Find(const MacroMap* pMap, const char*  Key);
 
 
 
