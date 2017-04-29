@@ -1,6 +1,5 @@
 
 
-
 //Define o que é meu dir
 #pragma mydir "C:\Users\kiki\Source\Repos\TurboLint"
 
@@ -11,12 +10,12 @@
 #pragma dir "C:\Users\kiki\Source\Repos\TurboLint\TurboLint\TurboLint"
 
 
+
 #include "StringEx.c"
-
-#include "Stream.c"
 #include "StrBuilder.c"
+#include "Path.c"
+#include "Stream.c"
 #include "Array.c"
-
 #include "dmalloc.c"
 #include "Map.c"
 #include "Map2.c"

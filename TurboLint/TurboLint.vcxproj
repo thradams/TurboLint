@@ -22,7 +22,7 @@
     <ProjectGuid>{516375FC-26A2-47C3-B83C-EAD758F49616}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TurboLint</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -146,13 +146,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Base\Array.c" />
-    <ClCompile Include="Base\Array2.c" />
     <ClCompile Include="Base\dmalloc.c" />
     <ClCompile Include="Base\Map.c" />
     <ClCompile Include="Base\Map2.c" />
+    <ClCompile Include="Base\Path.c" />
     <ClCompile Include="Base\StrBuilder.c" />
     <ClCompile Include="Base\Stream.c" />
-    <ClCompile Include="Base\String2.c" />
     <ClCompile Include="Base\StringEx.c" />
     <ClCompile Include="Parser\Ast.c" />
     <ClCompile Include="Parser\AstPrint.c" />
@@ -169,15 +168,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base\Array.h" />
-    <ClInclude Include="Base\Array2.h" />
     <ClInclude Include="Base\config.h" />
     <ClInclude Include="Base\dmalloc.h" />
     <ClInclude Include="Base\Map.h" />
     <ClInclude Include="Base\Map2.h" />
+    <ClInclude Include="Base\Path.h" />
     <ClInclude Include="Base\Result.h" />
     <ClInclude Include="Base\StrBuilder.h" />
     <ClInclude Include="Base\Stream.h" />
-    <ClInclude Include="Base\String2.h" />
     <ClInclude Include="Base\StringEx.h" />
     <ClInclude Include="Parser\Ast.h" />
     <ClInclude Include="Parser\AstPrint.h" />
@@ -194,6 +192,7 @@
   <ItemGroup>
     <Text Include="vs2015.txt" />
     <Text Include="Teste.txt" />
+    <Text Include="vs2017.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,17 @@
+﻿  Path.c
+Base\Path.c(13): warning C4005: '_MAX_DRIVE': macro redefinition
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt\stdlib.h(1052): note: see previous definition of '_MAX_DRIVE'
+Base\Path.c(14): warning C4005: '_MAX_DIR': macro redefinition
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt\stdlib.h(1053): note: see previous definition of '_MAX_DIR'
+Base\Path.c(15): warning C4005: '_MAX_FNAME': macro redefinition
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt\stdlib.h(1054): note: see previous definition of '_MAX_FNAME'
+Base\Path.c(16): warning C4005: '_MAX_EXT': macro redefinition
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt\stdlib.h(1055): note: see previous definition of '_MAX_EXT'
+  Stream.c
+  Generating code
+  15 of 579 functions ( 2.6%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    3 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  TurboLint.vcxproj -> C:\Users\kiki\Source\Repos\TurboLint\Release\TurboLint.exe
+  TurboLint.vcxproj -> C:\Users\kiki\Source\Repos\TurboLint\Release\TurboLint.pdb (Full PDB)

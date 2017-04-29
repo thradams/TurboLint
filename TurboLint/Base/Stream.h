@@ -21,11 +21,7 @@ typedef struct
 
 } SStream;
 
-void GetFullPath(const char* fileName, String* out);
-void GetFullDir(const char* fileName, String* out);
-bool IsFullPath(const char * path);
-bool IsInPath(const char * filePath, const char* path);
-bool FileExists(const char* fullPath);
+
 
 Result SStream_Init(SStream* pfStream,
                     const char* name,

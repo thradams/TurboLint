@@ -61,13 +61,7 @@
     <ClCompile Include="TurboLint\AstMatch.c">
       <Filter>Source Files\TurboLint</Filter>
     </ClCompile>
-    <ClCompile Include="Base\Array2.c">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Base\Map2.c">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="Base\String2.c">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
     <ClCompile Include="Parser\TokenArray.c">
@@ -78,6 +72,9 @@
     </ClCompile>
     <ClCompile Include="Parser\Macro.c">
       <Filter>Source Files\Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Path.c">
+      <Filter>Source Files\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,13 +126,7 @@
     <ClInclude Include="TurboLint\AstMatch.h">
       <Filter>Source Files\TurboLint</Filter>
     </ClInclude>
-    <ClInclude Include="Base\Array2.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
     <ClInclude Include="Base\Map2.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="Base\String2.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="Parser\Macro.h">
@@ -147,12 +138,18 @@
     <ClInclude Include="Parser\TokenArray.h">
       <Filter>Source Files\Parser</Filter>
     </ClInclude>
+    <ClInclude Include="Base\Path.h">
+      <Filter>Source Files\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Teste.txt">
       <Filter>Source Files</Filter>
     </Text>
     <Text Include="vs2015.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="vs2017.txt">
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>
