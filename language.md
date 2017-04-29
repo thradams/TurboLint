@@ -1,6 +1,6 @@
 # C language extensions
 
-´´´cpp
+```cpp
 
  typedef struct   {
  int x = 1;
@@ -29,7 +29,7 @@ void destroy Point_Destroy(Point* p)
   int main()
 {
  /*auto*/ Point p = {};
- /*auto*/Point* p2 = new Point;
+ /*auto*/Point* p2 = new (Point){};
  //p.~Point();
  destroy p2;
  delete p2;
@@ -37,5 +37,6 @@ void destroy Point_Destroy(Point* p)
 
 
 //~p;
-´´´
+```
+
 
