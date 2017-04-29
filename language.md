@@ -1,6 +1,6 @@
 # C language extensions
 
-Operator new and delete and destroy.
+Operator new, delete and destroy.
 
 ## Operator new
 
