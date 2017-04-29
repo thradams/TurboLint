@@ -30,6 +30,7 @@ Type* Type_OperatorNew()
 Let´s say I want my custon allocator for Type
 
 ```cpp
+
 Type* new TypeAllocator()
 {
   return malloc(sizeof Type);
