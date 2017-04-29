@@ -1495,7 +1495,7 @@ void Scanner_SkipCore(Scanner* pScanner)
         {
           pMacro2 = pMacro2;
         }
-        StrBuilder StrBuilder = STRBUILDER_INIT;
+        StrBuilder strBuilder = STRBUILDER_INIT;
         TokenArray ppTokenArray = TOKENARRAY_INIT;
 
         //confirma realmente se eh p expandir
@@ -1510,21 +1510,21 @@ void Scanner_SkipCore(Scanner* pScanner)
             false,
             false,
             NULL,
-            &StrBuilder);
+            &strBuilder);
 
-          if (StrBuilder.size == 0)
+          if (strBuilder.size == 0)
           {
             //esta com bug quando expande para nada 
             //so em algum casos
             //enquanto nao debugar melhor
             //este espaco resolve
-            StrBuilder_Append(&StrBuilder, " ");
+            StrBuilder_Append(&strBuilder, " ");
           }
 
 
           PushExpandedMacro(pScanner,
             pMacro2->Name,
-            StrBuilder.c_str);
+            strBuilder.c_str);
 
         }
 
@@ -1534,7 +1534,7 @@ void Scanner_SkipCore(Scanner* pScanner)
         }
 
         TokenArray2_Destroy(&ppTokenArray);
-        StrBuilder_Destroy(&StrBuilder);
+        StrBuilder_Destroy(&strBuilder);
 
         if (!bIsMacro)
         {

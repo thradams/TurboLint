@@ -28,6 +28,7 @@ void PPToken_Destroy(PPToken* p);
 PPToken*  PPToken_Create(const char* s, PPTokenType token);
 PPToken*  PPToken_Clone(PPToken* p);
 void PPToken_Delete(PPToken * p);
+void PPToken_DeleteVoid(void* pv);
 void PPToken_Swap(PPToken * pA, PPToken * pB);
 
 

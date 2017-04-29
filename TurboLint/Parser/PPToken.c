@@ -52,6 +52,11 @@ void PPToken_Delete(PPToken * p)
 	}
 }
 
+void PPToken_DeleteVoid(void* pv)
+{
+	PPToken_Delete((PPToken *)pv);
+}
+
 bool PPToken_IsIdentifier(PPToken* pHead)
 {
 	return pHead->Token == PPTokenType_Identifier;

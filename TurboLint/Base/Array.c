@@ -1,5 +1,7 @@
 #include "Array.h"
 #include <stdlib.h>
+#include <string.h>
+
 #include "config.h"
 #include "StringEx.h"
 
@@ -39,21 +41,29 @@ Result Array_Grow(Array* p, size_t nelements)
     return result;
 }
 
+
+void* Array_PopGet(Array* p)
+{
+	void* pItem = 0;
+	if (p->size > 0)
+	{
+		pItem = p->pItems[p->size - 1];
+		p->pItems[p->size - 1] = NULL;
+		p->size--;		
+	}
+	else
+	{
+		ASSERT(false);
+	}
+	return pItem;
+}
+
 void Array_Pop(Array* p, void(*pfDestroyData)(void*))
 {
-    if(p->size > 0)
+	void* pItem = Array_PopGet(p);
+    if(pfDestroyData)
     {
-        void* pItem = p->pItems[p->size - 1];
-        p->pItems[p->size - 1] = NULL;
-        p->size--;
-        if(pfDestroyData)
-        {
-            pfDestroyData(pItem);
-        }
-    }
-    else
-    {
-        ASSERT(false);
+       pfDestroyData(pItem);
     }
 }
 
@@ -303,4 +313,37 @@ void StrArray_Destroy(StrArray* p)
 {
     Array_Destroy((Array*)p, &Array_DeleteStrVoid);
 }
+
+
+
+void* Array_RemoveAt(Array* p, int index)
+{
+	if (index != p->size - 1)
+	{
+		void* t = p->pItems[index];
+		p->pItems[index] = p->pItems[p->size - 1];
+		p->pItems[p->size - 1] = t;
+	}
+
+	return Array_PopGet(p);
+}
+
+void* Array_PopFront(Array* p)
+{
+	void* pItem = NULL;
+	ASSERT(p->size > 0);
+	if (p->size > 0)
+	{
+		pItem = p->pItems[0];
+		if (p->size > 1)
+		{
+			memmove(p->pItems, p->pItems + 1, sizeof(void*) * (p->size - 1));
+		}
+		p->size--;
+	}
+	return pItem;
+}
+
+
+
 

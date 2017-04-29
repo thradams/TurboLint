@@ -7,7 +7,7 @@
 
 #include "Macro.h"
 #include "String.h"
-#include "..\Base\Array2.h"
+#include "..\Base\Array.h"
 #include <string.h>
 #include <stdlib.h>
 #include "PPToken.h"

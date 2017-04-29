@@ -18,6 +18,7 @@ typedef struct
 
 Result Array_Reserve(Array* p, size_t nelements);
 void Array_Pop(Array* p, void(*pfDestroyData)(void*));
+void* Array_PopGet(Array* p);
 void* Array_Top(Array* p);
 Result Array_Push(Array* p, void* pItem);
 void Array_Clear(Array* p, void(*pfDestroyData)(void*));
@@ -26,6 +27,8 @@ Result Array_Create(Array** pp);
 void Array_Destroy(Array* st, void(*pfDestroyData)(void*));
 void Array_Delete(Array* st, void(*pfDestroyData)(void*));
 void Array_Swap(Array* p1, Array* p2);
+void* Array_PopFront(Array* p);
+void* Array_RemoveAt(Array* p, int index);
 //////
 
 

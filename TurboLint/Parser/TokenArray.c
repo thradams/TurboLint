@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "TokenArray.h"
-#include "..\Base\Array2.h"
+#include "..\Base\Array.h"
 #include "PPToken.h"
 #include <string.h>
 #include "..\Base\Map2.h"
@@ -8,35 +8,33 @@
 
 int TokenArray2_Reserve(TokenArray* p, int nelements)
 {
-  return Array2_Reserve((Array2*)p, nelements);
+  return Array_Reserve((Array*)p, nelements);
 }
 
 int TokenArray2_Grow(TokenArray* p, size_t nelements)
 {
-  return Array2_Grow((Array2*)p, nelements);
+  return Array_Grow((Array*)p, nelements);
 }
 
 PPToken* TokenArray2_PopFront(TokenArray* p)
 {
-  void *pItem = Array2_PopFront((Array2*)p);
+  void *pItem = Array_PopFront((Array*)p);
   return (PPToken*)pItem;
 }
 
 void TokenArray2_Pop(TokenArray* p)
 {
-  void* pItem =
-    Array2_Pop((Array2*)p);
-  PPToken_Delete((PPToken*)pItem);
+  Array_Pop((Array*)p, PPToken_DeleteVoid);  
 }
 
 PPToken* TokenArray2_Top(TokenArray* p)
 {
-  return (PPToken*)Array2_Top((Array2*)p);
+  return (PPToken*)Array_Top((Array*)p);
 }
 
 int TokenArray2_Push(TokenArray* p, PPToken* pItem)
 {
-  int r = Array2_Push((Array2*)p, pItem);
+  int r = Array_Push((Array*)p, pItem);
 
   if (r == -1)
   {
@@ -48,12 +46,7 @@ int TokenArray2_Push(TokenArray* p, PPToken* pItem)
 
 void TokenArray2_Clear(TokenArray* p)
 {
-  for (int i = 0; i < p->Size; i++)
-  {
-    PPToken_Delete((PPToken*)p->pItems[i]);
-  }
-
-  Array2_Clear((Array2*)p);
+  Array_Clear((Array*)p, PPToken_DeleteVoid);
 }
 
 
@@ -109,7 +102,7 @@ PPToken* TokenArray2_End(TokenArray* p)
 void TokenArray2_RemoveAt(TokenArray* p, int index)
 {
   void *pItem =
-    Array2_RemoveAt((Array2*)p, index);
+    Array_RemoveAt((Array*)p, index);
   PPToken_Delete((PPToken*)pItem);
 }
 
@@ -289,7 +282,7 @@ int TokenSet_Add(TokenSet* p, PPToken* pItem)
 
   if (pTk == NULL)
   {
-    r = Array2_Push((Array2*)p, pItem);
+    r = Array_Push((Array*)p, pItem);
 
     if (r == -1)
     {
@@ -334,12 +327,7 @@ PPToken* TokenSet_Find(const TokenSet *pArray, const char * lexeme)
 
 void TokenSet_Clear(TokenSet* p)
 {
-  for (int i = 0; i < p->Size; i++)
-  {
-    PPToken_Delete((PPToken*)p->pItems[i]);
-  }
-
-  Array2_Clear((Array2*)p);
+  Array_Clear((Array*)p, PPToken_DeleteVoid);
 }
 
 
