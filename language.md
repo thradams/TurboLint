@@ -60,8 +60,9 @@ Syntaxe:
 Type p;
 destroy p;
 ```
-Destroy will can an special function defined with "destroy". 
-(I am not sure about the best position of this function modifier - but the idea is the use the same keyword destroy in two contexts)
+Destroy will call an special function defined with "destroy". 
+If no function is defined there is no effect.
+
 
 ```cpp
 void destroy Type_OperatorDestroy(Type* p)
@@ -102,3 +103,7 @@ void delete Type_Deallocator(Type* p)
 ```
  
  
+Obs:
+I tried to use the same keyword (whaterer it is) to define the operator and 
+the especial function modifiers. But i am not sure the best position to put for "especial" functions.
+
