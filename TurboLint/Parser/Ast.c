@@ -810,7 +810,11 @@ bool EvaluateConstantExpression(TExpression2 *  p, int *pResult)
 				case TK_LESSLESS:
 					result = (left << right);
 					break;
+				case TK_VERTICAL_LINE:
+					result = (left | right);
+					break;
 				default:
+					//TODO ADD THE OPERADOR?
 					ASSERT(false);
 			}
 

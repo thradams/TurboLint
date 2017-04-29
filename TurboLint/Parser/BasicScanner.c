@@ -720,7 +720,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         scanner->bLineStart = false;
         return;
     }
-    if(ch == '0' && ch1 == 'x')
+    if(ch == '0' && (ch1 == 'x' || ch1 == 'X'))
     {
         ch = BasicScanner_Match(scanner);
         ch = BasicScanner_Match(scanner);
