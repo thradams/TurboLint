@@ -12,7 +12,8 @@ Type *p = new (Type) {0};
 
 The code above is equivalent of:
 
-```cpp
+```c
+//Equivalent code in C
 Type* Type_OperatorNew()
 {
   Type* p = malloc (sizeof (Type));
@@ -36,7 +37,8 @@ Type* new TypeAllocator()
 ```
 This especial function will be called if present: (default is malloc)
 
-```cpp
+```c
+//Equivalent code in C
 Type* Type_OperatorNew()
 {
   Type* p = TypeAllocator();
