@@ -184,7 +184,7 @@ typedef struct TPostfixExpressionCoreTag
   Tokens token;
   String lexeme;
   TExpression*  pExpressionLeft;
-  TExpression*  pExpressionArray;
+  TExpression*  pExpressionRight;
   
   //cast
   

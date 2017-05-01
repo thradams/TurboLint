@@ -128,7 +128,7 @@ TExpression * MatchFunctionCall(TExpression* pExpression,
 		if (lexeme != NULL)
 		{
 			*funcNameOpt = lexeme;			
-			pResult = pPostfixExpressionCoreFirst->pExpressionArray;			
+			pResult = pPostfixExpressionCoreFirst->pExpressionRight;			
 		}
 	}
 

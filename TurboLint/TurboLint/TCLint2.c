@@ -603,7 +603,7 @@ static void CheckDestructorCallOnExpressionLocalVariablePointer(TProgram* pProgr
     {
 
       TPrimaryExpressionValue *pTPrimaryExpressionValue2 =
-        TExpression_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionArray);
+        TExpression_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionRight);
 
       if (pTPrimaryExpressionValue2)
       {
@@ -657,7 +657,7 @@ static void CheckDestructorCallOnExpressionLocalVariable(TProgram* pProgram,
     if (pTPrimaryExpressionValue)
     {
       TUnaryExpressionOperator *pUnaryExpressionOperator =
-        TExpression_As_TUnaryExpressionOperator(pPostfixExpressionCore->pExpressionArray);
+        TExpression_As_TUnaryExpressionOperator(pPostfixExpressionCore->pExpressionRight);
 
       if (pUnaryExpressionOperator &&
           pUnaryExpressionOperator->token == TK_AMPERSAND)
@@ -938,7 +938,7 @@ static void TPostfixExpressionCore_Analise(TProgram* pProgram,
 
     case TK_LEFT_SQUARE_BRACKET:
       //fprintf(fp, "[");
-      TExpression_Analise(pProgram, p->pExpressionArray, "r", pStackNames);
+      TExpression_Analise(pProgram, p->pExpressionRight, "r", pStackNames);
       //fprintf(fp, "]");
       break;
 
@@ -947,7 +947,7 @@ static void TPostfixExpressionCore_Analise(TProgram* pProgram,
 	  //aqui tem o nome da funcao e a parte de dentro
 	  //
       //fprintf(fp, "(");
-      TExpression_Analise(pProgram, p->pExpressionArray, "r", pStackNames);
+      TExpression_Analise(pProgram, p->pExpressionRight, "r", pStackNames);
       //fprintf(fp, ")");
     }
     break;
@@ -1003,7 +1003,7 @@ static void TPostfixExpressionCore_TypeOf(TProgram* pProgram,
 
     case TK_LEFT_SQUARE_BRACKET:
       //fprintf(fp, "[");
-      TExpression_Analise(pProgram, p->pExpressionArray, "r", pStackNames);
+      TExpression_Analise(pProgram, p->pExpressionRight, "r", pStackNames);
       //fprintf(fp, "]");
       break;
 
@@ -1037,7 +1037,7 @@ static void TPostfixExpressionCore_TypeOf(TProgram* pProgram,
 
 
       //fprintf(fp, "(");
-      //TExpression_Analise(pProgram, p->pExpressionArray, "r", pStackNames);
+      //TExpression_Analise(pProgram, p->pExpressionRight, "r", pStackNames);
       //fprintf(fp, ")");
     }
     break;
@@ -2089,7 +2089,7 @@ static bool CheckFunctionOnStructItem2(TExpressionStatement* p,
     {
       if (strcmp(pTPrimaryExpressionValueLeft->lexeme, funcName) == 0)
       {
-        bMatch = CheckStructMember(pPostfixExpressionCoreFirst->pExpressionArray,
+        bMatch = CheckStructMember(pPostfixExpressionCoreFirst->pExpressionRight,
                                    structVariablePointer,
                                    structMemberName);
 

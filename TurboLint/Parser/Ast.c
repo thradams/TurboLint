@@ -171,7 +171,7 @@ void TPostfixExpressionCore_Destroy(TPostfixExpressionCore* p)
   String_Destroy(&p->Identifier);
   String_Destroy(&p->lexeme);
   TExpression_Delete(p->pExpressionLeft);
-  TExpression_Delete(p->pExpressionArray);
+  TExpression_Delete(p->pExpressionRight);
 
 }
 
@@ -709,7 +709,7 @@ static bool TPostfixExpressionCore_CodePrint2(TPostfixExpressionCore * p,
 		{
 			int index;
 			//fprintf(fp, "[");
-			EvaluateConstantExpression(p->pExpressionArray,  &index);
+			EvaluateConstantExpression(p->pExpressionRight,  &index);
 			//fprintf(fp, "]");
 			ASSERT(false);
 		}
@@ -717,7 +717,7 @@ static bool TPostfixExpressionCore_CodePrint2(TPostfixExpressionCore * p,
 
 		case TK_LEFT_PARENTHESIS:
 		{						
-			EvaluateConstantExpression(p->pExpressionArray,  &result);						
+			EvaluateConstantExpression(p->pExpressionRight,  &result);						
 		}
 		break;
 

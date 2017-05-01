@@ -380,13 +380,13 @@ static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b,
 
   case TK_LEFT_SQUARE_BRACKET:
     fprintf(fp, "[");
-    b = TExpression_CodePrint(p->pExpressionArray, "r", b, fp);
+    b = TExpression_CodePrint(p->pExpressionRight, "r", b, fp);
     fprintf(fp, "]");
     break;
 
   case TK_LEFT_PARENTHESIS:
     fprintf(fp, "(");
-    b = TExpression_CodePrint(p->pExpressionArray, "r", b, fp);
+    b = TExpression_CodePrint(p->pExpressionRight, "r", b, fp);
     fprintf(fp, ")");
     break;
 

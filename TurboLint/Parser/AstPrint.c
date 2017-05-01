@@ -405,11 +405,11 @@ bool TPostfixExpressionCore_Print(TPostfixExpressionCore * p, bool b, FILE* fp)
 			break;
 
 		case TK_LEFT_SQUARE_BRACKET:
-			b = TExpression_Print(p->pExpressionArray, "r", b, fp);
+			b = TExpression_Print(p->pExpressionRight, "r", b, fp);
 			break;
 
 		case TK_LEFT_PARENTHESIS:
-			b = TExpression_Print(p->pExpressionArray, "r", b, fp);
+			b = TExpression_Print(p->pExpressionRight, "r", b, fp);
 			break;
 
 		case TK_PLUSPLUS:

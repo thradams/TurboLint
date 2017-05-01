@@ -549,7 +549,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 
 		if (token != TK_RIGHT_PARENTHESIS)
 		{
-			ArgumentExpressionList(ctx, &pPostfixExpressionCore->pExpressionArray);
+			ArgumentExpressionList(ctx, &pPostfixExpressionCore->pExpressionRight);
 		}
 
 		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
@@ -561,7 +561,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 		pPostfixExpressionCore->token = token;
 		// postfix-expression [ expression ]
 		MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
-		Expression0(ctx, &pPostfixExpressionCore->pExpressionArray);
+		Expression0(ctx, &pPostfixExpressionCore->pExpressionRight);
 		MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
 	}
 	break;
