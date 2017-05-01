@@ -3,14 +3,14 @@
 
 
 TPostfixExpressionCore * MatchStructPointerMember(const char * varName,
-	TExpression2 * pExpression);
+	TExpression * pExpression);
 
 
-bool MatchNULL(TExpression2 * pExpression);
+bool MatchNULL(TExpression * pExpression);
 
-const char * MatchIdentifier(TExpression2* pExpression);
-const char * MatchPrimaryExpression(TExpression2* pExpression);
+const char * MatchIdentifier(TExpression* pExpression);
+const char * MatchPrimaryExpression(TExpression* pExpression);
 
-TExpression2 * MatchFunctionCall(TExpression2* pExpression,
+TExpression * MatchFunctionCall(TExpression* pExpression,
 	const char** funcNameOpt);
 

@@ -48,4 +48,4 @@ bool GetAST(const char * filename,
 
 Result MatchAndGet(Parser* parser, ScannerItem* scannerItem);
 Tokens MatchToken(Parser* parser, Tokens tk);
-void ConstantExpression(Parser* ctx, TExpression2** ppExpression);
+void ConstantExpression(Parser* ctx, TExpression** ppExpression);

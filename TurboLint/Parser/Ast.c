@@ -13,43 +13,43 @@ void TLabeledStatement_Destroy(TLabeledStatement *p)
 {
   TStatement_Delete(p->pStatementOpt);
   String_Destroy(&p->Identifier);
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
 }
 
 void TForStatement_Destroy(TForStatement *p)
 {
   TAnyDeclaration_Delete(p->pInitDeclarationOpt);
-  TExpression2_Delete(p->pExpression1);
-  TExpression2_Delete(p->pExpression2);
-  TExpression2_Delete(p->pExpression3);
+  TExpression_Delete(p->pExpression1);
+  TExpression_Delete(p->pExpression2);
+  TExpression_Delete(p->pExpression3);
   TStatement_Delete(p->pStatement);
 }
 
 void TWhileStatement_Destroy(TWhileStatement *p)
 {
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
   TStatement_Delete(p->pStatement);
 }
 
 void TReturnStatement_Destroy(TReturnStatement *p)
 {
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
 }
 
 void TDoStatement_Destroy(TDoStatement *p)
 {
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
   TStatement_Delete(p->pStatement);
 }
 
 void TExpressionStatement_Destroy(TExpressionStatement *p)
 {
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
 }
 
 void TJumpStatement_Destroy(TJumpStatement *p)
 {
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
 }
 
 void TAsmStatement_Destroy(TAsmStatement *p)
@@ -59,13 +59,13 @@ void TAsmStatement_Destroy(TAsmStatement *p)
 
 void TSwitchStatement_Destroy(TSwitchStatement *p)
 {
-  TExpression2_Delete(p->pConditionExpression);
+  TExpression_Delete(p->pConditionExpression);
   TStatement_Delete(p->pExpression);
 }
 
 void TIfStatement_Destroy(TIfStatement *p)
 {
-  TExpression2_Delete(p->pConditionExpression);
+  TExpression_Delete(p->pConditionExpression);
   TStatement_Delete(p->pStatement);
   TStatement_Delete(p->pElseStatement);
 }
@@ -161,7 +161,7 @@ void TBlockItem_Destroy(TBlockItem* p)
 
 void TPrimaryExpressionValue_Destroy(TPrimaryExpressionValue* p)
 {
-  TExpression2_Delete(p->pExpressionOpt);
+  TExpression_Delete(p->pExpressionOpt);
   String_Destroy(&p->lexeme);
 }
 
@@ -170,31 +170,31 @@ void TPostfixExpressionCore_Destroy(TPostfixExpressionCore* p)
   TInitializerList_Delete(p->pInitializerList);
   String_Destroy(&p->Identifier);
   String_Destroy(&p->lexeme);
-  TExpression2_Delete(p->pExpressionLeft);
-  TExpression2_Delete(p->pExpressionArray);
+  TExpression_Delete(p->pExpressionLeft);
+  TExpression_Delete(p->pExpressionArray);
 
 }
 
 void TBinaryExpression_Destroy(TBinaryExpression* p)
 {
-  TExpression2_Delete(p->pExpressionLeft);
-  TExpression2_Delete(p->pExpressionRight);
+  TExpression_Delete(p->pExpressionLeft);
+  TExpression_Delete(p->pExpressionRight);
 }
 
 void TUnaryExpressionOperator_Destroy(TUnaryExpressionOperator* p)
 {
-  TExpression2_Delete(p->pExpressionLeft);
+  TExpression_Delete(p->pExpressionLeft);
   TParameterDeclaration_Destroy(&p->TypeName);
- // TExpression2_Delete(p->pExpressionRight);
+ // TExpression_Delete(p->pExpressionRight);
 }
 
 void TCastExpressionType_Destroy(TCastExpressionType* p)
 {
-	TExpression2_Delete(p->pExpression);
+	TExpression_Delete(p->pExpression);
 	TParameterDeclaration_Destroy(&p->TypeName);
 }
 
-void TExpression2_Destroy(TExpression2* p)
+void TExpression_Destroy(TExpression* p)
 {
   switch (p->type)
   {
@@ -229,13 +229,13 @@ void TExpression2_Destroy(TExpression2* p)
 void TStaticAssertDeclaration_Destroy(TStaticAssertDeclaration* p)
 {
   p->Type.type = TypeNull;
-  TExpression2_Delete(p->pConstantExpression);
+  TExpression_Delete(p->pConstantExpression);
 }
 
 void TEnumerator_Destroy(TEnumerator* p)
 {
   String_Destroy(&p->Name);
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
 }
 
 void TEnumSpecifier_Destroy(TEnumSpecifier* p)
@@ -282,7 +282,7 @@ void TDeclarator_Destroy(TDeclarator* p)
   TPointerList_Destroy(&p->PointerList);
   TDeclarator_Delete(p->pDeclaratorOpt);
   TInitializer_Delete(p->pInitializer);
-  TExpression2_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
 }
 
 const char* TDeclarator_FindName(TDeclarator*   p)
@@ -487,7 +487,7 @@ void TAnyDeclaration_Destroy(TAnyDeclaration* pDeclaration)
 
 void TDesignator_Destroy(TDesignator* p)
 {
-	TExpression2_Delete(p->pExpression);
+	TExpression_Delete(p->pExpression);
   String_Destroy(&p->Name);
 }
 
@@ -505,7 +505,7 @@ void TInitializer_Destroy(TInitializer* p)
 	}
 	else
 	{
-		TExpression2_Destroy((TExpression2*)p);
+		TExpression_Destroy((TExpression*)p);
 	}
   
 }
@@ -743,7 +743,7 @@ static bool TPostfixExpressionCore_CodePrint2(TPostfixExpressionCore * p,
 
 //Criado para avaliacao do #if
 //Tem que arrumar para fazer os casts do enum
-bool EvaluateConstantExpression(TExpression2 *  p, int *pResult)
+bool EvaluateConstantExpression(TExpression *  p, int *pResult)
 {
 	int result = -987654321;
 

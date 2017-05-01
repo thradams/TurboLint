@@ -158,7 +158,7 @@ static void TTypeSpecifier_Analise(TProgram* pProgram, TTypeSpecifier* p, TVaria
 static void TAnyStructDeclaration_Analise(TProgram* pProgram, TAnyStructDeclaration* p, TVariablesMapStack* pStackNames);
 static void TTypeQualifier_Analise(TProgram* pProgram, TTypeQualifier* p);
 static void TDeclaration_Analise(TProgram* pProgram, TDeclaration* p, TVariablesMapStack* pStackNames);
-static void TExpression_Analise(TProgram* pProgram, TExpression2 * p, const char* name, TVariablesMapStack* pStackNames);
+static void TExpression_Analise(TProgram* pProgram, TExpression * p, const char* name, TVariablesMapStack* pStackNames);
 static void TStatement_Analise(TProgram* pProgram, TStatement * p, TVariablesMapStack* pStackNames);
 static void TBlockItem_Analise(TProgram* pProgram, TBlockItem * p, TVariablesMapStack* pStackNames);
 static void TInitializer_Analise(TProgram* pProgram,
@@ -178,7 +178,7 @@ static void TInitializerListItem_Analise(TProgram* pProgram,
 
 
 static void TExpression_TypeOf(TProgram* pProgram,
-                               TExpression2 *  p,
+                               TExpression *  p,
                                TVariablesMapStack* pStackNames,
                                TDeclarationSpecifiers** ppSpecifiers,
                                TDeclarator**ppDeclarator);
@@ -597,13 +597,13 @@ static void CheckDestructorCallOnExpressionLocalVariablePointer(TProgram* pProgr
       pPostfixExpressionCore->token == TK_LEFT_PARENTHESIS)
   {
     TPrimaryExpressionValue *pTPrimaryExpressionValue =
-      TExpression2_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionLeft);
+      TExpression_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionLeft);
 
     if (pTPrimaryExpressionValue)
     {
 
       TPrimaryExpressionValue *pTPrimaryExpressionValue2 =
-        TExpression2_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionArray);
+        TExpression_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionArray);
 
       if (pTPrimaryExpressionValue2)
       {
@@ -652,18 +652,18 @@ static void CheckDestructorCallOnExpressionLocalVariable(TProgram* pProgram,
       pPostfixExpressionCore->token == TK_LEFT_PARENTHESIS)
   {
     TPrimaryExpressionValue *pTPrimaryExpressionValue =
-      TExpression2_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionLeft);
+      TExpression_As_TPrimaryExpressionValue(pPostfixExpressionCore->pExpressionLeft);
 
     if (pTPrimaryExpressionValue)
     {
       TUnaryExpressionOperator *pUnaryExpressionOperator =
-        TExpression2_As_TUnaryExpressionOperator(pPostfixExpressionCore->pExpressionArray);
+        TExpression_As_TUnaryExpressionOperator(pPostfixExpressionCore->pExpressionArray);
 
       if (pUnaryExpressionOperator &&
           pUnaryExpressionOperator->token == TK_AMPERSAND)
       {
         TPrimaryExpressionValue *pTPrimaryExpressionValue2 =
-          TExpression2_As_TPrimaryExpressionValue(pUnaryExpressionOperator->pExpressionLeft);
+          TExpression_As_TPrimaryExpressionValue(pUnaryExpressionOperator->pExpressionLeft);
 
         if (pTPrimaryExpressionValue2)
         {
@@ -1063,7 +1063,7 @@ static void TPostfixExpressionCore_TypeOf(TProgram* pProgram,
   }
 }
 
-static TVariable* GetVariable(TExpression2 * pExpression,
+static TVariable* GetVariable(TExpression * pExpression,
                               TVariablesMapStack* pStackNames)
 {
   TVariable *pVariable = NULL;
@@ -1080,7 +1080,7 @@ static TVariable* GetVariable(TExpression2 * pExpression,
 }
 
 static void TExpression_Analise(TProgram* pProgram,
-                                TExpression2 *  p,
+                                TExpression *  p,
                                 const char* name,
                                 TVariablesMapStack* pStackNames)
 {
@@ -1251,7 +1251,7 @@ static void TExpression_Analise(TProgram* pProgram,
 
 
 static void TExpression_TypeOf(TProgram* pProgram,
-                               TExpression2 *  p,
+                               TExpression *  p,
                                TVariablesMapStack* pStackNames,
                                TDeclarationSpecifiers** ppSpecifiers,
                                TDeclarator**ppDeclarator)
@@ -1688,8 +1688,8 @@ static void TInitializer_Analise(TProgram* pProgram,
 
   else
   {
-    TExpression2* pExpression =
-      (TExpression2*)pInitializer;
+    TExpression* pExpression =
+      (TExpression*)pInitializer;
 
     TDeclarationSpecifiers* pSpecifiersLocal = NULL;
     TDeclarator* pDeclaratorLocal = NULL;
@@ -2046,7 +2046,7 @@ static void TDeclarationSpecifiers_Analise(TProgram* pProgram, TDeclarationSpeci
 //Verifica o padrao:
 //varName->structMemberName
 //return true false
-static bool CheckStructMember(TExpression2 *pExpression,
+static bool CheckStructMember(TExpression *pExpression,
                               const char* varName,
                               const char* structMemberName)
 {
@@ -2077,13 +2077,13 @@ static bool CheckFunctionOnStructItem2(TExpressionStatement* p,
   bool bMatch = false;
 
   TPostfixExpressionCore * pPostfixExpressionCoreFirst =
-    TExpression2_As_TPostfixExpressionCore(p->pExpression);
+    TExpression_As_TPostfixExpressionCore(p->pExpression);
 
   if (pPostfixExpressionCoreFirst &&
       pPostfixExpressionCoreFirst->token == TK_LEFT_PARENTHESIS)
   {
     TPrimaryExpressionValue *pTPrimaryExpressionValueLeft =
-      TExpression2_As_TPrimaryExpressionValue(pPostfixExpressionCoreFirst->pExpressionLeft);
+      TExpression_As_TPrimaryExpressionValue(pPostfixExpressionCoreFirst->pExpressionLeft);
 
     if (pTPrimaryExpressionValueLeft)
     {
@@ -2171,7 +2171,7 @@ bool CheckDestructorImplementation(TProgram* pProgram,
                       if (pExpression != NULL)
                       {
                         const char* funcName = NULL;
-                        TExpression2 * pCallArgs =
+                        TExpression * pCallArgs =
                           MatchFunctionCall(pExpression->pExpression,
                                             &funcName);
 

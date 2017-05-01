@@ -12,7 +12,7 @@ static bool TTypeSpecifier_CodePrint(TTypeSpecifier* p, bool b, FILE* fp);
 static bool TAnyStructDeclaration_CodePrint(TAnyStructDeclaration* p, bool b, FILE* fp);
 static bool TTypeQualifier_CodePrint(TTypeQualifier* p, bool b, FILE* fp);
 static bool TDeclaration_CodePrint(TDeclaration* p, bool b, FILE* fp);
-static bool TExpression_CodePrint(TExpression2 * p, const char* name, bool b, FILE* fp);
+static bool TExpression_CodePrint(TExpression * p, const char* name, bool b, FILE* fp);
 static bool TStatement_CodePrint(TStatement * p, bool b, FILE* fp);
 static bool TBlockItem_CodePrint(TBlockItem * p, bool b, FILE* fp);
 static bool TInitializer_CodePrint(TInitializer* p, bool b, FILE* fp);
@@ -412,7 +412,7 @@ static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b,
   return b;
 }
 
-static bool TExpression_CodePrint(TExpression2 *  p,
+static bool TExpression_CodePrint(TExpression *  p,
   const char* name,
   bool b,
   FILE* fp)
@@ -764,7 +764,7 @@ static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
   }
   else
   {
-    b = TExpression_CodePrint((TExpression2*)p, "", false, fp);
+    b = TExpression_CodePrint((TExpression*)p, "", false, fp);
   }
 
   return b;

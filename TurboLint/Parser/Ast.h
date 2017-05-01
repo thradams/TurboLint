@@ -120,12 +120,12 @@ typedef struct
   Type type;
 } TTypePointer;
 
-typedef TTypePointer TExpression2;
+typedef TTypePointer TExpression;
 
 typedef struct
 {
   TTypePointer Type;
-  TExpression2* pConstantExpression;
+  TExpression* pConstantExpression;
 } TStaticAssertDeclaration;
 #define TSTATIC_ASSERT_DECLARATION_INIT { {TStaticAssertDeclaration_ID} , NULL}
 CREATETYPE(TStaticAssertDeclaration, TSTATIC_ASSERT_DECLARATION_INIT)
@@ -171,7 +171,7 @@ typedef struct
   TTypePointer Type;
   Tokens token;
   String lexeme;
-  TExpression2*  pExpressionOpt;
+  TExpression*  pExpressionOpt;
 } TPrimaryExpressionValue;
 #define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL}
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
@@ -183,8 +183,8 @@ typedef struct TPostfixExpressionCoreTag
   TTypePointer Type;
   Tokens token;
   String lexeme;
-  TExpression2*  pExpressionLeft;
-  TExpression2*  pExpressionArray;
+  TExpression*  pExpressionLeft;
+  TExpression*  pExpressionArray;
   
   //cast
   
@@ -202,8 +202,8 @@ typedef struct
 {
   TTypePointer Type;
   Tokens token;
-  TExpression2*  pExpressionLeft;
-  TExpression2*  pExpressionRight;
+  TExpression*  pExpressionLeft;
+  TExpression*  pExpressionRight;
   TPosition Position;
 } TBinaryExpression;
 #define TBINARYEXPRESSION_INIT { {TBinaryExpression_ID}, TK_NONE, NULL, NULL, TPOSITION_INIT}
@@ -213,16 +213,16 @@ typedef struct
 {
   TTypePointer Type;
   Tokens token;
-  TExpression2*  pExpressionLeft;
-  TExpression2*   pExpressionMiddle;
-  TExpression2*   pExpressionRight;
+  TExpression*  pExpressionLeft;
+  TExpression*   pExpressionMiddle;
+  TExpression*   pExpressionRight;
 } TTernaryExpression;
 #define TTERNARYEXPRESSION_INIT { {TTernaryExpression_ID}, TK_NONE, NULL, NULL, NULL}
 CREATETYPE(TTernaryExpression, TTERNARYEXPRESSION_INIT)
 
 
 
-CREATETYPEOR(TExpression2)
+CREATETYPEOR(TExpression)
 
 typedef struct
 {
@@ -252,7 +252,7 @@ typedef struct
 typedef struct
 {
   TTypePointer Type;  
-  TExpression2 *   pExpression;  
+  TExpression *   pExpression;  
 } TExpressionStatement;
 #define TEXPRESSION_STATEMENT_INIT { {TExpressionStatement_ID}, NULL}
 CREATETYPE(TExpressionStatement, TEXPRESSION_STATEMENT_INIT)
@@ -261,7 +261,7 @@ typedef struct
 {
   TTypePointer Type;
   Tokens token;
-  TExpression2 *  pExpression;
+  TExpression *  pExpression;
 } TJumpStatement;
 
 #define TJUMP_STATEMENT_INIT {{TJumpStatement_ID}, TK_NONE, NULL }
@@ -282,9 +282,9 @@ typedef struct
 {
   TTypePointer Type;
   TAnyDeclaration*  pInitDeclarationOpt;
-  TExpression2*  pExpression1;
-  TExpression2* pExpression2;
-  TExpression2*  pExpression3;
+  TExpression*  pExpression1;
+  TExpression* pExpression2;
+  TExpression*  pExpression3;
   TStatement*  pStatement;
 } TForStatement;
 
@@ -294,7 +294,7 @@ CREATETYPE(TForStatement, TFORSTATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2*  pExpression;
+  TExpression*  pExpression;
   TStatement*  pStatement;
 } TWhileStatement;
 
@@ -304,7 +304,7 @@ CREATETYPE(TWhileStatement, TWHILESTATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2*   pExpression;
+  TExpression*   pExpression;
 } TReturnStatement;
 
 #define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL}
@@ -314,7 +314,7 @@ CREATETYPE(TReturnStatement, TRETURN_STATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2 *   pExpression;
+  TExpression *   pExpression;
   TStatement*   pStatement;
 } TDoStatement;
 #define TDOSTATEMENT_INIT {{TDoStatement_ID}, NULL, NULL}
@@ -325,7 +325,7 @@ typedef struct
   TTypePointer Type;
   
   TStatement *   pStatementOpt;
-  TExpression2 *   pExpression;
+  TExpression *   pExpression;
   String Identifier;
   Tokens token;
 } TLabeledStatement;
@@ -337,7 +337,7 @@ CREATETYPE(TLabeledStatement, TLABEDSTATEMENT_INIT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2 *   pConditionExpression;
+  TExpression *   pConditionExpression;
   TStatement*   pExpression;
 } TSwitchStatement;
 
@@ -348,7 +348,7 @@ CREATETYPE(TSwitchStatement, TSWITCH_STATEMENT)
 typedef struct
 {
   TTypePointer Type;
-  TExpression2*    pConditionExpression;
+  TExpression*    pConditionExpression;
   TStatement*   pStatement;
   TStatement*   pElseStatement;
 } TIfStatement;
@@ -425,7 +425,7 @@ void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p);
 typedef struct
 {
   String Name;  
-  TExpression2*   pExpression;
+  TExpression*   pExpression;
 } TEnumerator;
 
 #define TENUMERATOR_INIT { STRING_INIT , NULL}
@@ -499,7 +499,7 @@ struct ParameterList_T;
 typedef struct
 {
   String Name;
-  TExpression2 *  pExpression;
+  TExpression *  pExpression;
 } TDesignator;
 #define TDESIGNATOR_INIT { STRING_INIT , NULL}
 CREATETYPE(TDesignator, TDESIGNATOR_INIT)
@@ -545,8 +545,8 @@ CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 CREATETYPEOR(TInitializer)
 CAST(TInitializer, TInitializerListType)
-CASTSAME(TInitializer, TExpression2)
-//CAST(TInitializer, TExpression2)
+CASTSAME(TInitializer, TExpression)
+//CAST(TInitializer, TExpression)
 
 
 typedef struct TDeclarator_S
@@ -558,7 +558,7 @@ typedef struct TDeclarator_S
   struct ParameterList_T*   pParametersOpt;
   TInitializer*   pInitializer;
 
-  TExpression2*   pExpression;
+  TExpression*   pExpression;
   Tokens token;
   
   TPosition Position;
@@ -759,7 +759,7 @@ typedef TParameterDeclaration TTypeName;
 typedef struct
 {
 	TTypePointer Type;
-	TExpression2*   pExpression;
+	TExpression*   pExpression;
 	TTypeName TypeName;
 } TCastExpressionType;
 #define TCAST_EXPRESSION_INIT { {TCastExpressionType_ID}, NULL , TTYPENAME_INIT}
@@ -772,7 +772,7 @@ typedef struct
 {
 	TTypePointer Type;
 	Tokens token;
-	TExpression2*   pExpressionLeft;
+	TExpression*   pExpressionLeft;
 	TTypeName TypeName;
 } TUnaryExpressionOperator;
 
@@ -780,12 +780,12 @@ typedef struct
 CREATETYPE(TUnaryExpressionOperator, TUNARY_EXPRESSION_OPERATOR_INIT)
 
 
-bool EvaluateConstantExpression(TExpression2 * p, int *pResult);
+bool EvaluateConstantExpression(TExpression * p, int *pResult);
 
 
-CAST(TExpression2, TPrimaryExpressionValue)
-CAST(TExpression2, TBinaryExpression)
-CAST(TExpression2, TUnaryExpressionOperator)
-CAST(TExpression2, TPostfixExpressionCore)
-CAST(TExpression2, TCastExpressionType)
+CAST(TExpression, TPrimaryExpressionValue)
+CAST(TExpression, TBinaryExpression)
+CAST(TExpression, TUnaryExpressionOperator)
+CAST(TExpression, TPostfixExpressionCore)
+CAST(TExpression, TCastExpressionType)
 

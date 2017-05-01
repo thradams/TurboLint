@@ -4,11 +4,11 @@
 
 
 //Matches varName->XXXX, retorna ->XXXX
-TPostfixExpressionCore* MatchStructPointerMember(const char* varName, TExpression2 *pExpression)
+TPostfixExpressionCore* MatchStructPointerMember(const char* varName, TExpression *pExpression)
 {
 	TPostfixExpressionCore*  pResult = NULL;
 	TPostfixExpressionCore *  pPostfixExpressionCore =
-		TExpression2_As_TPostfixExpressionCore(pExpression);
+		TExpression_As_TPostfixExpressionCore(pExpression);
 
 	if (pPostfixExpressionCore != NULL &&
 		pPostfixExpressionCore->token == TK_ARROW &&
@@ -28,7 +28,7 @@ TPostfixExpressionCore* MatchStructPointerMember(const char* varName, TExpressio
 
 
 
-bool MatchNULL(TExpression2* pExpression)
+bool MatchNULL(TExpression* pExpression)
 {
 	bool bResult = false;
 	const char *  lexeme =
@@ -43,7 +43,7 @@ bool MatchNULL(TExpression2* pExpression)
 	else
 	{
 		TPrimaryExpressionValue *  pPrimaryExpressionValue =
-			TExpression2_As_TPrimaryExpressionValue(pExpression);
+			TExpression_As_TPrimaryExpressionValue(pExpression);
 		if (pPrimaryExpressionValue &&
 			pPrimaryExpressionValue->pExpressionOpt != NULL)
 		{
@@ -52,7 +52,7 @@ bool MatchNULL(TExpression2* pExpression)
 
 		//((void *)0)
 		TCastExpressionType *  pCastExpressionType =
-			TExpression2_As_TCastExpressionType(pExpression);
+			TExpression_As_TCastExpressionType(pExpression);
 		if (pCastExpressionType != NULL)
 		{
 			if (pCastExpressionType->TypeName.Declarator.PointerList.size == 1)
@@ -75,12 +75,12 @@ bool MatchNULL(TExpression2* pExpression)
 	return bResult;
 }
 
-const char * MatchIdentifier(TExpression2* pExpression)
+const char * MatchIdentifier(TExpression* pExpression)
 {
 	const char *  pResult = NULL;
 
 	TPrimaryExpressionValue *  pPrimaryExpression =
-		TExpression2_As_TPrimaryExpressionValue(pExpression);
+		TExpression_As_TPrimaryExpressionValue(pExpression);
 
 	if (pPrimaryExpression && 
 		pPrimaryExpression->token == TK_identifier)
@@ -91,12 +91,12 @@ const char * MatchIdentifier(TExpression2* pExpression)
 	return pResult;
 }
 
-const char *  MatchPrimaryExpression(TExpression2* pExpression)
+const char *  MatchPrimaryExpression(TExpression* pExpression)
 {
 	const char *  pResult = NULL;
 
 	TPrimaryExpressionValue *  pPrimaryExpression =
-		TExpression2_As_TPrimaryExpressionValue(pExpression);
+		TExpression_As_TPrimaryExpressionValue(pExpression);
 
 	if (pPrimaryExpression)
 	{
@@ -112,13 +112,13 @@ const char *  MatchPrimaryExpression(TExpression2* pExpression)
 
 //funcName(XXX)
 //returna XXX e funcName
-TExpression2 * MatchFunctionCall(TExpression2* pExpression,
+TExpression * MatchFunctionCall(TExpression* pExpression,
 	const char** funcNameOpt)
 {
-	TExpression2 *  pResult = NULL;
+	TExpression *  pResult = NULL;
 
 	TPostfixExpressionCore *  pPostfixExpressionCoreFirst =
-		TExpression2_As_TPostfixExpressionCore(pExpression);
+		TExpression_As_TPostfixExpressionCore(pExpression);
 
 	if (pPostfixExpressionCoreFirst &&
 		pPostfixExpressionCoreFirst->token == TK_LEFT_PARENTHESIS)

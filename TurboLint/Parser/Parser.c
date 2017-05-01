@@ -341,11 +341,11 @@ bool ErrorOrEof(Parser* parser)
 //////////////////////////////////////////////////////////////
 
 
-void Expression0(Parser* ctx, TExpression2**);
-void CastExpression(Parser* ctx, TExpression2**);
+void Expression0(Parser* ctx, TExpression**);
+void CastExpression(Parser* ctx, TExpression**);
 void GenericSelection(Parser* ctx);
-void ArgumentExpressionList(Parser* ctx, TExpression2**);
-void AssignmentExpression(Parser* ctx, TExpression2**);
+void ArgumentExpressionList(Parser* ctx, TExpression**);
+void AssignmentExpression(Parser* ctx, TExpression**);
 void Initializer_List(Parser* ctx, TInitializerList* pInitializerList);
 void Specifier_Qualifier_List(Parser* ctx,
 	TTypeQualifier* pQualifiers,
@@ -380,7 +380,7 @@ bool IsFirstOfPrimaryExpression(Tokens token)
 	return bResult;
 }
 
-void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
+void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
 {
 	/*
 	(6.5.1) primary-expression:
@@ -419,7 +419,7 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 		}
 		StrBuilder_Append(&adjacentStrings, "\"");
 		String_Set(&pPrimaryExpressionValue->lexeme, adjacentStrings.c_str);
-		*ppPrimaryExpression = (TExpression2*)pPrimaryExpressionValue;
+		*ppPrimaryExpression = (TExpression*)pPrimaryExpressionValue;
 
 		StrBuilder_Destroy(&adjacentStrings);
 	}
@@ -438,14 +438,14 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 		String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
 
 		Match(ctx);
-		*ppPrimaryExpression = (TExpression2*)pPrimaryExpressionValue;
+		*ppPrimaryExpression = (TExpression*)pPrimaryExpressionValue;
 	}
 	break;
 
 	case TK_LEFT_PARENTHESIS:
 	{
 		Match(ctx);
-		TExpression2* pExpression;
+		TExpression* pExpression;
 		Expression0(ctx, &pExpression);
 		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
@@ -455,7 +455,7 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 		pPrimaryExpressionValue->token = token;
 		String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
 		pPrimaryExpressionValue->pExpressionOpt = pExpression;
-		*ppPrimaryExpression = (TExpression2*)pPrimaryExpressionValue;
+		*ppPrimaryExpression = (TExpression*)pPrimaryExpressionValue;
 	}
 	break;
 
@@ -632,7 +632,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 
 }
 
-void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
+void PostfixExpression(Parser* ctx, TExpression** ppExpression)
 {
 	*ppExpression = NULL;//out
 
@@ -685,13 +685,13 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 				Match(ctx);
 			}
 
-			*ppExpression = (TExpression2*)pTPostfixExpressionCore;
+			*ppExpression = (TExpression*)pTPostfixExpressionCore;
 		}
 
 		else
 		{
 			//primary-expression
-			TExpression2* pPrimaryExpression;
+			TExpression* pPrimaryExpression;
 			PrimaryExpression(ctx, &pPrimaryExpression);
 			*ppExpression = pPrimaryExpression;
 		}
@@ -700,7 +700,7 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 	else
 	{
 		//primary-expression
-		TExpression2* pPrimaryExpression;
+		TExpression* pPrimaryExpression;
 		PrimaryExpression(ctx, &pPrimaryExpression);
 		*ppExpression = pPrimaryExpression;
 	}
@@ -720,20 +720,20 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 			TPostfixExpressionCore_Create();
 		pPostfixExpressionCore->pExpressionLeft = *ppExpression;
 		PostfixExpressionCore(ctx, pPostfixExpressionCore);
-		*ppExpression = (TExpression2*)pPostfixExpressionCore;
+		*ppExpression = (TExpression*)pPostfixExpressionCore;
 	}
 	break;
 	}
 
 }
 
-void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
+void ArgumentExpressionList(Parser* ctx, TExpression** ppExpression)
 {
 	/*(6.5.2) argument-expression-list:
 	assignment-expression
 	argument-expression-list , assignment-expression
 	*/
-	TExpression2* pAssignmentExpression;
+	TExpression* pAssignmentExpression;
 	AssignmentExpression(ctx, &pAssignmentExpression);
 	*ppExpression = pAssignmentExpression;
 
@@ -742,7 +742,7 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 	if (token == TK_COMMA)
 	{
 		Match(ctx);
-		TExpression2* pAssignmentExpressionRight;
+		TExpression* pAssignmentExpressionRight;
 		AssignmentExpression(ctx, &pAssignmentExpressionRight);
 
 		TBinaryExpression *  pExpr =
@@ -755,7 +755,7 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 
 
 
-		*ppExpression = (TExpression2*)pExpr;
+		*ppExpression = (TExpression*)pExpr;
 	}
 
 	token = Token(ctx);
@@ -770,13 +770,13 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 		pExpr->token = TK_COMMA;
 		pExpr->pExpressionLeft = *ppExpression;
 
-		TExpression2 *pExpressionRight;
+		TExpression *pExpressionRight;
 		ArgumentExpressionList(ctx, &pExpressionRight);
 		pExpr->pExpressionRight = pExpressionRight;
 
 
 
-		*ppExpression = (TExpression2*)pExpr;
+		*ppExpression = (TExpression*)pExpr;
 	}
 }
 
@@ -855,7 +855,7 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme)
 	return bResult;
 }
 
-void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
+void UnaryExpression(Parser* ctx, TExpression** ppExpression)
 {
 	*ppExpression = NULL; //out
 
@@ -879,9 +879,9 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 	if (IsTypeName(ctx, tokenAhead, lookAheadlexeme))
 	{
 		//first para postfix-expression
-		TExpression2 * pPostfixExpression;
+		TExpression * pPostfixExpression;
 		PostfixExpression(ctx, &pPostfixExpression);
-		*ppExpression = (TExpression2*)(pPostfixExpression);
+		*ppExpression = (TExpression*)(pPostfixExpression);
 		return;
 	}
 
@@ -889,9 +889,9 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 	{
 		//primary-expression é first para postfix-expression
 
-		TExpression2 * pPostfixExpression;
+		TExpression * pPostfixExpression;
 		PostfixExpression(ctx, &pPostfixExpression);
-		*ppExpression = (TExpression2*)(pPostfixExpression);
+		*ppExpression = (TExpression*)(pPostfixExpression);
 		return;
 	}
 
@@ -901,14 +901,14 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 	case TK_MINUSMINUS:
 	{
 		Match(ctx);
-		TExpression2 *pUnaryExpression;
+		TExpression *pUnaryExpression;
 		UnaryExpression(ctx, &pUnaryExpression);
 
 		TUnaryExpressionOperator* pUnaryExpressionOperator =
 			TUnaryExpressionOperator_Create();
 		pUnaryExpressionOperator->token = token0;
 		pUnaryExpressionOperator->pExpressionLeft = pUnaryExpression;
-		*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+		*ppExpression = (TExpression*)pUnaryExpressionOperator;
 	}
 	break;
 
@@ -927,7 +927,7 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 		//
 	{
 		Match(ctx);
-		TExpression2* pCastExpression;
+		TExpression* pCastExpression;
 		CastExpression(ctx, &pCastExpression);
 
 
@@ -935,7 +935,7 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 			TUnaryExpressionOperator_Create();
 		pUnaryExpressionOperator->token = token0;
 		pUnaryExpressionOperator->pExpressionLeft = pCastExpression;
-		*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+		*ppExpression = (TExpression*)pUnaryExpressionOperator;
 
 	}
 	break;
@@ -968,21 +968,21 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 
 				pUnaryExpressionOperator->token = token0;
 				//pUnaryExpressionOperator->pExpressionRight = pCastExpression;
-				*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+				*ppExpression = (TExpression*)pUnaryExpressionOperator;
 
 			}
 
 			else
 			{
 				//sizeof do tipo desta expressao
-				TExpression2 *pTUnaryExpression;
+				TExpression *pTUnaryExpression;
 				UnaryExpression(ctx, &pTUnaryExpression);
 
 				TUnaryExpressionOperator* pUnaryExpressionOperator =
 					TUnaryExpressionOperator_Create();
 				pUnaryExpressionOperator->token = token0;
 				pUnaryExpressionOperator->pExpressionLeft = pTUnaryExpression;
-				*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+				*ppExpression = (TExpression*)pUnaryExpressionOperator;
 
 			}
 		}
@@ -990,14 +990,14 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 		else
 		{
 			//sizeof do tipo desta expressao
-			TExpression2 *pTUnaryExpression;
+			TExpression *pTUnaryExpression;
 			UnaryExpression(ctx, &pTUnaryExpression);
 
 			TUnaryExpressionOperator* pUnaryExpressionOperator =
 				TUnaryExpressionOperator_Create();
 			pUnaryExpressionOperator->token = token0;
 			pUnaryExpressionOperator->pExpressionLeft = pTUnaryExpression;
-			*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+			*ppExpression = (TExpression*)pUnaryExpressionOperator;
 		}
 
 		break;
@@ -1016,7 +1016,7 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 
 }
 
-void CastExpression(Parser* ctx, TExpression2** ppExpression)
+void CastExpression(Parser* ctx, TExpression** ppExpression)
 {
 	*ppExpression = NULL; //out
 
@@ -1075,7 +1075,7 @@ void CastExpression(Parser* ctx, TExpression2** ppExpression)
 			}
 			else
 			{
-				TExpression2* pCastExpression;
+				TExpression* pCastExpression;
 				CastExpression(ctx, &pCastExpression);
 
 				TCastExpressionType *pCastExpressionType =
@@ -1083,7 +1083,7 @@ void CastExpression(Parser* ctx, TExpression2** ppExpression)
 
 				TParameterDeclaration_Swap(&pCastExpressionType->TypeName, &typeName);
 				pCastExpressionType->pExpression = pCastExpression;
-				*ppExpression = (TExpression2*)pCastExpressionType;
+				*ppExpression = (TExpression*)pCastExpressionType;
 
 			}
 
@@ -1091,14 +1091,14 @@ void CastExpression(Parser* ctx, TExpression2** ppExpression)
 		}
 		else
 		{
-			TExpression2* pUnaryExpression;
+			TExpression* pUnaryExpression;
 			UnaryExpression(ctx, &pUnaryExpression);
 			*ppExpression = pUnaryExpression;
 		}
 	}
 	else
 	{
-		TExpression2* pUnaryExpression;
+		TExpression* pUnaryExpression;
 		UnaryExpression(ctx, &pUnaryExpression);
 
 		*ppExpression = pUnaryExpression;
@@ -1106,7 +1106,7 @@ void CastExpression(Parser* ctx, TExpression2** ppExpression)
 }
 
 
-void MultiplicativeExpression(Parser* ctx, TExpression2** ppExpression)
+void MultiplicativeExpression(Parser* ctx, TExpression** ppExpression)
 {
 
 
@@ -1118,7 +1118,7 @@ void MultiplicativeExpression(Parser* ctx, TExpression2** ppExpression)
 	multiplicative-expression % cast-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	CastExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1138,10 +1138,10 @@ void MultiplicativeExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		CastExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1161,16 +1161,16 @@ void MultiplicativeExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		MultiplicativeExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
-void AdditiveExpression(Parser* ctx, TExpression2** ppExpression)
+void AdditiveExpression(Parser* ctx, TExpression** ppExpression)
 {
 
 	/*
@@ -1180,7 +1180,7 @@ void AdditiveExpression(Parser* ctx, TExpression2** ppExpression)
 	additive-expression - multiplicative-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	MultiplicativeExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1199,10 +1199,10 @@ void AdditiveExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		MultiplicativeExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1219,17 +1219,17 @@ void AdditiveExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		AdditiveExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 
 }
 
-void ShiftExpression(Parser* ctx, TExpression2** ppExpression)
+void ShiftExpression(Parser* ctx, TExpression** ppExpression)
 {
 
 	/*(6.5.7) shift-expression:
@@ -1239,7 +1239,7 @@ void ShiftExpression(Parser* ctx, TExpression2** ppExpression)
 	*/
 
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	AdditiveExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1256,10 +1256,10 @@ void ShiftExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		AdditiveExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1276,16 +1276,16 @@ void ShiftExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		ShiftExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
-void RelationalExpression(Parser* ctx, TExpression2** ppExpression)
+void RelationalExpression(Parser* ctx, TExpression** ppExpression)
 {
 	/*
 	(6.5.8) relational-expression:
@@ -1296,7 +1296,7 @@ void RelationalExpression(Parser* ctx, TExpression2** ppExpression)
 	relational-expression >= shift-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	ShiftExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1315,10 +1315,10 @@ void RelationalExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		ShiftExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1337,17 +1337,17 @@ void RelationalExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		RelationalExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 
 }
 
-void EqualityExpression(Parser* ctx, TExpression2** ppExpression)
+void EqualityExpression(Parser* ctx, TExpression** ppExpression)
 {
 	/*(6.5.9) equality-expression:
 	relational-expression
@@ -1355,7 +1355,7 @@ void EqualityExpression(Parser* ctx, TExpression2** ppExpression)
 	equality-expression != relational-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	RelationalExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1372,10 +1372,10 @@ void EqualityExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		RelationalExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1392,23 +1392,23 @@ void EqualityExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		EqualityExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
-void AndExpression(Parser* ctx, TExpression2 **ppExpression)
+void AndExpression(Parser* ctx, TExpression **ppExpression)
 {
 	/*(6.5.10) AND-expression:
 	equality-expression
 	AND-expression & equality-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	EqualityExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1424,10 +1424,10 @@ void AndExpression(Parser* ctx, TExpression2 **ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		EqualityExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1443,16 +1443,16 @@ void AndExpression(Parser* ctx, TExpression2 **ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		AndExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
-void ExclusiveOrExpression(Parser* ctx, TExpression2** ppExpression)
+void ExclusiveOrExpression(Parser* ctx, TExpression** ppExpression)
 {
 	/*
 	(6.5.11) exclusive-OR-expression:
@@ -1460,7 +1460,7 @@ void ExclusiveOrExpression(Parser* ctx, TExpression2** ppExpression)
 	exclusive-OR-expression ^ AND-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	AndExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1476,10 +1476,10 @@ void ExclusiveOrExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		AndExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1495,17 +1495,17 @@ void ExclusiveOrExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		ExclusiveOrExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 
 }
 
-void InclusiveOrExpression(Parser* ctx, TExpression2**ppExpression)
+void InclusiveOrExpression(Parser* ctx, TExpression**ppExpression)
 {
 
 	/*
@@ -1514,7 +1514,7 @@ void InclusiveOrExpression(Parser* ctx, TExpression2**ppExpression)
 	inclusive-OR-expression | exclusive-OR-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	ExclusiveOrExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1530,10 +1530,10 @@ void InclusiveOrExpression(Parser* ctx, TExpression2**ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		ExclusiveOrExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1549,16 +1549,16 @@ void InclusiveOrExpression(Parser* ctx, TExpression2**ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		InclusiveOrExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
-void LogicalAndExpression(Parser* ctx, TExpression2** ppExpression)
+void LogicalAndExpression(Parser* ctx, TExpression** ppExpression)
 {
 
 	/*
@@ -1567,7 +1567,7 @@ void LogicalAndExpression(Parser* ctx, TExpression2** ppExpression)
 	logical-AND-expression && inclusive-OR-expression
 	*/
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	InclusiveOrExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1583,10 +1583,10 @@ void LogicalAndExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		GetPosition(ctx, &pBinaryExpression->Position);
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		InclusiveOrExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1605,16 +1605,16 @@ void LogicalAndExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		LogicalAndExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
-void LogicalOrExpression(Parser* ctx, TExpression2** ppExpression)
+void LogicalOrExpression(Parser* ctx, TExpression** ppExpression)
 {
 	/*(6.5.14) logical-OR-expression:
 	 logical-AND-expression
@@ -1622,7 +1622,7 @@ void LogicalOrExpression(Parser* ctx, TExpression2** ppExpression)
 	 */
 
 
-	TExpression2* pExpressionLeft;
+	TExpression* pExpressionLeft;
 	LogicalAndExpression(ctx, &pExpressionLeft);
 	*ppExpression = pExpressionLeft;
 
@@ -1639,10 +1639,10 @@ void LogicalOrExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		LogicalAndExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
@@ -1659,49 +1659,49 @@ void LogicalOrExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 
 		Match(ctx);
-		TExpression2* pExpressionRight;
+		TExpression* pExpressionRight;
 		LogicalOrExpression(ctx, &pExpressionRight);
 		pBinaryExpression->pExpressionRight = pExpressionRight;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 	}
 }
 
 
-void ConditionalExpression(Parser* ctx, TExpression2**ppExpression)
+void ConditionalExpression(Parser* ctx, TExpression**ppExpression)
 {
 	/*(6.5.15) conditional-expression:
 	logical-OR-expression
 	logical-OR-expression ? expression : conditional-expression
 	*/
-	TExpression2 * pLogicalOrExpressionLeft;
+	TExpression * pLogicalOrExpressionLeft;
 	LogicalOrExpression(ctx, &pLogicalOrExpressionLeft);
 	*ppExpression = pLogicalOrExpressionLeft;
 
 	if (Token(ctx) == TK_QUESTION_MARK)
 	{
 		Match(ctx);
-		TExpression2* pTExpression2;
-		Expression0(ctx, &pTExpression2);
+		TExpression* pTExpression;
+		Expression0(ctx, &pTExpression);
 		MatchToken(ctx, TK_COLON);
 
-		TExpression2* pConditionalExpressionRight;
+		TExpression* pConditionalExpressionRight;
 		ConditionalExpression(ctx, &pConditionalExpressionRight);
 
 		TTernaryExpression* pTernaryExpression =
 			TTernaryExpression_Create();
 		pTernaryExpression->token = TK_QUESTION_MARK;
 		pTernaryExpression->pExpressionLeft = pLogicalOrExpressionLeft;
-		pTernaryExpression->pExpressionMiddle = pTExpression2;
+		pTernaryExpression->pExpressionMiddle = pTExpression;
 		pTernaryExpression->pExpressionRight = pConditionalExpressionRight;
-		*ppExpression = (TExpression2*)pTernaryExpression;
+		*ppExpression = (TExpression*)pTernaryExpression;
 	}
 
 
 }
 
-void AssignmentExpression(Parser* ctx, TExpression2** ppExpression)
+void AssignmentExpression(Parser* ctx, TExpression** ppExpression)
 {
 	/*(6.5.16) assignment-expression:
 	conditional-expression
@@ -1716,7 +1716,7 @@ void AssignmentExpression(Parser* ctx, TExpression2** ppExpression)
 	//unary-expression
 	//Mas a conditional-expression faz tambem a
 	//unary-expression
-	TExpression2* pConditionalExpressionLeft;
+	TExpression* pConditionalExpressionLeft;
 	ConditionalExpression(ctx, &pConditionalExpressionLeft);
 	*ppExpression = pConditionalExpressionLeft;
 
@@ -1741,7 +1741,7 @@ void AssignmentExpression(Parser* ctx, TExpression2** ppExpression)
 		//Significa que o anterior deve ser do tipo  unary-expression
 		//embora tenhamos feito o parser de conditional-expression
 		//se nao for é erro.
-		TExpression2* pAssignmentExpressionRight;
+		TExpression* pAssignmentExpressionRight;
 		AssignmentExpression(ctx, &pAssignmentExpressionRight);
 
 		TBinaryExpression *pBinaryExpression =
@@ -1751,7 +1751,7 @@ void AssignmentExpression(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		pBinaryExpression->pExpressionRight = pAssignmentExpressionRight;
 		pBinaryExpression->token = token;
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 	break;
 
@@ -1761,7 +1761,7 @@ void AssignmentExpression(Parser* ctx, TExpression2** ppExpression)
 	}
 }
 
-void Expression0(Parser* ctx, TExpression2** ppExpression)
+void Expression0(Parser* ctx, TExpression** ppExpression)
 {
 	*ppExpression = NULL; //out
 	/*
@@ -1769,7 +1769,7 @@ void Expression0(Parser* ctx, TExpression2** ppExpression)
 	assignment-expression
 	expression , assignment-expression
 	*/
-	TExpression2* pAssignmentExpressionLeft;
+	TExpression* pAssignmentExpressionLeft;
 	AssignmentExpression(ctx, &pAssignmentExpressionLeft);
 	*ppExpression = pAssignmentExpressionLeft;
 
@@ -1777,7 +1777,7 @@ void Expression0(Parser* ctx, TExpression2** ppExpression)
 
 	if (token == TK_COMMA)
 	{
-		TExpression2* pAssignmentExpressionRight;
+		TExpression* pAssignmentExpressionRight;
 		Match(ctx);
 		Expression0(ctx, &pAssignmentExpressionRight);
 
@@ -1788,11 +1788,11 @@ void Expression0(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionRight = pAssignmentExpressionRight;
 		pBinaryExpression->token = TK_COMMA;
 
-		*ppExpression = (TExpression2*)pBinaryExpression;
+		*ppExpression = (TExpression*)pBinaryExpression;
 	}
 }
 
-void ConstantExpression(Parser* ctx, TExpression2** ppExpression)
+void ConstantExpression(Parser* ctx, TExpression** ppExpression)
 {
 	*ppExpression = NULL; //out
 
@@ -1815,7 +1815,7 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList);
 bool Statement(Parser* ctx, TStatement** ppStatement);
 //void Constant_Expression(Parser* ctx, Tokens endToken1, Tokens endToken2, ScannerItemStack* outStack);
 void Compound_Statement(Parser* ctx, TStatement** ppStatement);
-void Expression(Parser* ctx, TExpression2** pExpression, Tokens endToken1, Tokens endToken2);
+void Expression(Parser* ctx, TExpression** pExpression, Tokens endToken1, Tokens endToken2);
 void Parameter_Declaration(Parser* ctx, TParameterDeclaration* pParameterDeclaration);
 bool Declaration(Parser* ctx, TAnyDeclaration** ppDeclaration);
 void Type_Qualifier_ListOpt(Parser* ctx, TTypeQualifier* pQualifier);
@@ -2564,9 +2564,9 @@ void Struct_Declarator(Parser* ctx,
 	{
 		//AST TODO
 		Match(ctx);
-		TExpression2* p = NULL;
+		TExpression* p = NULL;
 		ConstantExpression(ctx, &p);
-		TExpression2_Delete(p);
+		TExpression_Delete(p);
 	}
 
 	else
@@ -2577,9 +2577,9 @@ void Struct_Declarator(Parser* ctx,
 		if (token == TK_COLON)
 		{
 			Match(ctx);
-			TExpression2* p = NULL;
+			TExpression* p = NULL;
 			ConstantExpression(ctx, &p);
-			TExpression2_Delete(p);
+			TExpression_Delete(p);
 		}
 #ifdef LANGUAGE_EXTENSIONS
 		else if (token == TK_EQUALS_SIGN)
@@ -3817,7 +3817,7 @@ void Initializer(Parser* ctx,
 
 	else
 	{
-		TExpression2* pExpression = NULL;
+		TExpression* pExpression = NULL;
 		AssignmentExpression(ctx, &pExpression);
 		*ppInitializer = (TInitializer*)pExpression;
 	}

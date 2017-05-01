@@ -761,14 +761,14 @@ bool Scanner_IsLexeme(Scanner* pScanner, const char* psz)
 int PreprocessorExpression(Parser* parser)
 {
   //Faz o parser da expressão
-  TExpression2* pExpression = NULL;
+  TExpression* pExpression = NULL;
   ConstantExpression(parser, &pExpression);
   //..a partir da arvore da expressão
   //calcula o valor
   //TODO pegar error
   int r;
   EvaluateConstantExpression(pExpression, &r);
-  TExpression2_Delete(pExpression);
+  TExpression_Delete(pExpression);
   return r;
 }
 

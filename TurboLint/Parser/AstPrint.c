@@ -11,7 +11,7 @@ bool TTypeSpecifier_Print(TTypeSpecifier* p, bool b, FILE* fp);
 bool TStructDeclaration_Print(TAnyStructDeclaration* p, bool b, FILE* fp);
 bool TTypeQualifier_Print(TTypeQualifier* p, bool b, FILE* fp);
 bool TDeclaration_Print(TDeclaration* p, bool b, FILE* fp);
-bool TExpression_Print(TExpression2 * p, const char* name, bool b, FILE* fp);
+bool TExpression_Print(TExpression * p, const char* name, bool b, FILE* fp);
 bool TStatement_Print(TStatement * p, bool b, FILE* fp);
 bool TBlockItem_Print(TBlockItem * p, bool b, FILE* fp);
 bool TInitializer_Print(TInitializer* p, bool b, FILE* fp);
@@ -442,7 +442,7 @@ bool TPostfixExpressionCore_Print(TPostfixExpressionCore * p, bool b, FILE* fp)
 	return b;
 }
 
-bool TExpression_Print(TExpression2 *  p, const char* name, bool b, FILE* fp)
+bool TExpression_Print(TExpression *  p, const char* name, bool b, FILE* fp)
 {
 	if (p == NULL)
 	{
@@ -857,7 +857,7 @@ bool TInitializer_Print(TInitializer* p, bool b, FILE* fp)
 		case TTernaryExpression_ID:
 
 			fprintf(fp, "{");
-			b = TExpression_Print((TExpression2*)p, "", false, fp);
+			b = TExpression_Print((TExpression*)p, "", false, fp);
 			fprintf(fp, "}");
 			break;
 
