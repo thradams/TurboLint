@@ -1349,7 +1349,7 @@ bool TDeclarations_Print(TDeclarations *p, bool b, FILE* fp)
 }
 
 
-void TProgram_PrintToFile(TProgram* pProgram,
+void TProgram_PrintAstToFile(TProgram* pProgram,
 	const char* fileName)
 {
 	FILE * fp = fopen(fileName, "w");

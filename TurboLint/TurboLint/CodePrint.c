@@ -1158,7 +1158,6 @@ static void TProgram_PrintToFile(TProgram* pProgram,
 
 
 static void TProgram_PrintFiles(TProgram* pProgram,
-  int level,
   FILE* fp,
   const char* userpath)
 {
@@ -1187,7 +1186,6 @@ static void TProgram_PrintFiles(TProgram* pProgram,
  */
 void TProgram_PrintCodeToFile(TProgram* pProgram,
   const char* fileName,
-  int includeLevel,
   const char* userpath)
 {
   FILE * fp = fopen(fileName, "w");
@@ -1201,7 +1199,7 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     printf("\"%s\"\n", pFile->FullPath);
   }
 
-  TProgram_PrintFiles(pProgram, includeLevel + 1, fp, userpath);
+  TProgram_PrintFiles(pProgram, fp,  userpath);
 
   for (size_t i = 0; i < pProgram->Declarations.size; i++)
   {

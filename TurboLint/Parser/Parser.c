@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include "Parser.h"
 #include "Scanner.h"
+#include "..\Base\Path.h"
+//Define to include modications
+#define LANGUAGE_EXTENSIONS 
+
 
 bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme);
 
@@ -42,8 +46,8 @@ Result Parser_InitString(Parser* parser,
 	//Map_Init(&parser->TypeDefNames, SYMBOL_BUCKETS_SIZE);
 	parser->bError = false;
 	StrBuilder_Init(&parser->ErrorMessage, 100);
-	
-	
+
+
 
 
 	/////////
@@ -59,7 +63,7 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
 	//Map_Init(&parser->TypeDefNames, SYMBOL_BUCKETS_SIZE);
 	parser->bError = false;
-	
+
 	StrBuilder_Init(&parser->ErrorMessage, 100);
 	Scanner_Init(&parser->Scanner);
 
@@ -356,21 +360,21 @@ bool IsFirstOfPrimaryExpression(Tokens token)
 
 	switch (token)
 	{
-		case TK_identifier:
-		case TK_string_literal:
-		case TK_char_literal:
-		case TK_DECIMAL_INTEGER:
-		case TK_HEX_INTEGER:
-		case TK_FLOAT_NUMBER:
-		case TK_LEFT_PARENTHESIS:
+	case TK_identifier:
+	case TK_string_literal:
+	case TK_char_literal:
+	case TK_DECIMAL_INTEGER:
+	case TK_HEX_INTEGER:
+	case TK_FLOAT_NUMBER:
+	case TK_LEFT_PARENTHESIS:
 
-			//desde que nao seja cast
-		case TK__Generic:
-			bResult = true;
-			break;
+		//desde que nao seja cast
+	case TK__Generic:
+		bResult = true;
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	return bResult;
@@ -397,70 +401,70 @@ void PrimaryExpression(Parser* ctx, TExpression2** ppPrimaryExpression)
 
 	switch (token)
 	{
-		case TK_string_literal:
+	case TK_string_literal:
+	{
+		TPrimaryExpressionValue *  pPrimaryExpressionValue
+			= TPrimaryExpressionValue_Create();
+
+		pPrimaryExpressionValue->token = token;
+
+		StrBuilder adjacentStrings = STRBUILDER_INIT;
+		StrBuilder_Append(&adjacentStrings, "\"");
+		while (token == TK_string_literal)
 		{
-			TPrimaryExpressionValue *  pPrimaryExpressionValue
-				= TPrimaryExpressionValue_Create();
-
-			pPrimaryExpressionValue->token = token;
-
-			StrBuilder adjacentStrings = STRBUILDER_INIT;
-			StrBuilder_Append(&adjacentStrings, "\"");
-			while (token == TK_string_literal)
-			{
-				const char* lexeme = Lexeme(ctx);
-				int len = strlen(lexeme);
-				StrBuilder_AppendN(&adjacentStrings, lexeme + 1, len - 2);
-				token = Match(ctx);
-			}
-			StrBuilder_Append(&adjacentStrings, "\"");
-			String_Set(&pPrimaryExpressionValue->lexeme, adjacentStrings.c_str);
-			*ppPrimaryExpression = (TExpression2*)  pPrimaryExpressionValue;
-
-			StrBuilder_Destroy(&adjacentStrings);
+			const char* lexeme = Lexeme(ctx);
+			int len = strlen(lexeme);
+			StrBuilder_AppendN(&adjacentStrings, lexeme + 1, len - 2);
+			token = Match(ctx);
 		}
+		StrBuilder_Append(&adjacentStrings, "\"");
+		String_Set(&pPrimaryExpressionValue->lexeme, adjacentStrings.c_str);
+		*ppPrimaryExpression = (TExpression2*)pPrimaryExpressionValue;
+
+		StrBuilder_Destroy(&adjacentStrings);
+	}
+	break;
+
+	case TK_identifier:
+	case TK_char_literal:
+	case TK_DECIMAL_INTEGER:
+	case TK_HEX_INTEGER:
+	case TK_FLOAT_NUMBER:
+	{
+		TPrimaryExpressionValue *   pPrimaryExpressionValue
+			= TPrimaryExpressionValue_Create();
+
+		pPrimaryExpressionValue->token = token;
+		String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
+
+		Match(ctx);
+		*ppPrimaryExpression = (TExpression2*)pPrimaryExpressionValue;
+	}
+	break;
+
+	case TK_LEFT_PARENTHESIS:
+	{
+		Match(ctx);
+		TExpression2* pExpression;
+		Expression0(ctx, &pExpression);
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+
+		TPrimaryExpressionValue *   pPrimaryExpressionValue
+			= TPrimaryExpressionValue_Create();
+
+		pPrimaryExpressionValue->token = token;
+		String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
+		pPrimaryExpressionValue->pExpressionOpt = pExpression;
+		*ppPrimaryExpression = (TExpression2*)pPrimaryExpressionValue;
+	}
+	break;
+
+	case TK__Generic:
+		GenericSelection(ctx);
 		break;
 
-		case TK_identifier:
-		case TK_char_literal:
-		case TK_DECIMAL_INTEGER:
-		case TK_HEX_INTEGER:
-		case TK_FLOAT_NUMBER:
-		{
-			TPrimaryExpressionValue *   pPrimaryExpressionValue
-				= TPrimaryExpressionValue_Create();
-
-			pPrimaryExpressionValue->token = token;
-			String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
-
-			Match(ctx);
-			*ppPrimaryExpression = (TExpression2*)  pPrimaryExpressionValue;
-		}
-		break;
-
-		case TK_LEFT_PARENTHESIS:
-		{
-			Match(ctx);
-			TExpression2* pExpression;
-			Expression0(ctx, &pExpression);
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-
-			TPrimaryExpressionValue *   pPrimaryExpressionValue
-				= TPrimaryExpressionValue_Create();
-
-			pPrimaryExpressionValue->token = token;
-			String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
-			pPrimaryExpressionValue->pExpressionOpt = pExpression;
-			*ppPrimaryExpression = (TExpression2*)  pPrimaryExpressionValue;
-		}
-		break;
-
-		case TK__Generic:
-			GenericSelection(ctx);
-			break;
-
-		default:
-			ASSERT(false);
+	default:
+		ASSERT(false);
 	}
 
 	ASSERT(*ppPrimaryExpression != NULL);
@@ -534,73 +538,73 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 
 	switch (token)
 	{
-		case TK_LEFT_PARENTHESIS:
+	case TK_LEFT_PARENTHESIS:
+	{
+		//aqui eu posso marcar a funcao como usada.
+
+		pPostfixExpressionCore->token = token;
+
+		//  postfix-expression ( argument-expression-listopt )
+		token = Match(ctx);
+
+		if (token != TK_RIGHT_PARENTHESIS)
 		{
-      //aqui eu posso marcar a funcao como usada.
-
-			pPostfixExpressionCore->token = token;
-
-			//  postfix-expression ( argument-expression-listopt )
-			token = Match(ctx);
-
-			if (token != TK_RIGHT_PARENTHESIS)
-			{
-				ArgumentExpressionList(ctx, &pPostfixExpressionCore->pExpressionArray);
-			}
-
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+			ArgumentExpressionList(ctx, &pPostfixExpressionCore->pExpressionArray);
 		}
-		break;
 
-		case TK_LEFT_SQUARE_BRACKET:
-		{
-			pPostfixExpressionCore->token = token;
-			// postfix-expression [ expression ]
-			MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
-			Expression0(ctx, &pPostfixExpressionCore->pExpressionArray);
-			MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
-		}
-		break;
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+	}
+	break;
 
-		case TK_FULL_STOP:
-		{
-			// postfix-expression . identifier
-			pPostfixExpressionCore->token = token;
-			Match(ctx);
-			String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
-			MatchToken(ctx, TK_identifier);
-		}
-		break;
+	case TK_LEFT_SQUARE_BRACKET:
+	{
+		pPostfixExpressionCore->token = token;
+		// postfix-expression [ expression ]
+		MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
+		Expression0(ctx, &pPostfixExpressionCore->pExpressionArray);
+		MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
+	}
+	break;
 
-		case TK_ARROW:
-		{
-			// postfix-expression -> identifier
-			pPostfixExpressionCore->token = token;
-			Match(ctx);
-			String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
-			MatchToken(ctx, TK_identifier);
-		}
-		break;
+	case TK_FULL_STOP:
+	{
+		// postfix-expression . identifier
+		pPostfixExpressionCore->token = token;
+		Match(ctx);
+		String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
+		MatchToken(ctx, TK_identifier);
+	}
+	break;
 
-		case TK_PLUSPLUS:
-		{
-			pPostfixExpressionCore->token = token;
-			//postfix-expression ++
-			Match(ctx);
-		}
-		break;
+	case TK_ARROW:
+	{
+		// postfix-expression -> identifier
+		pPostfixExpressionCore->token = token;
+		Match(ctx);
+		String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
+		MatchToken(ctx, TK_identifier);
+	}
+	break;
 
-		case TK_MINUSMINUS:
-		{
-			//  postfix-expression --
-			pPostfixExpressionCore->token = token;
-			Match(ctx);
-		}
-		break;
+	case TK_PLUSPLUS:
+	{
+		pPostfixExpressionCore->token = token;
+		//postfix-expression ++
+		Match(ctx);
+	}
+	break;
 
-		default:
-			// ASSERT(false);
-			break;
+	case TK_MINUSMINUS:
+	{
+		//  postfix-expression --
+		pPostfixExpressionCore->token = token;
+		Match(ctx);
+	}
+	break;
+
+	default:
+		// ASSERT(false);
+		break;
 	}
 
 
@@ -608,21 +612,21 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 
 	switch (token)
 	{
-		case TK_LEFT_PARENTHESIS:
-		case TK_LEFT_SQUARE_BRACKET:
-		case TK_FULL_STOP:
-		case TK_ARROW:
-		case TK_PLUSPLUS:
-		case TK_MINUSMINUS:
-		{
-			TPostfixExpressionCore *  pPostfixExpressionCoreNext =
-				TPostfixExpressionCore_Create();
-			PostfixExpressionCore(ctx, pPostfixExpressionCoreNext);
-			
-			ASSERT(pPostfixExpressionCore->pNext == NULL);
-			pPostfixExpressionCore->pNext =  pPostfixExpressionCoreNext;
-		}
-		break;
+	case TK_LEFT_PARENTHESIS:
+	case TK_LEFT_SQUARE_BRACKET:
+	case TK_FULL_STOP:
+	case TK_ARROW:
+	case TK_PLUSPLUS:
+	case TK_MINUSMINUS:
+	{
+		TPostfixExpressionCore *  pPostfixExpressionCoreNext =
+			TPostfixExpressionCore_Create();
+		PostfixExpressionCore(ctx, pPostfixExpressionCoreNext);
+
+		ASSERT(pPostfixExpressionCore->pNext == NULL);
+		pPostfixExpressionCore->pNext = pPostfixExpressionCoreNext;
+	}
+	break;
 	}
 
 
@@ -681,7 +685,7 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 				Match(ctx);
 			}
 
-			*ppExpression = (TExpression2*) pTPostfixExpressionCore;
+			*ppExpression = (TExpression2*)pTPostfixExpressionCore;
 		}
 
 		else
@@ -705,20 +709,20 @@ void PostfixExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_LEFT_PARENTHESIS:
-		case TK_LEFT_SQUARE_BRACKET:
-		case TK_FULL_STOP:
-		case TK_ARROW:
-		case TK_PLUSPLUS:
-		case TK_MINUSMINUS:
-		{
-			TPostfixExpressionCore *  pPostfixExpressionCore =
-				TPostfixExpressionCore_Create();
-			pPostfixExpressionCore->pExpressionLeft = *ppExpression;
-			PostfixExpressionCore(ctx, pPostfixExpressionCore);
-			*ppExpression = (TExpression2*)  pPostfixExpressionCore;
-		}
-		break;
+	case TK_LEFT_PARENTHESIS:
+	case TK_LEFT_SQUARE_BRACKET:
+	case TK_FULL_STOP:
+	case TK_ARROW:
+	case TK_PLUSPLUS:
+	case TK_MINUSMINUS:
+	{
+		TPostfixExpressionCore *  pPostfixExpressionCore =
+			TPostfixExpressionCore_Create();
+		pPostfixExpressionCore->pExpressionLeft = *ppExpression;
+		PostfixExpressionCore(ctx, pPostfixExpressionCore);
+		*ppExpression = (TExpression2*)pPostfixExpressionCore;
+	}
+	break;
 	}
 
 }
@@ -749,9 +753,9 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 		pExpr->pExpressionLeft = pAssignmentExpression;
 		pExpr->pExpressionRight = pAssignmentExpressionRight;
 
-		
 
-		*ppExpression = (TExpression2*)  pExpr;
+
+		*ppExpression = (TExpression2*)pExpr;
 	}
 
 	token = Token(ctx);
@@ -770,9 +774,9 @@ void ArgumentExpressionList(Parser* ctx, TExpression2** ppExpression)
 		ArgumentExpressionList(ctx, &pExpressionRight);
 		pExpr->pExpressionRight = pExpressionRight;
 
-		
 
-		*ppExpression = (TExpression2*)  pExpr;
+
+		*ppExpression = (TExpression2*)pExpr;
 	}
 }
 
@@ -784,20 +788,22 @@ static bool IsTypeQualifierToken(Tokens token)
 	switch (token)
 	{
 		//type-qualifier
-		case TK_const:
-		case TK_restrict:
-		case TK_volatile:
-		case TK__Atomic:
+	case TK_const:
+	case TK_restrict:
+	case TK_volatile:
+	case TK__Atomic:
 		//
-			bResult = true;
-			break;
+		bResult = true;
+		break;
+#ifdef LANGUAGE_EXTENSIONS
 		//type-qualifier-extensions 
-		case TK_OPT_QUALIFIER:
-		case TK_OWN_QUALIFIER:
-		case TK_DTOR_QUALIFIER:
-		case TK_MDTOR_QUALIFIER:
-			bResult = true;
-			break;
+	case TK_OPT_QUALIFIER:
+	case TK_OWN_QUALIFIER:
+	case TK_DTOR_QUALIFIER:
+	case TK_MDTOR_QUALIFIER:
+		bResult = true;
+		break;
+#endif
 	}
 	return bResult;
 }
@@ -809,40 +815,41 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme)
 	switch (token)
 	{
 
-		case TK_identifier:
-			bResult = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
-			break;
+	case TK_identifier:
+		bResult = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
+		break;
 
 		//type-qualifier
-		case TK_const:
-		case TK_restrict:
-		case TK_volatile:
-		case TK__Atomic:
-		
+	case TK_const:
+	case TK_restrict:
+	case TK_volatile:
+	case TK__Atomic:
+
+#ifdef LANGUAGE_EXTENSIONS
 		//type-qualifier-extensions 
-		case TK_OPT_QUALIFIER:
-		case TK_OWN_QUALIFIER:
-		case TK_DTOR_QUALIFIER:
-		case TK_MDTOR_QUALIFIER:
-			
+	case TK_OPT_QUALIFIER:
+	case TK_OWN_QUALIFIER:
+	case TK_DTOR_QUALIFIER:
+	case TK_MDTOR_QUALIFIER:
+#endif
 
 		//type-specifier
-		case TK_void:
-		case TK_char:
-		case TK_short:
-		case TK_int:
-		case TK_long:
-		case TK_float:
-		case TK_double:
-		case TK_signed:
-		case TK_unsigned:
-		case TK__Bool:
-		case TK__Complex:
-		case TK_struct:
-		case TK_union:
-		case TK_enum:
-			bResult = true;
-			break;
+	case TK_void:
+	case TK_char:
+	case TK_short:
+	case TK_int:
+	case TK_long:
+	case TK_float:
+	case TK_double:
+	case TK_signed:
+	case TK_unsigned:
+	case TK__Bool:
+	case TK__Complex:
+	case TK_struct:
+	case TK_union:
+	case TK_enum:
+		bResult = true;
+		break;
 	}
 
 	return bResult;
@@ -890,91 +897,79 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token0)
 	{
-		case TK_PLUSPLUS:
-		case TK_MINUSMINUS:
-		{
-			Match(ctx);
-			TExpression2 *pUnaryExpression;
-			UnaryExpression(ctx, &pUnaryExpression);
+	case TK_PLUSPLUS:
+	case TK_MINUSMINUS:
+	{
+		Match(ctx);
+		TExpression2 *pUnaryExpression;
+		UnaryExpression(ctx, &pUnaryExpression);
 
-			TUnaryExpressionOperator* pUnaryExpressionOperator =
-				TUnaryExpressionOperator_Create();
-			pUnaryExpressionOperator->token = token0;
-			pUnaryExpressionOperator->pExpressionLeft = pUnaryExpression;
-			*ppExpression = (TExpression2*)pUnaryExpressionOperator;
-		}
-		break;
+		TUnaryExpressionOperator* pUnaryExpressionOperator =
+			TUnaryExpressionOperator_Create();
+		pUnaryExpressionOperator->token = token0;
+		pUnaryExpressionOperator->pExpressionLeft = pUnaryExpression;
+		*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+	}
+	break;
 
-		//unary-operator cast-expression
-		case TK_AMPERSAND:
-		case TK_ASTERISK:
-		case TK_PLUS_SIGN:
-		case TK_HYPHEN_MINUS:
-		case TK_TILDE:
-		case TK_EXCLAMATION_MARK:
+	//unary-operator cast-expression
+	case TK_AMPERSAND:
+	case TK_ASTERISK:
+	case TK_PLUS_SIGN:
+	case TK_HYPHEN_MINUS:
+	case TK_TILDE:
+	case TK_EXCLAMATION_MARK:
+
+#ifdef LANGUAGE_EXTENSIONS
 		//unary-operator-extension
-		case TK_MOVE:
-	    //
+	case TK_MOVE:
+#endif
+		//
+	{
+		Match(ctx);
+		TExpression2* pCastExpression;
+		CastExpression(ctx, &pCastExpression);
+
+
+		TUnaryExpressionOperator* pUnaryExpressionOperator =
+			TUnaryExpressionOperator_Create();
+		pUnaryExpressionOperator->token = token0;
+		pUnaryExpressionOperator->pExpressionLeft = pCastExpression;
+		*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+
+	}
+	break;
+
+	//////////////
+
+	case TK_SIZEOF:
+		MatchToken(ctx, TK_SIZEOF);
+
+		if (Token(ctx) == TK_LEFT_PARENTHESIS)
 		{
-			Match(ctx);
-			TExpression2* pCastExpression;
-			CastExpression(ctx, &pCastExpression);
+			const char* lookAheadlexeme = LookAheadLexeme(ctx);
+			Tokens lookAheadToken = LookAheadToken(ctx);
 
-
-			TUnaryExpressionOperator* pUnaryExpressionOperator =
-				TUnaryExpressionOperator_Create();
-			pUnaryExpressionOperator->token = token0;
-			pUnaryExpressionOperator->pExpressionLeft = pCastExpression;
-			*ppExpression = (TExpression2*)pUnaryExpressionOperator;
-
-		}
-		break;
-
-		//////////////
-
-		case TK_SIZEOF:
-			MatchToken(ctx, TK_SIZEOF);
-
-			if (Token(ctx) == TK_LEFT_PARENTHESIS)
+			if (IsTypeName(ctx, lookAheadToken, lookAheadlexeme))
 			{
-				const char* lookAheadlexeme = LookAheadLexeme(ctx);
-				Tokens lookAheadToken = LookAheadToken(ctx);
-
-				if (IsTypeName(ctx, lookAheadToken, lookAheadlexeme))
-				{
-					TUnaryExpressionOperator* pUnaryExpressionOperator =
-						TUnaryExpressionOperator_Create();
+				TUnaryExpressionOperator* pUnaryExpressionOperator =
+					TUnaryExpressionOperator_Create();
 
 
 
-					//sizeof deste tipo
-					MatchToken(ctx, TK_LEFT_PARENTHESIS);
+				//sizeof deste tipo
+				MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
-					TypeName(ctx, &pUnaryExpressionOperator->TypeName);
+				TypeName(ctx, &pUnaryExpressionOperator->TypeName);
 
-					MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+				MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
 
 
-					pUnaryExpressionOperator->token = token0;
-					//pUnaryExpressionOperator->pExpressionRight = pCastExpression;
-					*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+				pUnaryExpressionOperator->token = token0;
+				//pUnaryExpressionOperator->pExpressionRight = pCastExpression;
+				*ppExpression = (TExpression2*)pUnaryExpressionOperator;
 
-				}
-
-				else
-				{
-					//sizeof do tipo desta expressao
-					TExpression2 *pTUnaryExpression;
-					UnaryExpression(ctx, &pTUnaryExpression);
-
-					TUnaryExpressionOperator* pUnaryExpressionOperator =
-						TUnaryExpressionOperator_Create();
-					pUnaryExpressionOperator->token = token0;
-					pUnaryExpressionOperator->pExpressionLeft = pTUnaryExpression;
-					*ppExpression = (TExpression2*)pUnaryExpressionOperator;
-
-				}
 			}
 
 			else
@@ -988,20 +983,35 @@ void UnaryExpression(Parser* ctx, TExpression2** ppExpression)
 				pUnaryExpressionOperator->token = token0;
 				pUnaryExpressionOperator->pExpressionLeft = pTUnaryExpression;
 				*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+
 			}
+		}
 
-			break;
+		else
+		{
+			//sizeof do tipo desta expressao
+			TExpression2 *pTUnaryExpression;
+			UnaryExpression(ctx, &pTUnaryExpression);
 
-		case TK__Alignof:
-			//Match
-			ASSERT(false);
-			break;
+			TUnaryExpressionOperator* pUnaryExpressionOperator =
+				TUnaryExpressionOperator_Create();
+			pUnaryExpressionOperator->token = token0;
+			pUnaryExpressionOperator->pExpressionLeft = pTUnaryExpression;
+			*ppExpression = (TExpression2*)pUnaryExpressionOperator;
+		}
 
-		default:
-      //ASSERT(false);
-      SetError(ctx, "Assert");
-			
-			break;
+		break;
+
+	case TK__Alignof:
+		//Match
+		ASSERT(false);
+		break;
+
+	default:
+		//ASSERT(false);
+		SetError(ctx, "Assert");
+
+		break;
 	}
 
 }
@@ -1090,7 +1100,7 @@ void CastExpression(Parser* ctx, TExpression2** ppExpression)
 	{
 		TExpression2* pUnaryExpression;
 		UnaryExpression(ctx, &pUnaryExpression);
-		
+
 		*ppExpression = pUnaryExpression;
 	}
 }
@@ -1117,46 +1127,46 @@ void MultiplicativeExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_PERCENT_SIGN:
-		case TK_SOLIDUS:
-		case TK_ASTERISK:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			
-			GetPosition(ctx, &pBinaryExpression->Position);
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			CastExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_PERCENT_SIGN:
+	case TK_SOLIDUS:
+	case TK_ASTERISK:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+
+		GetPosition(ctx, &pBinaryExpression->Position);
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		CastExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_PERCENT_SIGN:
-		case TK_SOLIDUS:
-		case TK_ASTERISK:
-		{
-			TBinaryExpression *pBinaryExpression = 
-				TBinaryExpression_Create();
+	case TK_PERCENT_SIGN:
+	case TK_SOLIDUS:
+	case TK_ASTERISK:
+	{
+		TBinaryExpression *pBinaryExpression =
+			TBinaryExpression_Create();
 
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			MultiplicativeExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		MultiplicativeExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1179,42 +1189,42 @@ void AdditiveExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_PLUS_SIGN:
-		case TK_HYPHEN_MINUS:
-		{
-			TBinaryExpression *pBinaryExpression = 
-				TBinaryExpression_Create();
-			GetPosition(ctx, &pBinaryExpression->Position);
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			MultiplicativeExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_PLUS_SIGN:
+	case TK_HYPHEN_MINUS:
+	{
+		TBinaryExpression *pBinaryExpression =
+			TBinaryExpression_Create();
+		GetPosition(ctx, &pBinaryExpression->Position);
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		MultiplicativeExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_PLUS_SIGN:
-		case TK_HYPHEN_MINUS:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			AdditiveExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_PLUS_SIGN:
+	case TK_HYPHEN_MINUS:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		AdditiveExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 }
@@ -1238,40 +1248,40 @@ void ShiftExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_GREATERGREATER:
-		case TK_LESSLESS:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			AdditiveExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_GREATERGREATER:
+	case TK_LESSLESS:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		AdditiveExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_GREATERGREATER:
-		case TK_LESSLESS:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			ShiftExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_GREATERGREATER:
+	case TK_LESSLESS:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		ShiftExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1295,44 +1305,44 @@ void RelationalExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_LESS_THAN_SIGN:
-		case TK_GREATER_THAN_SIGN:
-		case TK_GREATEREQUAL:
-		case TK_LESSEQUAL:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			ShiftExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_LESS_THAN_SIGN:
+	case TK_GREATER_THAN_SIGN:
+	case TK_GREATEREQUAL:
+	case TK_LESSEQUAL:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		ShiftExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_LESS_THAN_SIGN:
-		case TK_GREATER_THAN_SIGN:
-		case TK_GREATEREQUAL:
-		case TK_LESSEQUAL:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			RelationalExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_LESS_THAN_SIGN:
+	case TK_GREATER_THAN_SIGN:
+	case TK_GREATEREQUAL:
+	case TK_LESSEQUAL:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		RelationalExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 }
@@ -1354,40 +1364,40 @@ void EqualityExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_EQUALEQUAL:
-		case TK_NOTEQUAL:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			RelationalExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_EQUALEQUAL:
+	case TK_NOTEQUAL:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		RelationalExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_EQUALEQUAL:
-		case TK_NOTEQUAL:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			EqualityExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_EQUALEQUAL:
+	case TK_NOTEQUAL:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		EqualityExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1407,38 +1417,38 @@ void AndExpression(Parser* ctx, TExpression2 **ppExpression)
 
 	switch (token)
 	{
-		case TK_AMPERSAND:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			EqualityExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_AMPERSAND:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		EqualityExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_AMPERSAND:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			AndExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_AMPERSAND:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		AndExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1459,38 +1469,38 @@ void ExclusiveOrExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_CIRCUMFLEX_ACCENT:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			AndExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_CIRCUMFLEX_ACCENT:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		AndExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_CIRCUMFLEX_ACCENT:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			ExclusiveOrExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_CIRCUMFLEX_ACCENT:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		ExclusiveOrExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 }
@@ -1513,38 +1523,38 @@ void InclusiveOrExpression(Parser* ctx, TExpression2**ppExpression)
 
 	switch (token)
 	{
-		case TK_VERTICAL_LINE:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			ExclusiveOrExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_VERTICAL_LINE:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		ExclusiveOrExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_VERTICAL_LINE:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			InclusiveOrExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_VERTICAL_LINE:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		InclusiveOrExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1566,41 +1576,41 @@ void LogicalAndExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_ANDAND:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			GetPosition(ctx, &pBinaryExpression->Position);
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			InclusiveOrExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_ANDAND:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		InclusiveOrExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_ANDAND:
-		{
-			TBinaryExpression *pBinaryExpression = 
-				TBinaryExpression_Create();
+	case TK_ANDAND:
+	{
+		TBinaryExpression *pBinaryExpression =
+			TBinaryExpression_Create();
 
-			GetPosition(ctx, &pBinaryExpression->Position);
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			LogicalAndExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+		GetPosition(ctx, &pBinaryExpression->Position);
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		LogicalAndExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1621,40 +1631,40 @@ void LogicalOrExpression(Parser* ctx, TExpression2** ppExpression)
 
 	switch (token)
 	{
-		case TK_OROR:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			GetPosition(ctx, &pBinaryExpression->Position);
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			LogicalAndExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_OROR:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		GetPosition(ctx, &pBinaryExpression->Position);
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		LogicalAndExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 
 	token = Token(ctx);
 
 	switch (token)
 	{
-		case TK_OROR:
-		{
-			TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
-			GetPosition(ctx, &pBinaryExpression->Position);
-			pBinaryExpression->token = token;
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			
-			Match(ctx);
-			TExpression2* pExpressionRight;
-			LogicalOrExpression(ctx, &pExpressionRight);
-			pBinaryExpression->pExpressionRight = pExpressionRight;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
-		break;
+	case TK_OROR:
+	{
+		TBinaryExpression *pBinaryExpression = TBinaryExpression_Create();
+		GetPosition(ctx, &pBinaryExpression->Position);
+		pBinaryExpression->token = token;
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+
+		Match(ctx);
+		TExpression2* pExpressionRight;
+		LogicalOrExpression(ctx, &pExpressionRight);
+		pBinaryExpression->pExpressionRight = pExpressionRight;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
 	}
 }
 
@@ -1715,39 +1725,39 @@ void AssignmentExpression(Parser* ctx, TExpression2** ppExpression)
 	switch (token)
 	{
 
-		case TK_EQUALS_SIGN:
-		case TK_MULTIEQUAL:
-		case TK_DIVEQUAL:
-		case TK_PERCENT_EQUAL:
-		case TK_PLUSEQUAL:
-		case TK_MINUS_EQUAL:
-		case TK_LESSLESSEQUAL:
-		case TK_GREATERGREATEREQUAL:
-		case TK_ANDEQUAL:
-		case TK_CARETEQUAL:
-		case TK_OREQUAL:
-		{
-			Match(ctx);
-			//Significa que o anterior deve ser do tipo  unary-expression
-			//embora tenhamos feito o parser de conditional-expression
-			//se nao for é erro.
-			TExpression2* pAssignmentExpressionRight;
-			AssignmentExpression(ctx, &pAssignmentExpressionRight);
+	case TK_EQUALS_SIGN:
+	case TK_MULTIEQUAL:
+	case TK_DIVEQUAL:
+	case TK_PERCENT_EQUAL:
+	case TK_PLUSEQUAL:
+	case TK_MINUS_EQUAL:
+	case TK_LESSLESSEQUAL:
+	case TK_GREATERGREATEREQUAL:
+	case TK_ANDEQUAL:
+	case TK_CARETEQUAL:
+	case TK_OREQUAL:
+	{
+		Match(ctx);
+		//Significa que o anterior deve ser do tipo  unary-expression
+		//embora tenhamos feito o parser de conditional-expression
+		//se nao for é erro.
+		TExpression2* pAssignmentExpressionRight;
+		AssignmentExpression(ctx, &pAssignmentExpressionRight);
 
-			TBinaryExpression *pBinaryExpression =
-				TBinaryExpression_Create();
-			GetPosition(ctx, &pBinaryExpression->Position);
+		TBinaryExpression *pBinaryExpression =
+			TBinaryExpression_Create();
+		GetPosition(ctx, &pBinaryExpression->Position);
 
-			pBinaryExpression->pExpressionLeft = *ppExpression;
-			pBinaryExpression->pExpressionRight = pAssignmentExpressionRight;
-			pBinaryExpression->token = token;
-			*ppExpression = (TExpression2*)pBinaryExpression;
-		}
+		pBinaryExpression->pExpressionLeft = *ppExpression;
+		pBinaryExpression->pExpressionRight = pAssignmentExpressionRight;
+		pBinaryExpression->token = token;
+		*ppExpression = (TExpression2*)pBinaryExpression;
+	}
+	break;
+
+	default:
+		//É apenas conditional-expression
 		break;
-
-		default:
-			//É apenas conditional-expression
-			break;
 	}
 }
 
@@ -1777,7 +1787,7 @@ void Expression0(Parser* ctx, TExpression2** ppExpression)
 		pBinaryExpression->pExpressionLeft = *ppExpression;
 		pBinaryExpression->pExpressionRight = pAssignmentExpressionRight;
 		pBinaryExpression->token = TK_COMMA;
-		
+
 		*ppExpression = (TExpression2*)pBinaryExpression;
 	}
 }
@@ -1849,50 +1859,50 @@ void Selection_Statement(Parser* ctx, TStatement** ppStatement)
 
 	switch (token)
 	{
-		case TK_IF:
+	case TK_IF:
+	{
+		TIfStatement* pIfStatement = TIfStatement_Create();
+		*ppStatement = (TStatement*)pIfStatement;
+		Match(ctx);
+		MatchToken(ctx, TK_LEFT_PARENTHESIS);
+		//      TExpression0 * pExpression =
+		//      NewObject(pStatement, "expression");
+		Expression0(ctx, &pIfStatement->pConditionExpression);
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+		//TStatement0 * pTrueStatement =
+		//NewObject(pStatement, "statement-true");
+		Statement(ctx, &pIfStatement->pStatement);
+		token = Token(ctx);
+
+		if (token == TK_ELSE)
 		{
-			TIfStatement* pIfStatement = TIfStatement_Create();
-			*ppStatement = (TStatement*)pIfStatement;
 			Match(ctx);
-			MatchToken(ctx, TK_LEFT_PARENTHESIS);
-			//      TExpression0 * pExpression =
-			//      NewObject(pStatement, "expression");
-			Expression0(ctx, &pIfStatement->pConditionExpression);
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-			//TStatement0 * pTrueStatement =
-			//NewObject(pStatement, "statement-true");
-			Statement(ctx, &pIfStatement->pStatement);
-			token = Token(ctx);
-
-			if (token == TK_ELSE)
-			{
-				Match(ctx);
-				// TStatement0 * pElseStatement =
-				//  NewObject(pStatement, "statement-else");
-				Statement(ctx, &pIfStatement->pElseStatement);
-			}
+			// TStatement0 * pElseStatement =
+			//  NewObject(pStatement, "statement-else");
+			Statement(ctx, &pIfStatement->pElseStatement);
 		}
-		break;
+	}
+	break;
 
-		case TK_SWITCH:
-		{
-			TSwitchStatement* pSelectionStatement = TSwitchStatement_Create();
-			*ppStatement = (TStatement*)pSelectionStatement;
-			Match(ctx);
-			MatchToken(ctx, TK_LEFT_PARENTHESIS);
-			//TExpression0 * pExpression =
-			//NewObject(pStatement, "expression");
-			Expression0(ctx, &pSelectionStatement->pConditionExpression);
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-			//TStatement0 * pStatement0 =
-			// NewObject(pStatement, "statement");
-			Statement(ctx, &pSelectionStatement->pExpression);
-		}
-		break;
+	case TK_SWITCH:
+	{
+		TSwitchStatement* pSelectionStatement = TSwitchStatement_Create();
+		*ppStatement = (TStatement*)pSelectionStatement;
+		Match(ctx);
+		MatchToken(ctx, TK_LEFT_PARENTHESIS);
+		//TExpression0 * pExpression =
+		//NewObject(pStatement, "expression");
+		Expression0(ctx, &pSelectionStatement->pConditionExpression);
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+		//TStatement0 * pStatement0 =
+		// NewObject(pStatement, "statement");
+		Statement(ctx, &pSelectionStatement->pExpression);
+	}
+	break;
 
-		default:
-			ASSERT(false);
-			break;
+	default:
+		ASSERT(false);
+		break;
 	}
 }
 
@@ -1910,55 +1920,55 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
 
 	switch (token)
 	{
-		case TK_GOTO:
+	case TK_GOTO:
+	{
+		TJumpStatement* pJumpStatement = TJumpStatement_Create();
+		pJumpStatement->token = token;
+		*ppStatement = (TStatement*)pJumpStatement;
+		Match(ctx);
+		MatchToken(ctx, TK_identifier);
+	}
+	break;
+
+	case TK_CONTINUE:
+	{
+		TJumpStatement* pJumpStatement = TJumpStatement_Create();
+		pJumpStatement->token = token;
+		*ppStatement = (TStatement*)pJumpStatement;
+		Match(ctx);
+		MatchToken(ctx, TK_SEMICOLON);
+	}
+	break;
+
+	case TK_BREAK:
+	{
+		TJumpStatement* pJumpStatement = TJumpStatement_Create();
+		pJumpStatement->token = token;
+		*ppStatement = (TStatement*)pJumpStatement;
+		Match(ctx);
+		MatchToken(ctx, TK_SEMICOLON);
+	}
+	break;
+
+	case TK_RETURN:
+	{
+		TReturnStatement* pReturnStatement = TReturnStatement_Create();
+
+		*ppStatement = (TStatement*)pReturnStatement;
+		token = Match(ctx);
+
+		if (token != TK_SEMICOLON)
 		{
-			TJumpStatement* pJumpStatement = TJumpStatement_Create();
-			pJumpStatement->token = token;
-			*ppStatement = (TStatement*)pJumpStatement;
-			Match(ctx);
-			MatchToken(ctx, TK_identifier);
+			Expression0(ctx, &pReturnStatement->pExpression);
 		}
+
+		MatchToken(ctx, TK_SEMICOLON);
+	}
+	break;
+
+	default:
+		ASSERT(false);
 		break;
-
-		case TK_CONTINUE:
-		{
-			TJumpStatement* pJumpStatement = TJumpStatement_Create();
-			pJumpStatement->token = token;
-			*ppStatement = (TStatement*)pJumpStatement;
-			Match(ctx);
-			MatchToken(ctx, TK_SEMICOLON);
-		}
-		break;
-
-		case TK_BREAK:
-		{
-			TJumpStatement* pJumpStatement = TJumpStatement_Create();
-			pJumpStatement->token = token;
-			*ppStatement = (TStatement*)pJumpStatement;
-			Match(ctx);
-			MatchToken(ctx, TK_SEMICOLON);
-		}
-		break;
-
-		case TK_RETURN:
-		{
-			TReturnStatement* pReturnStatement = TReturnStatement_Create();
-
-			*ppStatement = (TStatement*)pReturnStatement;
-			token = Match(ctx);
-
-			if (token != TK_SEMICOLON)
-			{
-				Expression0(ctx, &pReturnStatement->pExpression);
-			}
-
-			MatchToken(ctx, TK_SEMICOLON);
-		}
-		break;
-
-		default:
-			ASSERT(false);
-			break;
 	}
 }
 
@@ -1975,98 +1985,50 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
 
 	switch (token)
 	{
-		case TK_WHILE:
-		{
-			TWhileStatement* pWhileStatement = TWhileStatement_Create();
-			*ppStatement = (TStatement*)pWhileStatement;
-			Match(ctx);
-			MatchToken(ctx, TK_LEFT_PARENTHESIS);
-			Expression0(ctx, &pWhileStatement->pExpression);
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-			Statement(ctx, &pWhileStatement->pStatement);
-		}
-		break;
+	case TK_WHILE:
+	{
+		TWhileStatement* pWhileStatement = TWhileStatement_Create();
+		*ppStatement = (TStatement*)pWhileStatement;
+		Match(ctx);
+		MatchToken(ctx, TK_LEFT_PARENTHESIS);
+		Expression0(ctx, &pWhileStatement->pExpression);
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+		Statement(ctx, &pWhileStatement->pStatement);
+	}
+	break;
 
-		case TK_DO:
-		{
-			TDoStatement* pDoStatement = TDoStatement_Create();
-			*ppStatement = (TStatement*)pDoStatement;
-			Match(ctx);
-			Statement(ctx, &pDoStatement->pStatement);
-			MatchToken(ctx, TK_WHILE);
-			MatchToken(ctx, TK_LEFT_PARENTHESIS);
-			Expression0(ctx, &pDoStatement->pExpression);
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-			MatchToken(ctx, TK_SEMICOLON);
-		}
-		break;
+	case TK_DO:
+	{
+		TDoStatement* pDoStatement = TDoStatement_Create();
+		*ppStatement = (TStatement*)pDoStatement;
+		Match(ctx);
+		Statement(ctx, &pDoStatement->pStatement);
+		MatchToken(ctx, TK_WHILE);
+		MatchToken(ctx, TK_LEFT_PARENTHESIS);
+		Expression0(ctx, &pDoStatement->pExpression);
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+		MatchToken(ctx, TK_SEMICOLON);
+	}
+	break;
 
-		case TK_FOR:
-		{
-			TForStatement* pIterationStatement = TForStatement_Create();
-			*ppStatement = (TStatement*)pIterationStatement;
-			Match(ctx);
-			token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
+	case TK_FOR:
+	{
+		TForStatement* pIterationStatement = TForStatement_Create();
+		*ppStatement = (TStatement*)pIterationStatement;
+		Match(ctx);
+		token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
-			//primeira expressao do for
-			if (token != TK_SEMICOLON)
+		//primeira expressao do for
+		if (token != TK_SEMICOLON)
+		{
+			//
+			//for (expressionopt; expressionopt; expressionopt) statement
+			//for (declaration expressionopt; expressionopt) statement
+
+			bool bHasDeclaration = Declaration(ctx, &pIterationStatement->pInitDeclarationOpt);
+
+			if (bHasDeclaration)
 			{
-				//
-				//for (expressionopt; expressionopt; expressionopt) statement
-				//for (declaration expressionopt; expressionopt) statement
-
-				bool bHasDeclaration = Declaration(ctx, &pIterationStatement->pInitDeclarationOpt);
-
-				if (bHasDeclaration)
-				{
-					token = Token(ctx);
-
-					if (token != TK_SEMICOLON)
-					{
-						//Esta eh a 2 expressao do for, a declaracao ja comeu 1
-						Expression0(ctx, &pIterationStatement->pExpression2);
-						MatchToken(ctx, TK_SEMICOLON);
-					}
-					else
-					{
-						//segunda expressao vazia
-						MatchToken(ctx, TK_SEMICOLON);
-					}
-				}
-
-				else
-				{
-					token = Token(ctx);
-
-					if (token != TK_SEMICOLON)
-					{
-						//primeira expressao do for
-						Expression0(ctx, &pIterationStatement->pExpression1);
-						MatchToken(ctx, TK_SEMICOLON);
-					}
-
-					token = Token(ctx);
-
-					if (token != TK_SEMICOLON)
-					{
-						//segunda expressao do for
-						Expression0(ctx, &pIterationStatement->pExpression2);
-						MatchToken(ctx, TK_SEMICOLON);
-					}
-
-					else
-					{
-						//segunda expressao vazia
-						MatchToken(ctx, TK_SEMICOLON);
-					}
-
-				}
-			}
-
-			else
-			{
-				//primeira expressao do for vazia
-				MatchToken(ctx, TK_SEMICOLON);
 				token = Token(ctx);
 
 				if (token != TK_SEMICOLON)
@@ -2075,30 +2037,78 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
 					Expression0(ctx, &pIterationStatement->pExpression2);
 					MatchToken(ctx, TK_SEMICOLON);
 				}
-
 				else
 				{
-					//segunda expressao do for vazia tb
+					//segunda expressao vazia
 					MatchToken(ctx, TK_SEMICOLON);
 				}
 			}
 
+			else
+			{
+				token = Token(ctx);
+
+				if (token != TK_SEMICOLON)
+				{
+					//primeira expressao do for
+					Expression0(ctx, &pIterationStatement->pExpression1);
+					MatchToken(ctx, TK_SEMICOLON);
+				}
+
+				token = Token(ctx);
+
+				if (token != TK_SEMICOLON)
+				{
+					//segunda expressao do for
+					Expression0(ctx, &pIterationStatement->pExpression2);
+					MatchToken(ctx, TK_SEMICOLON);
+				}
+
+				else
+				{
+					//segunda expressao vazia
+					MatchToken(ctx, TK_SEMICOLON);
+				}
+
+			}
+		}
+
+		else
+		{
+			//primeira expressao do for vazia
+			MatchToken(ctx, TK_SEMICOLON);
 			token = Token(ctx);
 
-			//terceira expressao do for
-			if (token != TK_RIGHT_PARENTHESIS)
+			if (token != TK_SEMICOLON)
 			{
-				Expression0(ctx, &pIterationStatement->pExpression3);
+				//Esta eh a 2 expressao do for, a declaracao ja comeu 1
+				Expression0(ctx, &pIterationStatement->pExpression2);
+				MatchToken(ctx, TK_SEMICOLON);
 			}
 
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-			Statement(ctx, &pIterationStatement->pStatement);
+			else
+			{
+				//segunda expressao do for vazia tb
+				MatchToken(ctx, TK_SEMICOLON);
+			}
 		}
-		break;
 
-		default:
-			ASSERT(false);
-			break;
+		token = Token(ctx);
+
+		//terceira expressao do for
+		if (token != TK_RIGHT_PARENTHESIS)
+		{
+			Expression0(ctx, &pIterationStatement->pExpression3);
+		}
+
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+		Statement(ctx, &pIterationStatement->pStatement);
+	}
+	break;
+
+	default:
+		ASSERT(false);
+		break;
 	}
 }
 
@@ -2130,7 +2140,7 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
 		Match(ctx);
 		ConstantExpression(ctx, &pLabeledStatement->pExpression);
 		MatchToken(ctx, TK_COLON);
-		Statement(ctx, &pLabeledStatement->pStatementOpt);				
+		Statement(ctx, &pLabeledStatement->pStatementOpt);
 	}
 
 	else if (token == TK_DEFAULT)
@@ -2233,159 +2243,162 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 
 	switch (token)
 	{
-		case TK__Asm:
-			bResult = true;
-			Asm_Statement(ctx, ppStatement);
-			break;
-
-		case TK_LEFT_CURLY_BRACKET:
-		{
-			bResult = true;
-			Compound_Statement(ctx, ppStatement);
-		}
+	case TK__Asm:
+		bResult = true;
+		Asm_Statement(ctx, ppStatement);
 		break;
 
-		case TK_case:
-		case TK_DEFAULT:
-			bResult = true;
-			Labeled_Statement(ctx, ppStatement);
-			break;
+	case TK_LEFT_CURLY_BRACKET:
+	{
+		bResult = true;
+		Compound_Statement(ctx, ppStatement);
+	}
+	break;
 
-		case TK_SWITCH:
-			bResult = true;
-			Selection_Statement(ctx, ppStatement);
-			break;
+	case TK_case:
+	case TK_DEFAULT:
+		bResult = true;
+		Labeled_Statement(ctx, ppStatement);
+		break;
 
-		case TK_IF:
-			bResult = true;
-			Selection_Statement(ctx, ppStatement);
-			break;
+	case TK_SWITCH:
+		bResult = true;
+		Selection_Statement(ctx, ppStatement);
+		break;
 
-		case TK_ELSE:
-			//Ele tem que estar fazendo os statement do IF!
-			bResult = true;
-			Match(ctx); //else
-			//poderia retornar uma coisa so  p dizer q eh else
-			//Statement(ctx, obj);
-			break;
+	case TK_IF:
+		bResult = true;
+		Selection_Statement(ctx, ppStatement);
+		break;
 
-			//iteration-statement
-		case TK_WHILE:
-		case TK_FOR:
-		case TK_DO:
-			bResult = true;
-			Iteration_Statement(ctx, ppStatement);
-			break;
+	case TK_ELSE:
+		//Ele tem que estar fazendo os statement do IF!
+		bResult = true;
+		Match(ctx); //else
+		//poderia retornar uma coisa so  p dizer q eh else
+		//Statement(ctx, obj);
+		break;
 
-			//jump-statement
-		case TK_GOTO:
-		case TK_CONTINUE:
-		case TK_BREAK:
-		case TK_RETURN:
-			bResult = true;
-			Jump_Statement(ctx, ppStatement);
-			break;
+		//iteration-statement
+	case TK_WHILE:
+	case TK_FOR:
+	case TK_DO:
+		bResult = true;
+		Iteration_Statement(ctx, ppStatement);
+		break;
 
-			//lista de first para expressões
-			//expression-statement
-		case TK_LEFT_PARENTHESIS:
-		case TK_SEMICOLON:
-		
-		case TK_DECIMAL_INTEGER:
-		case TK_FLOAT_NUMBER:
-		case TK_string_literal:
-		
+		//jump-statement
+	case TK_GOTO:
+	case TK_CONTINUE:
+	case TK_BREAK:
+	case TK_RETURN:
+		bResult = true;
+		Jump_Statement(ctx, ppStatement);
+		break;
+
+		//lista de first para expressões
+		//expression-statement
+	case TK_LEFT_PARENTHESIS:
+	case TK_SEMICOLON:
+
+	case TK_DECIMAL_INTEGER:
+	case TK_FLOAT_NUMBER:
+	case TK_string_literal:
+
 
 		//unary
-		case TK_PLUSPLUS:
-		case TK_MINUSMINUS:
+	case TK_PLUSPLUS:
+	case TK_MINUSMINUS:
 
-		case TK_SIZEOF:
+	case TK_SIZEOF:
 
 		//unary-operator
-		case TK_AMPERSAND:
-		case TK_ASTERISK:
-		case TK_PLUS_SIGN:
-		case TK_HYPHEN_MINUS:
-		case TK_TILDE:
-		case TK_EXCLAMATION_MARK:
-			//unary-operator-extension
-		case TK_ANDAND: //&&
+	case TK_AMPERSAND:
+	case TK_ASTERISK:
+	case TK_PLUS_SIGN:
+	case TK_HYPHEN_MINUS:
+	case TK_TILDE:
+	case TK_EXCLAMATION_MARK:
+#ifdef LANGUAGE_EXTENSIONS
+		//unary-operator-extension
+	case TK_ANDAND: //&&
+#endif
+		bResult = true;
+		Expression_Statement(ctx, ppStatement);
+		break;
 
-			bResult = true;
-			Expression_Statement(ctx, ppStatement);
-			break;
+	case TK_identifier:
 
-		case TK_identifier:
-
-			if (DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme))
+		if (DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme))
+		{
+			//É uma declaracao
+		}
+		else
+		{
+			if (LookAheadToken(ctx) == TK_COLON)
 			{
-				//É uma declaracao
+				//era um label..
+				Labeled_Statement(ctx, ppStatement);
 			}
+
 			else
 			{
-				if (LookAheadToken(ctx) == TK_COLON)
-				{
-					//era um label..
-					Labeled_Statement(ctx, ppStatement);
-				}
-
-				else
-				{
-					Expression_Statement(ctx, ppStatement);
-				}
-
-				bResult = true;
+				Expression_Statement(ctx, ppStatement);
 			}
 
-			break;
+			bResult = true;
+		}
 
-		case TK_inline:
-		case TK__Noreturn:
-		case TK__Alignas:
-		
+		break;
+
+	case TK_inline:
+	case TK__Noreturn:
+	case TK__Alignas:
+
 		//type-qualifier
-		case TK_const:
-		case TK_restrict:
-		case TK_volatile:
-		case TK__Atomic:
-		
-		//type-qualifier-extensions 
-		case TK_OPT_QUALIFIER:
-		case TK_OWN_QUALIFIER:
-		case TK_DTOR_QUALIFIER:
-		case TK_MDTOR_QUALIFIER:
-		//
-		
-		case TK_typedef:
-		case TK_extern:
-		case TK_static:
-		case TK__Thread_local:
-		case TK_auto:
-		case TK_register:
-		case TK_void:
-		case TK_char:
-		case TK_short:
-		case TK_int:
-		case TK_long:
-		case TK_float:
-		case TK_double:
-		case TK_signed:
-		case TK_unsigned:
-		case TK__Bool:
-		case TK__Complex:
-		case TK_struct:
-		case TK_union:
-		case TK_enum:
-			bResult = false;
-			break;
+	case TK_const:
+	case TK_restrict:
+	case TK_volatile:
+	case TK__Atomic:
 
-		default:
-			ASSERT(false);
-			//bResult = true;
-			//SetType(pStatement, "expression-statement");
-			//Expression_Statement(ctx, pStatement);
-			break;
+#ifdef LANGUAGE_EXTENSIONS
+		//type-qualifier-extensions 
+	case TK_OPT_QUALIFIER:
+	case TK_OWN_QUALIFIER:
+	case TK_DTOR_QUALIFIER:
+	case TK_MDTOR_QUALIFIER:
+		//
+#endif
+
+	case TK_typedef:
+	case TK_extern:
+	case TK_static:
+	case TK__Thread_local:
+	case TK_auto:
+	case TK_register:
+	case TK_void:
+	case TK_char:
+	case TK_short:
+	case TK_int:
+	case TK_long:
+	case TK_float:
+	case TK_double:
+	case TK_signed:
+	case TK_unsigned:
+	case TK__Bool:
+	case TK__Complex:
+	case TK_struct:
+	case TK_union:
+	case TK_enum:
+		bResult = false;
+		break;
+
+	default:
+		ASSERT(false);
+		//bResult = true;
+		//SetType(pStatement, "expression-statement");
+		//Expression_Statement(ctx, pStatement);
+		break;
 	}
 
 	return bResult;
@@ -2470,19 +2483,19 @@ void Struct_Or_Union(Parser* ctx,
 
 	switch (token)
 	{
-		case TK_struct:
-			pStructUnionSpecifier->bIsStruct = true;
-			Match(ctx);
-			break;
+	case TK_struct:
+		pStructUnionSpecifier->bIsStruct = true;
+		Match(ctx);
+		break;
 
-		case TK_union:
-			pStructUnionSpecifier->bIsStruct = false;
-			Match(ctx);
-			break;
+	case TK_union:
+		pStructUnionSpecifier->bIsStruct = false;
+		Match(ctx);
+		break;
 
-		default:
-			ASSERT(false);
-			break;
+	default:
+		ASSERT(false);
+		break;
 	}
 }
 
@@ -2568,7 +2581,7 @@ void Struct_Declarator(Parser* ctx,
 			ConstantExpression(ctx, &p);
 			TExpression2_Delete(p);
 		}
-
+#ifdef LANGUAGE_EXTENSIONS
 		else if (token == TK_EQUALS_SIGN)
 		{
 			//TODO COMPILER EXTENSION! SHOW ERROR IF EXTENSIONS NOT ENABLED
@@ -2576,6 +2589,7 @@ void Struct_Declarator(Parser* ctx,
 			Match(ctx);
 			Initializer(ctx, &pTDeclarator2->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
 		}
+#endif
 	}
 }
 
@@ -2909,20 +2923,20 @@ bool Function_Specifier(Parser* ctx,
 
 	switch (token)
 	{
-		case TK_inline:
-			pFunctionSpecifier->bIsInline = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_inline:
+		pFunctionSpecifier->bIsInline = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK__Noreturn:
-			pFunctionSpecifier->bIsNoReturn = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK__Noreturn:
+		pFunctionSpecifier->bIsNoReturn = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	return bResult;
@@ -2947,44 +2961,44 @@ bool Storage_Class_Specifier(Parser* ctx,
 	//const char* lexeme = Lexeme(ctx);
 	switch (token)
 	{
-		case TK_typedef:
-			pStorageSpecifier->bIsTypedef = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_typedef:
+		pStorageSpecifier->bIsTypedef = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK_extern:
-			pStorageSpecifier->bIsExtern = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_extern:
+		pStorageSpecifier->bIsExtern = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK_static:
-			pStorageSpecifier->bIsStatic = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_static:
+		pStorageSpecifier->bIsStatic = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK__Thread_local:
-			pStorageSpecifier->bIsThread_local = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK__Thread_local:
+		pStorageSpecifier->bIsThread_local = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK_auto:
-			pStorageSpecifier->bIsAuto = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_auto:
+		pStorageSpecifier->bIsAuto = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK_register:
-			pStorageSpecifier->bIsRegister = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_register:
+		pStorageSpecifier->bIsRegister = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	return bResult;
@@ -3001,7 +3015,7 @@ void Parameter_List(Parser* ctx,
 	Tokens token = Token(ctx);
 
 	TParameterDeclaration*  pParameter = TParameterDeclaration_Create();
-	TParameterList_Push(pParameterList,  pParameter);
+	TParameterList_Push(pParameterList, pParameter);
 	Parameter_Declaration(ctx, pParameter);
 
 	//Tem mais?
@@ -3033,9 +3047,9 @@ bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator* pTDeclarator2)
 
 	switch (token)
 	{
-		case TK_ASTERISK:
-			AbstractDeclarator(ctx, pTDeclarator2);
-			break;
+	case TK_ASTERISK:
+		AbstractDeclarator(ctx, pTDeclarator2);
+		break;
 	}
 
 	return bResult;
@@ -3062,13 +3076,13 @@ void DirectAbstractDeclarator(Parser* ctx)
 
 	switch (token)
 	{
-		case TK_LEFT_PARENTHESIS:
-			//AbstractDeclarator(ctx, pTDeclarator2);
-			break;
+	case TK_LEFT_PARENTHESIS:
+		//AbstractDeclarator(ctx, pTDeclarator2);
+		break;
 
-		case TK_LEFT_SQUARE_BRACKET:
+	case TK_LEFT_SQUARE_BRACKET:
 
-			break;
+		break;
 	}
 }
 
@@ -3128,56 +3142,56 @@ void Direct_DeclaratorCore(Parser* ctx, TDeclarator* pDeclarator2)
 	Tokens token = Token(ctx);
 	switch (token)
 	{
-		case TK_LEFT_SQUARE_BRACKET:
+	case TK_LEFT_SQUARE_BRACKET:
+	{
+		/*
+		direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
+		direct-declarator [ static type-qualifier-listopt assignment-expression ]
+		direct-declarator [ type-qualifier-list static assignment-expression ]
+		direct-declarator [ type-qualifier-listopt * ]
+		*/
+		pDeclarator2->token = token;
+		token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
+		if (token == TK_static)
 		{
-			/*
-			direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
-			direct-declarator [ static type-qualifier-listopt assignment-expression ]
-			direct-declarator [ type-qualifier-list static assignment-expression ]
-			direct-declarator [ type-qualifier-listopt * ]
-			*/
-			pDeclarator2->token = token;
-			token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
-			if (token == TK_static)
+		}
+		else
+		{
+			if (token != TK_RIGHT_SQUARE_BRACKET)
 			{
+				ASSERT(pDeclarator2->pExpression == NULL);
+				AssignmentExpression(ctx, &pDeclarator2->pExpression);
 			}
 			else
 			{
-        if (token != TK_RIGHT_SQUARE_BRACKET)
-        {
-          ASSERT(pDeclarator2->pExpression == NULL);
-          AssignmentExpression(ctx, &pDeclarator2->pExpression);
-        }
-        else
-        {
-          //array vazio é permitido se for o ultimo cara da struct          
-          //struct X { int ElementCount;  int Elements[]; };           
-        }
+				//array vazio é permitido se for o ultimo cara da struct          
+				//struct X { int ElementCount;  int Elements[]; };           
 			}
-
-			MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
-
 		}
-		break;
-		case TK_LEFT_PARENTHESIS:
+
+		MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
+
+	}
+	break;
+	case TK_LEFT_PARENTHESIS:
+	{
+		/*
+		direct-declarator ( parameter-type-list )
+		direct-declarator ( identifier-listopt )
+		*/
+		pDeclarator2->token = token;
+		ASSERT(pDeclarator2->pParametersOpt == NULL);
+		pDeclarator2->pParametersOpt = TParameterList_Create();
+		token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
+
+		if (token != TK_RIGHT_PARENTHESIS)
 		{
-			/*
-			direct-declarator ( parameter-type-list )
-			direct-declarator ( identifier-listopt )
-			*/
-			pDeclarator2->token = token;
-			ASSERT(pDeclarator2->pParametersOpt == NULL);
-			pDeclarator2->pParametersOpt = TParameterList_Create();
-			token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
+			//opt
+			Parameter_Type_List(ctx, pDeclarator2->pParametersOpt);
+		}
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
-			if (token != TK_RIGHT_PARENTHESIS)
-			{
-				//opt
-				Parameter_Type_List(ctx, pDeclarator2->pParametersOpt);
-			}
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-
-		}break;
+	}break;
 	}
 
 	//Tem mais?
@@ -3185,28 +3199,28 @@ void Direct_DeclaratorCore(Parser* ctx, TDeclarator* pDeclarator2)
 	token = Token(ctx);
 	switch (token)
 	{
-		case TK_LEFT_SQUARE_BRACKET:
+	case TK_LEFT_SQUARE_BRACKET:
+		ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
+		pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
+		Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
+		break;
+	case TK_LEFT_PARENTHESIS:
+	{
+		Tokens token2 = LookAheadToken(ctx);
+		if (token2 == TK_ASTERISK)
+		{
+			ASSERT(false); //cai aqui?
+			MatchToken(ctx, TK_LEFT_PARENTHESIS);
+			Declarator(ctx, pDeclarator2);
+			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+		}
+		else
+		{
 			ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
 			pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
 			Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
-			break;
-		case TK_LEFT_PARENTHESIS:
-		{
-			Tokens token2 = LookAheadToken(ctx);
-			if (token2 == TK_ASTERISK)
-			{
-				ASSERT(false); //cai aqui?
-				MatchToken(ctx, TK_LEFT_PARENTHESIS);
-				Declarator(ctx, pDeclarator2);
-				MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-			}
-			else
-			{
-				ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-				pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-				Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
-			}
-		}	break;
+		}
+	}	break;
 
 	}
 }
@@ -3235,33 +3249,33 @@ void Direct_Declarator(Parser* ctx, TDeclarator* pDeclarator2)
 
 	switch (token)
 	{
-		case TK_LEFT_PARENTHESIS:
-		{
-			
-			MatchToken(ctx, TK_LEFT_PARENTHESIS);
-			//ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-			//pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-			Declarator(ctx, pDeclarator2);
-			
-			pDeclarator2->token = token;
-			
-			MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+	case TK_LEFT_PARENTHESIS:
+	{
 
-		}
-		break;
+		MatchToken(ctx, TK_LEFT_PARENTHESIS);
+		//ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
+		//pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
+		Declarator(ctx, pDeclarator2);
 
-		case TK_identifier:
-		{
-			//identifier
-			pDeclarator2->token = token;
-			const char* lexeme = Lexeme(ctx);
-			String_Set(&pDeclarator2->Name, lexeme);
-            pDeclarator2->Position.Line = GetCurrentLine(ctx);
-            pDeclarator2->Position.FileIndex = GetFileIndex(ctx);
+		pDeclarator2->token = token;
 
-			Match(ctx);
+		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
-		}  break;
+	}
+	break;
+
+	case TK_identifier:
+	{
+		//identifier
+		pDeclarator2->token = token;
+		const char* lexeme = Lexeme(ctx);
+		String_Set(&pDeclarator2->Name, lexeme);
+		pDeclarator2->Position.Line = GetCurrentLine(ctx);
+		pDeclarator2->Position.FileIndex = GetFileIndex(ctx);
+
+		Match(ctx);
+
+	}  break;
 	}
 
 	//Tem mais?
@@ -3269,12 +3283,12 @@ void Direct_Declarator(Parser* ctx, TDeclarator* pDeclarator2)
 	token = Token(ctx);
 	switch (token)
 	{
-		case TK_LEFT_PARENTHESIS:
-		case TK_LEFT_SQUARE_BRACKET:
-			ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-			pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-			Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
-			break;
+	case TK_LEFT_PARENTHESIS:
+	case TK_LEFT_SQUARE_BRACKET:
+		ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
+		pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
+		Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
+		break;
 	}
 
 }
@@ -3294,57 +3308,58 @@ bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
 	//const char* lexeme = Lexeme(ctx);
 	switch (token)
 	{
-		
-		
 
-		case TK_const:
-			pQualifier->bIsConst = true;
-			Match(ctx);
-			bResult = true;
-			break;
 
-		case TK_restrict:
-			pQualifier->bIsRestrict = true;
-			Match(ctx);
-			bResult = true;
-			break;
 
-		case TK_volatile:
-			pQualifier->bIsVolatile = true;
-			Match(ctx);
-			bResult = true;
-			break;
+	case TK_const:
+		pQualifier->bIsConst = true;
+		Match(ctx);
+		bResult = true;
+		break;
 
-		case TK__Atomic:
-			pQualifier->bIsAtomic = true;
-			Match(ctx);
-			bResult = true;
-			break;
-		
+	case TK_restrict:
+		pQualifier->bIsRestrict = true;
+		Match(ctx);
+		bResult = true;
+		break;
+
+	case TK_volatile:
+		pQualifier->bIsVolatile = true;
+		Match(ctx);
+		bResult = true;
+		break;
+
+	case TK__Atomic:
+		pQualifier->bIsAtomic = true;
+		Match(ctx);
+		bResult = true;
+		break;
+
+#ifdef LANGUAGE_EXTENSIONS
 		//type-qualifier-extensions 
-		case TK_OPT_QUALIFIER:
-			pQualifier->bIsOpt = true;
-			Match(ctx);
-			bResult = true;
-			break;
-		case TK_OWN_QUALIFIER:
-			pQualifier->bIsOwner = true;
-			Match(ctx);
-			bResult = true;
-			break;
-		case TK_DTOR_QUALIFIER:
-			pQualifier->bIsDestructor = true;
-			Match(ctx);
-			bResult = true;
-			break;
-		case TK_MDTOR_QUALIFIER:
-			pQualifier->bIsMemDestructor = true;
-			Match(ctx);
-			bResult = true;
-			break;
-
-		default:
-			break;
+	case TK_OPT_QUALIFIER:
+		pQualifier->bIsOpt = true;
+		Match(ctx);
+		bResult = true;
+		break;
+	case TK_OWN_QUALIFIER:
+		pQualifier->bIsOwner = true;
+		Match(ctx);
+		bResult = true;
+		break;
+	case TK_DTOR_QUALIFIER:
+		pQualifier->bIsDestructor = true;
+		Match(ctx);
+		bResult = true;
+		break;
+	case TK_MDTOR_QUALIFIER:
+		pQualifier->bIsMemDestructor = true;
+		Match(ctx);
+		bResult = true;
+		break;
+#endif
+	default:
+		break;
 	}
 
 	return bResult;
@@ -3379,12 +3394,12 @@ int PointerOpt(Parser* ctx, TPointerList* pPointerList)
 	Tokens token = Token(ctx);
 
 	while (IsTypeQualifierToken(token) ||
-		   token == TK_ASTERISK)   //pointer
+		token == TK_ASTERISK)   //pointer
 	{
 		TPointer* pPointer = TPointer_Create();
 		TPointerList_Push(pPointerList, pPointer);
-		
-		if (IsTypeQualifierToken(token))			
+
+		if (IsTypeQualifierToken(token))
 		{
 			Type_Qualifier_ListOpt(ctx, &pPointer->Qualifier);
 		}
@@ -3469,12 +3484,12 @@ bool Type_Specifier(Parser* ctx,
 
 		else
 		{
-      //ver caso a caso
-      /*
-      //exemplo
-      typedef struct X X;
-      typedef struct X {  int i; } X;
-      */
+			//ver caso a caso
+			/*
+			//exemplo
+			typedef struct X X;
+			typedef struct X {  int i; } X;
+			*/
 			//long long long int
 		}
 	}
@@ -3486,246 +3501,246 @@ bool Type_Specifier(Parser* ctx,
 	switch (token)
 	{
 		//type - specifier
-		case TK_void:
+	case TK_void:
+	{
+		if (pSingleTypeSpecifier == NULL)
 		{
-			if (pSingleTypeSpecifier == NULL)
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsVoid = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_char:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsChar = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_short:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsShort = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_int:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsInt = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_long:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->nLong++;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_float:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsFloat = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_double:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsDouble = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_signed:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsSigned = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK_unsigned:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsUnsigned = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK__Bool:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsBool = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	case TK__Complex:
+	{
+		if (pSingleTypeSpecifier == NULL)
+		{
+			pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+		}
+
+		pSingleTypeSpecifier->bIsComplex = true;
+		bResult = true;
+		Match(ctx);
+		*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+	}
+	break;
+
+	//atomic-type-specifier
+	case TK_struct:
+	case TK_union:
+	{
+		ASSERT(*ppTypeSpecifier == NULL);
+		bResult = true;
+		TStructUnionSpecifier* pStructUnionSpecifier = TStructUnionSpecifier_Create();
+		*ppTypeSpecifier = (TTypeSpecifier*)pStructUnionSpecifier;
+		Struct_Or_Union_Specifier(ctx, pStructUnionSpecifier);
+	}
+	break;
+
+	case TK_enum:
+	{
+		ASSERT(*ppTypeSpecifier == NULL);
+		bResult = true;
+		TEnumSpecifier* pEnumSpecifier2 = TEnumSpecifier_Create();
+		*ppTypeSpecifier = (TTypeSpecifier*)pEnumSpecifier2;
+		Enum_Specifier(ctx, pEnumSpecifier2);
+	}
+	break;
+
+	case TK_identifier:
+	{
+		bool bIsTypedef = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
+
+		if (bIsTypedef)
+		{
+			if (*typedefCount == 0 /*&&
+				ppTypeSpecifier == NULL*/)
 			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+
+				if (*ppTypeSpecifier == NULL)
+				{
+					*typedefCount = 1;
+
+					pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+					pSingleTypeSpecifier->bIsTypeDef = true;
+					String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
+					bResult = true;
+					Match(ctx);
+					*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+				}
+				else
+				{
+					bResult = false;
+					//ERROR
+					//typedef int INT;
+					//typedef  double INT;
+
+
+					//OK
+					//typedef int INT;
+					//typedef  int INT;
+
+					//if ((*ppTypeSpecifier)->type)
+					//daria este problema se wchar_t ja tivesse sido definido
+					//typedef unsigned short wchar_t;
+
+					//typedef int INT;
+				  // SetError(ctx, "??");
+					//*typedefCount = 1;
+
+					//pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
+					//pSingleTypeSpecifier->bIsTypeDef = true;
+					//String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
+					//bResult = true;
+					//Match(ctx);
+					//*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
+				}
 			}
-
-			pSingleTypeSpecifier->bIsVoid = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_char:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsChar = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_short:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsShort = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_int:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsInt = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_long:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->nLong++;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_float:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsFloat = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_double:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsDouble = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_signed:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsSigned = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK_unsigned:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsUnsigned = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK__Bool:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsBool = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		case TK__Complex:
-		{
-			if (pSingleTypeSpecifier == NULL)
-			{
-				pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-			}
-
-			pSingleTypeSpecifier->bIsComplex = true;
-			bResult = true;
-			Match(ctx);
-			*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-		}
-		break;
-
-		//atomic-type-specifier
-		case TK_struct:
-		case TK_union:
-		{
-			ASSERT(*ppTypeSpecifier == NULL);
-			bResult = true;
-			TStructUnionSpecifier* pStructUnionSpecifier = TStructUnionSpecifier_Create();
-			*ppTypeSpecifier = (TTypeSpecifier*)pStructUnionSpecifier;
-			Struct_Or_Union_Specifier(ctx, pStructUnionSpecifier);
-		}
-		break;
-
-		case TK_enum:
-		{
-			ASSERT(*ppTypeSpecifier == NULL);
-			bResult = true;
-			TEnumSpecifier* pEnumSpecifier2 = TEnumSpecifier_Create();
-			*ppTypeSpecifier = (TTypeSpecifier*)pEnumSpecifier2;
-			Enum_Specifier(ctx, pEnumSpecifier2);
-		}
-		break;
-
-		case TK_identifier:
-		{
-			bool bIsTypedef = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
-
-			if (bIsTypedef)
-			{
-        if (*typedefCount == 0 /*&&
-            ppTypeSpecifier == NULL*/)
-        {
-
-          if (*ppTypeSpecifier == NULL)
-          {
-            *typedefCount = 1;
-
-            pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-            pSingleTypeSpecifier->bIsTypeDef = true;
-            String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
-            bResult = true;
-            Match(ctx);
-            *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-          }
-          else
-          {
-            bResult = false;
-            //ERROR
-            //typedef int INT;
-            //typedef  double INT;
-            
-
-            //OK
-            //typedef int INT;
-            //typedef  int INT;
-
-            //if ((*ppTypeSpecifier)->type)
-            //daria este problema se wchar_t ja tivesse sido definido
-            //typedef unsigned short wchar_t;
-
-            //typedef int INT;
-          // SetError(ctx, "??");
-            //*typedefCount = 1;
-
-            //pSingleTypeSpecifier = TSingleTypeSpecifier_Create();
-            //pSingleTypeSpecifier->bIsTypeDef = true;
-            //String_Set(&pSingleTypeSpecifier->TypedefName, lexeme);
-            //bResult = true;
-            //Match(ctx);
-            //*ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
-          }
-        }
-        else
-        {
-          bResult = false;
-        }
-			}
-
 			else
 			{
 				bResult = false;
 			}
 		}
-		break;
 
-		default:
-			break;
+		else
+		{
+			bResult = false;
+		}
+	}
+	break;
+
+	default:
+		break;
 	}
 
 	//ASSERT((bResult && *ppTypeSpecifier != NULL) ||
@@ -3749,7 +3764,7 @@ bool Declaration_Specifiers(Parser* ctx,
 	/*
 	typedef unsigned A;
 	typedef int  B;
-    A B;	
+	A B;
 	*/
 	for (; ;)
 	{
@@ -3823,7 +3838,13 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList)
 		TInitializerListItem* pTInitializerListItem = TInitializerListItem_Create();
 		TInitializerList_Push(pInitializerList, pTInitializerListItem);
 		Tokens token = Token(ctx);
-
+#ifdef LANGUAGE_EXTENSIONS
+		if (token == TK_RIGHT_CURLY_BRACKET)
+		{
+			 //Empty initializer
+			break;
+		}
+#endif
 		if (token == TK_LEFT_SQUARE_BRACKET ||
 			token == TK_FULL_STOP)
 		{
@@ -4076,19 +4097,19 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
 		{
 			TDeclarations_Push(declarations, pDeclarationOut);
 			declarationIndex++;
-			SetSymbolsFromDeclaration(ctx, pDeclarationOut);		
+			SetSymbolsFromDeclaration(ctx, pDeclarationOut);
 		}
 		else
 		{
-      if (Token(ctx) == TK_EOF)
-      {
-        //ok
-      }
-      else
-      {
-        //nao ter mais declaracao nao eh erro
-        SetError(ctx, "declaration expected");
-      }      
+			if (Token(ctx) == TK_EOF)
+			{
+				//ok
+			}
+			else
+			{
+				//nao ter mais declaracao nao eh erro
+				SetError(ctx, "declaration expected");
+			}
 			break;
 		}
 
@@ -4180,41 +4201,41 @@ void PrintString(const char* psz)
 	{
 		switch (*psz)
 		{
-			case '"':
-				printf("\\\"");
-				break;
+		case '"':
+			printf("\\\"");
+			break;
 
-			case '/':
-				printf("\\/");
-				break;
+		case '/':
+			printf("\\/");
+			break;
 
-			case '\b':
-				printf("\\b");
-				break;
+		case '\b':
+			printf("\\b");
+			break;
 
-			case '\f':
-				printf("\\f");
-				break;
+		case '\f':
+			printf("\\f");
+			break;
 
-			case '\n':
-				printf("\\n");
-				break;
+		case '\n':
+			printf("\\n");
+			break;
 
-			case L'\r':
-				printf("\\r");
-				break;
+		case L'\r':
+			printf("\\r");
+			break;
 
-			case L'\t':
-				printf("\\t");
-				break;
+		case L'\t':
+			printf("\\t");
+			break;
 
-			case L'\\':
-				printf("\\\\");
-				break;
+		case L'\\':
+			printf("\\\\");
+			break;
 
-			default:
-				printf("%c", *psz);
-				break;
+		default:
+			printf("%c", *psz);
+			break;
 		}
 
 		psz++;

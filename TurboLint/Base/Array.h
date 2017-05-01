@@ -17,6 +17,7 @@ typedef struct
 #define ARRAY_INIT { NULL , 0 , 0 }
 
 Result Array_Reserve(Array* p, size_t nelements);
+Result Array_Grow(Array* p, size_t nelements);
 void Array_Pop(Array* p, void(*pfDestroyData)(void*));
 void* Array_PopGet(Array* p);
 void* Array_Top(Array* p);

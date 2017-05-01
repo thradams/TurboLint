@@ -944,6 +944,8 @@ static void TPostfixExpressionCore_Analise(TProgram* pProgram,
 
     case TK_LEFT_PARENTHESIS:
     {
+	  //aqui tem o nome da funcao e a parte de dentro
+	  //
       //fprintf(fp, "(");
       TExpression_Analise(pProgram, p->pExpressionArray, "r", pStackNames);
       //fprintf(fp, ")");
@@ -1022,6 +1024,10 @@ static void TPostfixExpressionCore_TypeOf(TProgram* pProgram,
           *ppDeclarator = pDeclaration->Declarators.pItems[0];
           //pDeclaration->
         }
+		else
+		{
+			//nao achou esta funcao
+		}
       }
 
       else
@@ -2377,8 +2383,14 @@ void TProgram_Analize(TProgram * pProgram,
     int fileIndex = TAnyDeclaration_GetFileIndex(pItem);
     TFile *pFile = pProgram->Files2.pItems[fileIndex];
     const char * path = pFile->FullPath;
-    TAnyDeclaration_Analise(pProgram, pItem);
+	//este cara aqui pode adicionar mais declaracoes antes dele
+	//que vao ser as do template
+	TAnyDeclaration_Analise(pProgram, pItem);
+	//tb pode ser out declaracoes que serao a definicao das funcoes template
   }
+  //adicionar no fim.. as funcao criadas.
+  //se fosse fazer compialcao separada isso teria que ser
+  //um aquivo separado json? que depois um linker iria juntar
 }
 
 

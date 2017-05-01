@@ -5,7 +5,7 @@
 #include "Ast.h"
 
 
-void TProgram_PrintToFile(TProgram* pProgram,
+void TProgram_PrintAstToFile(TProgram* pProgram,
                           const char* fileName);
 
 

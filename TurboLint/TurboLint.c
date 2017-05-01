@@ -8,24 +8,6 @@
 #include ".\TurboLint\CodePrint.h"
 #include ".\TurboLint\TCLint2.h"
 
-void PrintASTToFile(const char* filename,
-                    const char* configFileName,
-                    const char* outFileName,
-	                const char* userpath)
-{
-    TProgram program = TPROGRAM_INIT;
-    GetAST(filename, configFileName, &program);
-    TProgram_PrintToFile(&program,
-                               outFileName);
-
-	//TProgram_PrintCodeToFile(&program,
-//		outFileName,
-		//2,
-		//userpath);
-
-    TProgram_Destroy(&program);
-}
-
 
 void RunLint(const char* configFileName,
              const char* filename)
@@ -41,9 +23,11 @@ void RunLint(const char* configFileName,
 			1,
 			"");
 
+		TProgram_PrintAstToFile(&program,
+			"C:\\Users\\kiki\\Source\\Repos\\TurboLint\\teste.json"  /*out*/);
+
         TProgram_PrintCodeToFile(&program,
           "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\teste.c",  /*out*/
-          100, 
           "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\");
 		 
         
@@ -94,15 +78,6 @@ int main(int argc, char* argv[])
         PrintPreprocessedToFile(filename, configFileName, "pre.txt");
     }
       
-    //PrintPreprocessedTpoFile(filename, configFileName, "pre.txt");
-	//const char* userpath = "C:\\Users\\thiago\\Source\\Repos\\TurboLint\\";
-	//const char* userpath = "C:\\ThiagoDevel\\MobileServer\\MobileServer";
-   // PrintASTToFile(filename, configFileName, "teste.json", userpath);
-
-    
-    //Aqui poderia ir uma lista de folders
-    //que sera convertida array de indices..
-    //de arquivos que estao naquele folder
     RunLint(configFileName, filename);
     return 0;
 }
