@@ -4015,13 +4015,15 @@ bool  Declaration(Parser* ctx,
 				Declaration_Specifiers(ctx, &pFuncVarDeclaration->Specifiers);
 		}
 
-		*ppDeclaration = (TAnyDeclaration*)pFuncVarDeclaration;
-		pFuncVarDeclaration->FileIndex = GetFileIndex(ctx);
-		pFuncVarDeclaration->Line = GetCurrentLine(ctx);
-		ASSERT(pFuncVarDeclaration->FileIndex >= 0);
+		
 
 		if (bHasDeclaration)
 		{
+			*ppDeclaration = (TAnyDeclaration*)pFuncVarDeclaration;
+			pFuncVarDeclaration->FileIndex = GetFileIndex(ctx);
+			pFuncVarDeclaration->Line = GetCurrentLine(ctx);
+			ASSERT(pFuncVarDeclaration->FileIndex >= 0);
+
 			token = Token(ctx);
 
 			if (token == TK_SEMICOLON)
@@ -4048,6 +4050,10 @@ bool  Declaration(Parser* ctx,
 					MatchToken(ctx, TK_SEMICOLON);
 				}
 			}
+		}
+		else
+		{
+			TDeclaration_Delete(pFuncVarDeclaration);
 		}
 	}
 
