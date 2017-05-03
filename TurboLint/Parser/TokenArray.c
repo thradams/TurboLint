@@ -247,26 +247,7 @@ void TokenArrayMap_Destroy(TokenArrayMap* p)
   Map2_Destroy((Map2*)p);
 }
 
-TokenArrayMap* TokenArrayMap_Create()
-{
-  TokenArrayMap* p = (TokenArrayMap*)malloc(sizeof * p);
 
-  if (p)
-  {
-    TokenArrayMap_Init(p);
-  }
-
-  return p;
-}
-
-void TokenArrayMap_Delete(TokenArrayMap * p)
-{
-  if (p != NULL)
-  {
-    TokenArrayMap_Destroy(p);
-    free(p);
-  }
-}
 
 void TokenArrayMap_Swap(TokenArrayMap * pA, TokenArrayMap * pB)
 {

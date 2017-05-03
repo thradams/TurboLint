@@ -81,8 +81,7 @@ bool TokenArrayMap_RemoveKey(TokenArrayMap* pMap,
 void TokenArrayMap_Init(TokenArrayMap* p);
 void TokenArrayMap_Destroy(TokenArrayMap* p);
 
-TokenArrayMap*  TokenArrayMap_Create();
-void TokenArrayMap_Delete(TokenArrayMap * p);
+
 
 void TokenArrayMap_Swap(TokenArrayMap * pA, TokenArrayMap * pB);
 
