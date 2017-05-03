@@ -19,9 +19,7 @@ void RunLint(const char* configFileName,
         printf("Running Code Analysis...\n");
 
 		
-		TProgram_Analize(&program,
-			1,
-			"");
+		TProgram_Analize(&program);
 
 		TProgram_PrintAstToFile(&program,
 			"C:\\Users\\kiki\\Source\\Repos\\TurboLint\\teste.json"  /*out*/);
@@ -30,10 +28,6 @@ void RunLint(const char* configFileName,
           "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\teste.c",  /*out*/
           "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\");
 		 
-        
-
-        //RunStaticAnalysis(&program);
-        //RunStaticAnalysis2(&program);
         printf("Complete\n");
     }
     TProgram_Destroy(&program);

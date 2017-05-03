@@ -1179,11 +1179,7 @@ static void TProgram_PrintFiles(TProgram* pProgram,
   fprintf(fp, "\n");
 }
 
-/*
- *  pathUser = NULL, imprime as declaracoes de todos includes
- *           != NULL imprime as declaracoes dos arquivos dentro
- *                   do folder pathUser
- */
+
 void TProgram_PrintCodeToFile(TProgram* pProgram,
   const char* fileName,
   const char* userpath)

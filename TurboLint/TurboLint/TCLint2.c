@@ -2373,9 +2373,7 @@ static void TDeclarations_Analise(TProgram* pProgram, TDeclarations *p)
 }
 
 
-void TProgram_Analize(TProgram * pProgram,
-                      int includeLevel,
-                      const char* userpath)
+void TProgram_Analize(TProgram * pProgram)
 {
   for (size_t i = 0; i < pProgram->Declarations.size; i++)
   {

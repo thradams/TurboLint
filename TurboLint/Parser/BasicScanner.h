@@ -157,15 +157,6 @@ typedef enum
 //
 #define TK_MOVE TK_ANDAND
 
-
-__inline bool IsNumber(Tokens token)
-{
-    return token == TK_DECIMAL_INTEGER ||
-           token == TK_FLOAT_NUMBER ||
-           token == TK_HEX_INTEGER ||
-           token == TK_CHAR_LITERAL;
-}
-
 typedef struct
 {
     StrBuilder lexeme;

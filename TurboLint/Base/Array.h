@@ -47,10 +47,7 @@ Result StrArray_Reserve(StrArray* p, size_t nelements);
 Result StrArray_Push(StrArray* p, const char* pItem);
 void StrArray_Clear(StrArray* p);
 Result StrArray_Init(StrArray* p);
-//Result StrArray_Create(StrArray ** pp);
 void StrArray_Destroy(StrArray* st);
-//void StrArray_Delete(StrArray * st);
-//void StrArray_Swap(StrArray* p1, StrArray* p2);
 
 
 typedef struct

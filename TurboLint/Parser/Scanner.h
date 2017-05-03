@@ -12,7 +12,6 @@ typedef struct
     String FullPath;
     int FileIndex;
     bool PragmaOnce;    
-	  //int FileLevel;
     bool bDirectInclude;
 } TFile;
 #define TFILE_INIT {STRING_INIT, 0, false, false}
@@ -107,7 +106,6 @@ int Scanner_GetFileIndex(Scanner * pScanner);
 Tokens Scanner_Token(Scanner * pScanner);
 const char * Scanner_Lexeme(Scanner * pScanner);
 
-//BasicScanner * Scanner_Top(Scanner * pScanner);
 int Scanner_Line(Scanner* scanner);
 int Scanner_Col(Scanner* scanner);
 void Scanner_Next(Scanner* pScanner);

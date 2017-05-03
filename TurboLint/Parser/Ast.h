@@ -546,8 +546,6 @@ CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 CREATETYPEOR(TInitializer)
 CAST(TInitializer, TInitializerListType)
 CASTSAME(TInitializer, TExpression)
-//CAST(TInitializer, TExpression)
-
 
 typedef struct TDeclarator_S
 {
@@ -728,8 +726,6 @@ typedef struct
 void TProgram_Destroy(TProgram* p);
 TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName);
 TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name);
-TDeclaration* TProgram_FindDestructorDefinition(TProgram* p, const char* name);
-TDeclaration* TProgram_FindDestructorDeclaration(TProgram* p, const char* name);
 
 
 CAST(TBlockItem, TCompoundStatement)

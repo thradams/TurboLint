@@ -5,8 +5,6 @@
 #include "..\Parser\Ast.h"
 
 
-
-
 void TProgram_PrintCodeToFile(TProgram * pProgram,
                             const char * fileName,
 	                        
