@@ -98,12 +98,11 @@ void Array_Clear(Array* p, void(*pfDestroyData)(void*))
 }
 
 
-Result Array_Init(Array* p)
+void Array_Init(Array* p)
 {
     p->capacity = 0;
     p->size = 0;
-    p->pItems = NULL;
-    return RESULT_OK;
+    p->pItems = NULL;    
 }
 
 Result Array_Create(Array** pp)
@@ -112,15 +111,8 @@ Result Array_Create(Array** pp)
     Array* p = (Array*)malloc(sizeof(Array));
     if(p)
     {
-        result = Array_Init(p);
-        if(result == RESULT_OK)
-        {
-            *pp = p;
-        }
-        else
-        {
-            free(p);
-        }
+        Array_Init(p);        
+        *pp = p;        
     }
     return result;
 }
@@ -304,9 +296,9 @@ void StrArray_Clear(StrArray* p)
     Array_Clear((Array*)p, Array_DeleteStrVoid);
 }
 
-Result StrArray_Init(StrArray* p)
+void StrArray_Init(StrArray* p)
 {
-    return Array_Init((Array*)p);
+    Array_Init((Array*)p);
 }
 
 void StrArray_Destroy(StrArray* p)

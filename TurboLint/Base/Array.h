@@ -23,7 +23,7 @@ void* Array_PopGet(Array* p);
 void* Array_Top(Array* p);
 Result Array_Push(Array* p, void* pItem);
 void Array_Clear(Array* p, void(*pfDestroyData)(void*));
-Result Array_Init(Array* p);
+void Array_Init(Array* p);
 Result Array_Create(Array** pp);
 void Array_Destroy(Array* st, void(*pfDestroyData)(void*));
 void Array_Delete(Array* st, void(*pfDestroyData)(void*));
@@ -46,7 +46,7 @@ typedef struct
 Result StrArray_Reserve(StrArray* p, size_t nelements);
 Result StrArray_Push(StrArray* p, const char* pItem);
 void StrArray_Clear(StrArray* p);
-Result StrArray_Init(StrArray* p);
+void StrArray_Init(StrArray* p);
 void StrArray_Destroy(StrArray* st);
 
 
