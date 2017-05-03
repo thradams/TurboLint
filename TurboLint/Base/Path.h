@@ -7,5 +7,5 @@ void GetFullDir(const char* fileName, String* out);
 bool IsFullPath(const char * path);
 bool IsInPath(const char * filePath, const char* path);
 bool FileExists(const char* fullPath);
-void _splitpath2(const char* path, char* drv, char* dir, char* name, char* ext);
+void SplitPath(const char* path, char* drv, char* dir, char* name, char* ext);
 

@@ -13,9 +13,6 @@
 #include "PPToken.h"
 #include <stdio.h>
 
-#define ASSERT(x)
-
-
 
 Macro* Macro_Create()
 {

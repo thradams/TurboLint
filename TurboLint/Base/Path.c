@@ -8,15 +8,13 @@
 #include <Shlwapi.h>
 #include <ctype.h>
 
-typedef wchar_t WCHAR;
+//#define _MAX_DRIVE 255
+//#define _MAX_DIR 255
+//#define _MAX_FNAME 255
+//#define _MAX_EXT 255
+//#define MAX_PATH 260
 
-#define _MAX_DRIVE 255
-#define _MAX_DIR 255
-#define _MAX_FNAME 255
-#define _MAX_EXT 255
-#define MAX_PATH 260
-
-void _splitpath2(const char* path, char* drv, char* dir, char* name, char* ext)
+void SplitPath(const char* path, char* drv, char* dir, char* name, char* ext)
 {
 	const char* end; /* end of processed string */
 	const char* p;      /* search pointer */
@@ -153,7 +151,7 @@ void GetFullDir(const char* fileName, String* out)
 	char dir[_MAX_DIR];
 	char fname[_MAX_FNAME];
 	char ext[_MAX_EXT];
-	_splitpath2(buffer, drive, dir, fname, ext); // C4996
+	SplitPath(buffer, drive, dir, fname, ext); // C4996
 	StrBuilder s;// = STRBUILDER_INIT;
 	StrBuilder_Init(&s, 100);
 	StrBuilder_Append(&s, drive);
@@ -176,7 +174,7 @@ void GetFullPath(const char* fileName, String* out)
 	char dir[_MAX_DIR];
 	char fname[_MAX_FNAME];
 	char ext[_MAX_EXT];
-	_splitpath2(buffer, drive, dir, fname, ext); // C4996
+	SplitPath(buffer, drive, dir, fname, ext); // C4996
 	StrBuilder s = STRBUILDER_INIT;
 	// StrBuilder_Init(&s, 100);
 	StrBuilder_Append(&s, drive);

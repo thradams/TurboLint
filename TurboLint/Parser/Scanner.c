@@ -1,7 +1,7 @@
 #include "Scanner.h"
 #include "Parser.h"
 #include "Macro.h"
-
+#include "..\Base\Path.h"
 BasicScanner * Scanner_Top(Scanner * pScanner);;
 
 PPTokenType TokenToPPToken(Tokens token)

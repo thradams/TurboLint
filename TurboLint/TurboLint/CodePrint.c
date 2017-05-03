@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "..\Base\Path.h"
 
 static bool TInitializerList_CodePrint(TInitializerList*p, bool b, FILE* fp);
 static bool TDeclarator_CodePrint(TDeclarator* p, bool b, FILE* fp);
