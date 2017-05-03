@@ -6,33 +6,33 @@
 #include "..\Base\Map2.h"
 #include  <stdio.h>
 
-int TokenArray2_Reserve(TokenArray* p, int nelements)
+int TokenArray_Reserve(TokenArray* p, int nelements)
 {
   return Array_Reserve((Array*)p, nelements);
 }
 
-int TokenArray2_Grow(TokenArray* p, size_t nelements)
+int TokenArray_Grow(TokenArray* p, size_t nelements)
 {
   return Array_Grow((Array*)p, nelements);
 }
 
-PPToken* TokenArray2_PopFront(TokenArray* p)
+PPToken* TokenArray_PopFront(TokenArray* p)
 {
   void *pItem = Array_PopFront((Array*)p);
   return (PPToken*)pItem;
 }
 
-void TokenArray2_Pop(TokenArray* p)
+void TokenArray_Pop(TokenArray* p)
 {
   Array_Pop((Array*)p, PPToken_DeleteVoid);  
 }
 
-PPToken* TokenArray2_Top(TokenArray* p)
+PPToken* TokenArray_Top(TokenArray* p)
 {
   return (PPToken*)Array_Top((Array*)p);
 }
 
-int TokenArray2_Push(TokenArray* p, PPToken* pItem)
+int TokenArray_Push(TokenArray* p, PPToken* pItem)
 {
   int r = Array_Push((Array*)p, pItem);
 
@@ -44,62 +44,62 @@ int TokenArray2_Push(TokenArray* p, PPToken* pItem)
   return r;
 }
 
-void TokenArray2_Clear(TokenArray* p)
+void TokenArray_Clear(TokenArray* p)
 {
   Array_Clear((Array*)p, PPToken_DeleteVoid);
 }
 
 
-void TokenArray2_Init(TokenArray* p)
+void TokenArray_Init(TokenArray* p)
 {
   TokenArray temp = TOKENARRAY_INIT;
   *p = temp;
 }
 
-TokenArray* TokenArray2_Create()
+TokenArray* TokenArray_Create()
 {
   TokenArray* p = (TokenArray*)malloc(sizeof * p);
 
   if (p)
   {
-    TokenArray2_Init(p);
+    TokenArray_Init(p);
   }
 
   return p;
 }
 
-void TokenArray2_Destroy(TokenArray* st)
+void TokenArray_Destroy(TokenArray* st)
 {
-  TokenArray2_Clear(st);
+  TokenArray_Clear(st);
 }
 
-void TokenArray2_Swap(TokenArray* p1, TokenArray* p2)
+void TokenArray_Swap(TokenArray* p1, TokenArray* p2)
 {
   TokenArray temp = *p1;
   *p1 = *p2;
   *p2 = temp;
 }
 
-void TokenArray2_Delete(TokenArray* st)
+void TokenArray_Delete(TokenArray* st)
 {
   if (st != NULL)
   {
-    TokenArray2_Destroy(st);
+    TokenArray_Destroy(st);
     free(st);
   }
 }
 
-PPToken* TokenArray2_Begin(TokenArray* p)
+PPToken* TokenArray_Begin(TokenArray* p)
 {
   return p->pItems[0];
 }
 
-PPToken* TokenArray2_End(TokenArray* p)
+PPToken* TokenArray_End(TokenArray* p)
 {
   return p->pItems[p->Size];
 }
 
-void TokenArray2_RemoveAt(TokenArray* p, int index)
+void TokenArray_RemoveAt(TokenArray* p, int index)
 {
   void *pItem =
     Array_RemoveAt((Array*)p, index);
@@ -108,45 +108,45 @@ void TokenArray2_RemoveAt(TokenArray* p, int index)
 
 
 
-bool TokenArray2_Contain(TokenArray *pArray, PPToken* pToken)
+bool TokenArray_Contain(TokenArray *pArray, PPToken* pToken)
 {
   return false;
 }
 
-void TokenArray2_AppendTokensCopy(TokenArray *pArray, PPToken** pToken, int len)
+void TokenArray_AppendTokensCopy(TokenArray *pArray, PPToken** pToken, int len)
 {
   for (int i = 0; i < len; i++)
   {
-    TokenArray2_Push(pArray, PPToken_Clone(pToken[i]));
+    TokenArray_Push(pArray, PPToken_Clone(pToken[i]));
   }
 }
-void TokenArray2_AppendTokensMove(TokenArray *pArray, PPToken** pToken, int len)
+void TokenArray_AppendTokensMove(TokenArray *pArray, PPToken** pToken, int len)
 {
   for (int i = 0; i < len; i++)
   {
-    TokenArray2_Push(pArray, pToken[i]);
+    TokenArray_Push(pArray, pToken[i]);
     pToken[i] = NULL;
   }
 }
 
-void TokenArray2_AppendCopy(TokenArray *pArrayTo, const TokenArray *pArrayFrom)
+void TokenArray_AppendCopy(TokenArray *pArrayTo, const TokenArray *pArrayFrom)
 {
   for (int i = 0; i < pArrayFrom->Size; i++)
   {
-    TokenArray2_Push(pArrayTo, PPToken_Clone(pArrayFrom->pItems[i]));
+    TokenArray_Push(pArrayTo, PPToken_Clone(pArrayFrom->pItems[i]));
   }
 }
 
-void TokenArray2_AppendMove(TokenArray *pArrayTo, TokenArray *pArrayFrom)
+void TokenArray_AppendMove(TokenArray *pArrayTo, TokenArray *pArrayFrom)
 {
   for (int i = 0; i < pArrayFrom->Size; i++)
   {
-    TokenArray2_Push(pArrayTo, pArrayFrom->pItems[i]);
+    TokenArray_Push(pArrayTo, pArrayFrom->pItems[i]);
     pArrayFrom->pItems[i] = NULL;
   }
 }
 
-PPToken* TokenArray2_Find(const TokenArray *pArray, const char * lexeme)
+PPToken* TokenArray_Find(const TokenArray *pArray, const char * lexeme)
 {
   PPToken* pFound = NULL;
 
@@ -162,7 +162,7 @@ PPToken* TokenArray2_Find(const TokenArray *pArray, const char * lexeme)
   return pFound;
 }
 
-void TokenArray2_Print(const TokenArray* tokens)
+void TokenArray_Print(const TokenArray* tokens)
 {
   if (tokens->Size == 0)
   {
@@ -179,7 +179,7 @@ void TokenArray2_Print(const TokenArray* tokens)
 }
 
 
-void TokenArray2_Erase(TokenArray *pArray, int begin, int end)
+void TokenArray_Erase(TokenArray *pArray, int begin, int end)
 {
   for (int i = begin; i < end; i++)
   {
@@ -205,7 +205,7 @@ int TokenArrayMap_SetAt(TokenArrayMap* pMap,
 {
   void *pPrevious;
   int r = Map2_SetAt((Map2*)pMap, Key, newValue, &pPrevious);
-  TokenArray2_Delete((TokenArray*)pPrevious);
+  TokenArray_Delete((TokenArray*)pPrevious);
   return r;
 }
 
@@ -230,7 +230,7 @@ bool TokenArrayMap_RemoveKey(TokenArrayMap* pMap, const char*  Key)
 
   if (r)
   {
-    TokenArray2_Delete(pItem);
+    TokenArray_Delete(pItem);
   }
 
   return r;

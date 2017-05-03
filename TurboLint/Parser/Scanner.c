@@ -215,7 +215,7 @@ static Result AddStandardMacro(Scanner* pScanner,
   Macro* pDefine1 = Macro_Create();
   String_Set(&pDefine1->Name, name);
   //TODO tipo do token
-  TokenArray2_Push(&pDefine1->TokenSequence, PPToken_Create(value, PPTokenType_Other));
+  TokenArray_Push(&pDefine1->TokenSequence, PPToken_Create(value, PPTokenType_Other));
   pDefine1->FileIndex = 0;
   MacroMap_SetAt(&pScanner->Defines2, name, pDefine1);
   return RESULT_OK;
@@ -817,7 +817,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
   const char* lexeme = Scanner_Lexeme(pScanner);
   PPToken *ppToken = PPToken_Create(lexeme,
     TokenToPPToken(GetToken(pScanner)));
-  TokenArray2_Push(ppTokenArray, ppToken);
+  TokenArray_Push(ppTokenArray, ppToken);
 
   Scanner_Match(pScanner);
   //verificar se tem parametros
@@ -832,7 +832,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
     if (token == TK_LEFT_PARENTHESIS)
     {
       PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
-      TokenArray2_Push(ppTokenArray, ppToken);
+      TokenArray_Push(ppTokenArray, ppToken);
       //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
       BasicScanner_Next(Scanner_Top(pScanner));
       //comeca com 1
@@ -847,7 +847,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
         {
           //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
           PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
-          TokenArray2_Push(ppTokenArray, ppToken);
+          TokenArray_Push(ppTokenArray, ppToken);
           BasicScanner_Next(Scanner_Top(pScanner));
           iInsideParentesis++;
         }
@@ -858,7 +858,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
           {
             //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
             PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
-            TokenArray2_Push(ppTokenArray, ppToken);
+            TokenArray_Push(ppTokenArray, ppToken);
             BasicScanner_Next(Scanner_Top(pScanner));
             break;
           }
@@ -866,7 +866,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
           iInsideParentesis--;
           //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
           PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
-          TokenArray2_Push(ppTokenArray, ppToken);
+          TokenArray_Push(ppTokenArray, ppToken);
           BasicScanner_Next(Scanner_Top(pScanner));
         }
 
@@ -884,7 +884,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
 
           //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
           PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
-          TokenArray2_Push(ppTokenArray, ppToken);
+          TokenArray_Push(ppTokenArray, ppToken);
           BasicScanner_Next(Scanner_Top(pScanner));
         }
 
@@ -892,7 +892,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
         {
           //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
           PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
-          TokenArray2_Push(ppTokenArray, ppToken);
+          TokenArray_Push(ppTokenArray, ppToken);
           BasicScanner_Next(Scanner_Top(pScanner));
         }
       }
@@ -988,7 +988,7 @@ void GetPPTokens(Scanner* pScanner, TokenArray* pptokens)
   {
     const char* lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
     PPToken* ppToken = PPToken_Create(lexeme, TokenToPPToken(GetToken(pScanner)));
-    TokenArray2_Push(pptokens, ppToken);
+    TokenArray_Push(pptokens, ppToken);
     BasicScanner_Next(Scanner_Top(pScanner));
   }
 }
@@ -1041,7 +1041,7 @@ void ParsePreDefine(Scanner* pScanner)
 
       lexeme = BasicScanner_Lexeme(Scanner_Top(pScanner));
       PPToken * ppToken = PPToken_Create(lexeme, TokenToPPToken(GetToken(pScanner)));
-      TokenArray2_Push(&pNewMacro->FormalArguments, ppToken);
+      TokenArray_Push(&pNewMacro->FormalArguments, ppToken);
       //StrArray_Push(&pDefine->Args, lexeme);
       //JObj_PushString(pArgs, lexeme);
       Scanner_Match(pScanner);
@@ -1082,7 +1082,7 @@ int EvalPre(Scanner* pScanner)
   int iRes = EvalExpression(strBuilder.c_str, pScanner);
 
   StrBuilder_Destroy(&strBuilder);
-  TokenArray2_Destroy(&pptokens);
+  TokenArray_Destroy(&pptokens);
   return iRes;
 }
 
@@ -1533,7 +1533,7 @@ void Scanner_SkipCore(Scanner* pScanner)
           //ASSERT(false);
         }
 
-        TokenArray2_Destroy(&ppTokenArray);
+        TokenArray_Destroy(&ppTokenArray);
         StrBuilder_Destroy(&strBuilder);
 
         if (!bIsMacro)

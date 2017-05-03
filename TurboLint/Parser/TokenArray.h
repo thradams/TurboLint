@@ -13,37 +13,35 @@ typedef struct
 
 #define TOKENARRAY_INIT {0, 0, 0}
 
-int      TokenArray2_Reserve(TokenArray* p, int nelements);
-int      TokenArray2_Grow(TokenArray* p, size_t nelements);
-void     TokenArray2_Pop(TokenArray* p);
+int      TokenArray_Reserve(TokenArray* p, int nelements);
+int      TokenArray_Grow(TokenArray* p, size_t nelements);
+void     TokenArray_Pop(TokenArray* p);
 
-PPToken* TokenArray2_PopFront(TokenArray* p);
+PPToken* TokenArray_PopFront(TokenArray* p);
 
-PPToken*      TokenArray2_Top(TokenArray* p);
-int      TokenArray2_Push(TokenArray* p, PPToken* pItem);
-void     TokenArray2_Clear(TokenArray* p);
-void     TokenArray2_Init(TokenArray* p);
-TokenArray* TokenArray2_Create();
-void     TokenArray2_Destroy(TokenArray* st);
-void     TokenArray2_Delete(TokenArray* st);
-void     TokenArray2_Swap(TokenArray* p1, TokenArray* p2);
+PPToken*      TokenArray_Top(TokenArray* p);
+int      TokenArray_Push(TokenArray* p, PPToken* pItem);
+void     TokenArray_Clear(TokenArray* p);
+void     TokenArray_Init(TokenArray* p);
+TokenArray* TokenArray_Create();
+void     TokenArray_Destroy(TokenArray* st);
+void     TokenArray_Delete(TokenArray* st);
+void     TokenArray_Swap(TokenArray* p1, TokenArray* p2);
 
-PPToken*      TokenArray2_Begin(TokenArray* p);
-PPToken*      TokenArray2_End(TokenArray* p);
+PPToken*      TokenArray_Begin(TokenArray* p);
+PPToken*      TokenArray_End(TokenArray* p);
 
 //
 
 
-bool TokenArray2_Contain(TokenArray *pArray, PPToken* pToken);
+bool TokenArray_Contain(TokenArray *pArray, PPToken* pToken);
 
-void TokenArray2_AppendCopy(TokenArray *pArrayTo, const TokenArray *pArrayFrom);
-void TokenArray2_AppendMove(TokenArray *pArrayTo, TokenArray *pArrayFrom);
-//void TokenArray2_AppendTokensCopy(TokenArray *pArray, Token** pToken, int len);
-//void TokenArray2_AppendTokensMove(TokenArray *pArray, Token** pToken, int len);
-void TokenArray2_Print(const TokenArray* tokens);
+void TokenArray_AppendCopy(TokenArray *pArrayTo, const TokenArray *pArrayFrom);
+void TokenArray_AppendMove(TokenArray *pArrayTo, TokenArray *pArrayFrom);
+void TokenArray_Print(const TokenArray* tokens);
 
-PPToken* TokenArray2_Find(const TokenArray *pArray, const char * lexeme);
-void TokenArray2_Erase(TokenArray *pArray, int begin, int end);
+PPToken* TokenArray_Find(const TokenArray *pArray, const char * lexeme);
+void TokenArray_Erase(TokenArray *pArray, int begin, int end);
 
 
 ///////////////////////////////
