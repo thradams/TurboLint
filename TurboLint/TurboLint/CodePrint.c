@@ -42,7 +42,7 @@ static bool TLabeledStatement_CodePrint(TLabeledStatement * p, bool b, FILE* fp)
 {
   b = true;
 
-  if (p->token == TK_case)
+  if (p->token == TK_CASE)
   {
     fprintf(fp, "case ");
     if (p->pStatementOpt)
@@ -57,7 +57,7 @@ static bool TLabeledStatement_CodePrint(TLabeledStatement * p, bool b, FILE* fp)
     fprintf(fp, "default:\n");
     b = TStatement_CodePrint(p->pStatementOpt, false, fp);
   }
-  else if (p->token == TK_identifier)
+  else if (p->token == TK_IDENTIFIER)
   {
     fprintf(fp, "%s:", p->Identifier);
   }

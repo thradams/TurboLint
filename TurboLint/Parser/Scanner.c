@@ -10,7 +10,7 @@ PPTokenType TokenToPPToken(Tokens token)
 
   switch (token)
   {
-  case TK_identifier:
+  case TK_IDENTIFIER:
     result = PPTokenType_Identifier;
     break;
 
@@ -24,11 +24,11 @@ PPTokenType TokenToPPToken(Tokens token)
     result = PPTokenType_Number;
     break;
 
-  case TK_char_literal:
+  case TK_CHAR_LITERAL:
     result = PPTokenType_CharConstant;
     break;
 
-  case TK_string_literal:
+  case TK_STRING_LITERAL:
     result = PPTokenType_StringLiteral;
     break;
 
@@ -1114,7 +1114,7 @@ void Scanner_SkipCore(Scanner* pScanner)
 
         Scanner_Match(pScanner);
 
-        if (GetToken(pScanner) == TK_string_literal)
+        if (GetToken(pScanner) == TK_STRING_LITERAL)
         {
           String fileName;
           String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
@@ -1476,7 +1476,7 @@ void Scanner_SkipCore(Scanner* pScanner)
       }
     }
 
-    else if (token == TK_identifier)
+    else if (token == TK_IDENTIFIER)
     {
       if (!IsIncludeState(state))
       {

@@ -847,7 +847,7 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
 			{
 				switch (pPrimaryExpressionValue->token)
 				{
-					case TK_identifier:
+					case TK_IDENTIFIER:
 						result = 0; //para macro
 						break;
 
@@ -859,7 +859,7 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
 						result = strtol(pPrimaryExpressionValue->lexeme, NULL, 16);
 						break;
 
-					case TK_char_literal:
+					case TK_CHAR_LITERAL:
 					default:
 						ASSERT(0);
 						break;

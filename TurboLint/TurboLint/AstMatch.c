@@ -83,7 +83,7 @@ const char * MatchIdentifier(TExpression* pExpression)
 		TExpression_As_TPrimaryExpressionValue(pExpression);
 
 	if (pPrimaryExpression && 
-		pPrimaryExpression->token == TK_identifier)
+		pPrimaryExpression->token == TK_IDENTIFIER)
 	{		
 		pResult = pPrimaryExpression->lexeme;		
 	}

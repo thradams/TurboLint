@@ -440,7 +440,7 @@ static void TCompoundStatement_Analise(TProgram* pProgram,
 
 static void TLabeledStatement_Analise(TProgram* pProgram, TLabeledStatement * p, TVariablesMapStack* pStackNames)
 {
-  if (p->token == TK_case)
+  if (p->token == TK_CASE)
   {
     //fprintf(fp, "case ");
     if (p->pStatementOpt)
@@ -458,7 +458,7 @@ static void TLabeledStatement_Analise(TProgram* pProgram, TLabeledStatement * p,
     TStatement_Analise(pProgram, p->pStatementOpt, pStackNames);
   }
 
-  else if (p->token == TK_identifier)
+  else if (p->token == TK_IDENTIFIER)
   {
     //fprintf(fp, "%s:", p->Identifier);
   }

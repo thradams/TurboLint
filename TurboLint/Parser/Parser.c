@@ -360,16 +360,16 @@ bool IsFirstOfPrimaryExpression(Tokens token)
 
 	switch (token)
 	{
-	case TK_identifier:
-	case TK_string_literal:
-	case TK_char_literal:
+	case TK_IDENTIFIER:
+	case TK_STRING_LITERAL:
+	case TK_CHAR_LITERAL:
 	case TK_DECIMAL_INTEGER:
 	case TK_HEX_INTEGER:
 	case TK_FLOAT_NUMBER:
 	case TK_LEFT_PARENTHESIS:
 
 		//desde que nao seja cast
-	case TK__Generic:
+	case TK__GENERIC:
 		bResult = true;
 		break;
 
@@ -401,7 +401,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
 
 	switch (token)
 	{
-	case TK_string_literal:
+	case TK_STRING_LITERAL:
 	{
 		TPrimaryExpressionValue *  pPrimaryExpressionValue
 			= TPrimaryExpressionValue_Create();
@@ -410,7 +410,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
 
 		StrBuilder adjacentStrings = STRBUILDER_INIT;
 		StrBuilder_Append(&adjacentStrings, "\"");
-		while (token == TK_string_literal)
+		while (token == TK_STRING_LITERAL)
 		{
 			const char* lexeme = Lexeme(ctx);
 			int len = strlen(lexeme);
@@ -425,8 +425,8 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
 	}
 	break;
 
-	case TK_identifier:
-	case TK_char_literal:
+	case TK_IDENTIFIER:
+	case TK_CHAR_LITERAL:
 	case TK_DECIMAL_INTEGER:
 	case TK_HEX_INTEGER:
 	case TK_FLOAT_NUMBER:
@@ -459,7 +459,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
 	}
 	break;
 
-	case TK__Generic:
+	case TK__GENERIC:
 		GenericSelection(ctx);
 		break;
 
@@ -572,7 +572,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 		pPostfixExpressionCore->token = token;
 		Match(ctx);
 		String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
-		MatchToken(ctx, TK_identifier);
+		MatchToken(ctx, TK_IDENTIFIER);
 	}
 	break;
 
@@ -582,7 +582,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 		pPostfixExpressionCore->token = token;
 		Match(ctx);
 		String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
-		MatchToken(ctx, TK_identifier);
+		MatchToken(ctx, TK_IDENTIFIER);
 	}
 	break;
 
@@ -788,10 +788,10 @@ static bool IsTypeQualifierToken(Tokens token)
 	switch (token)
 	{
 		//type-qualifier
-	case TK_const:
-	case TK_restrict:
-	case TK_volatile:
-	case TK__Atomic:
+	case TK_CONST:
+	case TK_RESTRICT:
+	case TK_VOLATILE:
+	case TK__ATOMIC:
 		//
 		bResult = true;
 		break;
@@ -815,15 +815,15 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme)
 	switch (token)
 	{
 
-	case TK_identifier:
+	case TK_IDENTIFIER:
 		bResult = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
 		break;
 
 		//type-qualifier
-	case TK_const:
-	case TK_restrict:
-	case TK_volatile:
-	case TK__Atomic:
+	case TK_CONST:
+	case TK_RESTRICT:
+	case TK_VOLATILE:
+	case TK__ATOMIC:
 
 #ifdef LANGUAGE_EXTENSIONS
 		//type-qualifier-extensions 
@@ -834,20 +834,20 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme)
 #endif
 
 		//type-specifier
-	case TK_void:
+	case TK_VOID:
 	case TK_char:
-	case TK_short:
-	case TK_int:
-	case TK_long:
-	case TK_float:
-	case TK_double:
-	case TK_signed:
-	case TK_unsigned:
-	case TK__Bool:
-	case TK__Complex:
-	case TK_struct:
-	case TK_union:
-	case TK_enum:
+	case TK_SHORT:
+	case TK_INT:
+	case TK_LONG:
+	case TK_FLOAT:
+	case TK_DOUBLE:
+	case TK_SIGNED:
+	case TK_UNSIGNED:
+	case TK__BOOL:
+	case TK__COMPLEX:
+	case TK_STRUCT:
+	case TK_UNION:
+	case TK_ENUM:
 		bResult = true;
 		break;
 	}
@@ -1002,7 +1002,7 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
 
 		break;
 
-	case TK__Alignof:
+	case TK__ALINGOF:
 		//Match
 		ASSERT(false);
 		break;
@@ -1926,7 +1926,7 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
 		pJumpStatement->token = token;
 		*ppStatement = (TStatement*)pJumpStatement;
 		Match(ctx);
-		MatchToken(ctx, TK_identifier);
+		MatchToken(ctx, TK_IDENTIFIER);
 	}
 	break;
 
@@ -2126,7 +2126,7 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
 	Tokens token = Token(ctx);
 	pLabeledStatement->token = token;
 
-	if (token == TK_identifier)
+	if (token == TK_IDENTIFIER)
 	{
 		//aqui nao eh um tipo
 		String_Set(&pLabeledStatement->Identifier, Lexeme(ctx));
@@ -2135,7 +2135,7 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
 		Statement(ctx, &pLabeledStatement->pStatementOpt);
 	}
 
-	else if (token == TK_case)
+	else if (token == TK_CASE)
 	{
 		Match(ctx);
 		ConstantExpression(ctx, &pLabeledStatement->pExpression);
@@ -2159,7 +2159,7 @@ void Asm_Statement(Parser* ctx, TStatement** ppStatement)
 	*/
 	TAsmStatement * pAsmStatement = TAsmStatement_Create();
 	*ppStatement = (TStatement*)pAsmStatement;
-	MatchToken(ctx, TK__Asm);
+	MatchToken(ctx, TK__ASM);
 	Tokens token = Token(ctx);
 
 	if (token == TK_LEFT_CURLY_BRACKET)
@@ -2243,7 +2243,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 
 	switch (token)
 	{
-	case TK__Asm:
+	case TK__ASM:
 		bResult = true;
 		Asm_Statement(ctx, ppStatement);
 		break;
@@ -2255,7 +2255,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 	}
 	break;
 
-	case TK_case:
+	case TK_CASE:
 	case TK_DEFAULT:
 		bResult = true;
 		Labeled_Statement(ctx, ppStatement);
@@ -2303,7 +2303,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 
 	case TK_DECIMAL_INTEGER:
 	case TK_FLOAT_NUMBER:
-	case TK_string_literal:
+	case TK_STRING_LITERAL:
 
 
 		//unary
@@ -2327,7 +2327,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 		Expression_Statement(ctx, ppStatement);
 		break;
 
-	case TK_identifier:
+	case TK_IDENTIFIER:
 
 		if (DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme))
 		{
@@ -2351,15 +2351,15 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 
 		break;
 
-	case TK_inline:
-	case TK__Noreturn:
-	case TK__Alignas:
+	case TK_INLINE:
+	case TK__NORETURN:
+	case TK__ALIGNAS:
 
 		//type-qualifier
-	case TK_const:
-	case TK_restrict:
-	case TK_volatile:
-	case TK__Atomic:
+	case TK_CONST:
+	case TK_RESTRICT:
+	case TK_VOLATILE:
+	case TK__ATOMIC:
 
 #ifdef LANGUAGE_EXTENSIONS
 		//type-qualifier-extensions 
@@ -2370,26 +2370,26 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 		//
 #endif
 
-	case TK_typedef:
-	case TK_extern:
-	case TK_static:
-	case TK__Thread_local:
-	case TK_auto:
-	case TK_register:
-	case TK_void:
+	case TK_TYPEDEF:
+	case TK_EXTERN:
+	case TK_STATIC:
+	case TK__THREAD_LOCAL:
+	case TK_AUTO:
+	case TK_REGISTER:
+	case TK_VOID:
 	case TK_char:
-	case TK_short:
-	case TK_int:
-	case TK_long:
-	case TK_float:
-	case TK_double:
-	case TK_signed:
-	case TK_unsigned:
-	case TK__Bool:
-	case TK__Complex:
-	case TK_struct:
-	case TK_union:
-	case TK_enum:
+	case TK_SHORT:
+	case TK_INT:
+	case TK_LONG:
+	case TK_FLOAT:
+	case TK_DOUBLE:
+	case TK_SIGNED:
+	case TK_UNSIGNED:
+	case TK__BOOL:
+	case TK__COMPLEX:
+	case TK_STRUCT:
+	case TK_UNION:
+	case TK_ENUM:
 		bResult = false;
 		break;
 
@@ -2483,12 +2483,12 @@ void Struct_Or_Union(Parser* ctx,
 
 	switch (token)
 	{
-	case TK_struct:
+	case TK_STRUCT:
 		pStructUnionSpecifier->bIsStruct = true;
 		Match(ctx);
 		break;
 
-	case TK_union:
+	case TK_UNION:
 		pStructUnionSpecifier->bIsStruct = false;
 		Match(ctx);
 		break;
@@ -2507,7 +2507,7 @@ void Static_Assert_Declaration(Parser* ctx, TStaticAssertDeclaration* pStaticAss
 	*/
 	Tokens token = Token(ctx);
 
-	if (token == TK__Static_assert)
+	if (token == TK__STATIC_ASSERT)
 	{
 		Match(ctx);
 		MatchToken(ctx, TK_LEFT_PARENTHESIS);
@@ -2516,7 +2516,7 @@ void Static_Assert_Declaration(Parser* ctx, TStaticAssertDeclaration* pStaticAss
 			&pStaticAssertDeclaration->pConstantExpression);
 
 		MatchToken(ctx, TK_COMMA);
-		MatchToken(ctx, TK_string_literal);
+		MatchToken(ctx, TK_STRING_LITERAL);
 		MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 		MatchToken(ctx, TK_SEMICOLON);
 	}
@@ -2642,7 +2642,7 @@ void Struct_Declaration(Parser* ctx,
 	*/
 	Tokens token = Token(ctx);
 
-	if (token != TK__Static_assert)
+	if (token != TK__STATIC_ASSERT)
 	{
 		TStructDeclaration* pStructDeclarationBase = TStructDeclaration_Create();
 		*ppStructDeclaration = (TAnyStructDeclaration*)pStructDeclarationBase;
@@ -2709,7 +2709,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
 	Tokens token0 = Token(ctx);
 	const char* lexeme = Lexeme(ctx);
 
-	if (token0 == TK_identifier)
+	if (token0 == TK_IDENTIFIER)
 	{
 		String_Set(&pStructUnionSpecifier->Name, lexeme);
 	}
@@ -2724,7 +2724,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
 	Match(ctx);
 	Tokens token1 = Token(ctx);
 
-	if (token0 == TK_identifier)
+	if (token0 == TK_IDENTIFIER)
 	{
 		//ja foi feito match do identificador
 		if (token1 == TK_LEFT_CURLY_BRACKET)
@@ -2763,7 +2763,7 @@ void Enumeration_Constant(Parser* ctx,
 	//TODO colocar um ponteiro
 	Map_Set(&ctx->EnumMap, lexeme, (void*)1);
 
-	MatchToken(ctx, TK_identifier);
+	MatchToken(ctx, TK_IDENTIFIER);
 }
 
 bool EnumeratorC(Parser* ctx, TEnumerator* pEnumerator2)
@@ -2862,10 +2862,10 @@ void Enum_Specifier(Parser* ctx, TEnumSpecifier* pEnumSpecifier2)
 	enum identifieropt { enumerator-list, }
 	enum identifier
 	*/
-	MatchToken(ctx, TK_enum);
+	MatchToken(ctx, TK_ENUM);
 	Tokens token = Token(ctx);
 
-	if (token == TK_identifier)
+	if (token == TK_IDENTIFIER)
 	{
 		const char* lexeme = Lexeme(ctx);
 		String_Set(&pEnumSpecifier2->Name, lexeme);
@@ -2879,7 +2879,7 @@ void Enum_Specifier(Parser* ctx, TEnumSpecifier* pEnumSpecifier2)
 
 	Match(ctx);
 
-	if (token == TK_identifier)
+	if (token == TK_IDENTIFIER)
 	{
 		//Ja fez Match do identifier
 		token = Token(ctx);
@@ -2923,13 +2923,13 @@ bool Function_Specifier(Parser* ctx,
 
 	switch (token)
 	{
-	case TK_inline:
+	case TK_INLINE:
 		pFunctionSpecifier->bIsInline = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK__Noreturn:
+	case TK__NORETURN:
 		pFunctionSpecifier->bIsNoReturn = true;
 		Match(ctx);
 		bResult = true;
@@ -2961,37 +2961,37 @@ bool Storage_Class_Specifier(Parser* ctx,
 	//const char* lexeme = Lexeme(ctx);
 	switch (token)
 	{
-	case TK_typedef:
+	case TK_TYPEDEF:
 		pStorageSpecifier->bIsTypedef = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK_extern:
+	case TK_EXTERN:
 		pStorageSpecifier->bIsExtern = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK_static:
+	case TK_STATIC:
 		pStorageSpecifier->bIsStatic = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK__Thread_local:
+	case TK__THREAD_LOCAL:
 		pStorageSpecifier->bIsThread_local = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK_auto:
+	case TK_AUTO:
 		pStorageSpecifier->bIsAuto = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK_register:
+	case TK_REGISTER:
 		pStorageSpecifier->bIsRegister = true;
 		Match(ctx);
 		bResult = true;
@@ -3152,7 +3152,7 @@ void Direct_DeclaratorCore(Parser* ctx, TDeclarator* pDeclarator2)
 		*/
 		pDeclarator2->token = token;
 		token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
-		if (token == TK_static)
+		if (token == TK_STATIC)
 		{
 		}
 		else
@@ -3264,7 +3264,7 @@ void Direct_Declarator(Parser* ctx, TDeclarator* pDeclarator2)
 	}
 	break;
 
-	case TK_identifier:
+	case TK_IDENTIFIER:
 	{
 		//identifier
 		pDeclarator2->token = token;
@@ -3311,25 +3311,25 @@ bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
 
 
 
-	case TK_const:
+	case TK_CONST:
 		pQualifier->bIsConst = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK_restrict:
+	case TK_RESTRICT:
 		pQualifier->bIsRestrict = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK_volatile:
+	case TK_VOLATILE:
 		pQualifier->bIsVolatile = true;
 		Match(ctx);
 		bResult = true;
 		break;
 
-	case TK__Atomic:
+	case TK__ATOMIC:
 		pQualifier->bIsAtomic = true;
 		Match(ctx);
 		bResult = true;
@@ -3441,7 +3441,7 @@ bool Alignment_Specifier(Parser* ctx,
 	*/
 	Tokens token = Token(ctx);
 
-	if (token == TK__Alignas)
+	if (token == TK__ALIGNAS)
 	{
 		MatchToken(ctx, TK_LEFT_PARENTHESIS);
 		ASSERT(false);//TODO
@@ -3501,7 +3501,7 @@ bool Type_Specifier(Parser* ctx,
 	switch (token)
 	{
 		//type - specifier
-	case TK_void:
+	case TK_VOID:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3529,7 +3529,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_short:
+	case TK_SHORT:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3543,7 +3543,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_int:
+	case TK_INT:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3557,7 +3557,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_long:
+	case TK_LONG:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3571,7 +3571,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_float:
+	case TK_FLOAT:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3585,7 +3585,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_double:
+	case TK_DOUBLE:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3599,7 +3599,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_signed:
+	case TK_SIGNED:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3613,7 +3613,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_unsigned:
+	case TK_UNSIGNED:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3627,7 +3627,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK__Bool:
+	case TK__BOOL:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3641,7 +3641,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK__Complex:
+	case TK__COMPLEX:
 	{
 		if (pSingleTypeSpecifier == NULL)
 		{
@@ -3656,8 +3656,8 @@ bool Type_Specifier(Parser* ctx,
 	break;
 
 	//atomic-type-specifier
-	case TK_struct:
-	case TK_union:
+	case TK_STRUCT:
+	case TK_UNION:
 	{
 		ASSERT(*ppTypeSpecifier == NULL);
 		bResult = true;
@@ -3667,7 +3667,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_enum:
+	case TK_ENUM:
 	{
 		ASSERT(*ppTypeSpecifier == NULL);
 		bResult = true;
@@ -3677,7 +3677,7 @@ bool Type_Specifier(Parser* ctx,
 	}
 	break;
 
-	case TK_identifier:
+	case TK_IDENTIFIER:
 	{
 		bool bIsTypedef = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
 
@@ -3933,7 +3933,7 @@ void Designator(Parser* ctx, TDesignator* p)
 	{
 		Match(ctx);
 		String_Set(&p->Name, Lexeme(ctx));
-		MatchToken(ctx, TK_identifier);
+		MatchToken(ctx, TK_IDENTIFIER);
 	}
 }
 
@@ -3990,7 +3990,7 @@ bool  Declaration(Parser* ctx,
 	bool bHasDeclaration = false;
 	Tokens token = Token(ctx);
 
-	if (token == TK__Static_assert)
+	if (token == TK__STATIC_ASSERT)
 	{
 		TStaticAssertDeclaration* pStaticAssertDeclaration = TStaticAssertDeclaration_Create();
 		*ppDeclaration = (TAnyDeclaration*)pStaticAssertDeclaration;

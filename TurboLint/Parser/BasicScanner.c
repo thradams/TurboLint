@@ -20,9 +20,9 @@ const char* TokenToString(Tokens tk)
             return "LINE_COMMENT";
         case TK_COMMENT:
             return "COMMENT";
-        case TK_string_literal:
+        case TK_STRING_LITERAL:
             return "LITERALSTR";
-        case TK_identifier:
+        case TK_IDENTIFIER:
             return "IDENTIFIER";
         case TK_SPACES:
             return "SPACES";
@@ -104,15 +104,15 @@ const char* TokenToString(Tokens tk)
         case TK_TILDE:
           return "~";//,// = '~';
           break;
-        case TK_auto:
+        case TK_AUTO:
             return "auto";
         case TK_BREAK:
             return "break";
-        case TK_case:
+        case TK_CASE:
             return "case";
         case TK_char:
             return "char";
-        case TK_const:
+        case TK_CONST:
             return "const";
         case TK_CONTINUE:
             return "continue";
@@ -120,15 +120,15 @@ const char* TokenToString(Tokens tk)
             return "default";
         case TK_DO:
             return "DO";
-        case TK_double:
+        case TK_DOUBLE:
             return "DOUBLE";
         case TK_ELSE:
             return "ELSE";
-        case TK_enum:
+        case TK_ENUM:
             return "ENUM";
-        case TK_extern:
+        case TK_EXTERN:
             return "EXTERN";
-        case TK_float:
+        case TK_FLOAT:
             return "FLOAT";
         case TK_FOR:
             return "FOR";
@@ -136,35 +136,35 @@ const char* TokenToString(Tokens tk)
             return "GOTO";
         case TK_IF:
             return "IF";
-        case TK_int:
+        case TK_INT:
             return "INT";
-        case TK_long:
+        case TK_LONG:
             return "LONG";
-        case TK_register:
+        case TK_REGISTER:
             return "REGISTER";
         case TK_RETURN:
             return "RETURN";
-        case TK_short:
+        case TK_SHORT:
             return "SHORT";
-        case TK_signed:
+        case TK_SIGNED:
             return "SIGNED";
         case TK_SIZEOF:
             return "SIZEOF";
-        case TK_static:
+        case TK_STATIC:
             return "STATIC";
-        case TK_struct:
+        case TK_STRUCT:
             return "STRUCT";
         case TK_SWITCH:
             return "SWITCH";
-        case TK_typedef:
+        case TK_TYPEDEF:
             return "TYPEDEF";
-        case TK_union:
+        case TK_UNION:
             return "UNION";
-        case TK_unsigned:
+        case TK_UNSIGNED:
             return "UNSIGNED";
-        case TK_void:
+        case TK_VOID:
             return "VOID";
-        case TK_volatile:
+        case TK_VOLATILE:
             return "VOLATILE";
         case TK_WHILE:
             return "WHILE";
@@ -538,52 +538,52 @@ static struct TkPair doubleoperators[] =
 static struct TkPair keywords[] =
 {
     //keywords
-    { "auto", TK_auto },
+    { "auto", TK_AUTO },
     { "break", TK_BREAK },
-    { "case", TK_case },
+    { "case", TK_CASE },
     { "char", TK_char },
-    { "const", TK_const },
+    { "const", TK_CONST },
     { "continue", TK_CONTINUE },
     { "default", TK_DEFAULT },
     { "do", TK_DO },
-    { "double", TK_double },
+    { "double", TK_DOUBLE },
     { "else", TK_ELSE },
-    { "enum", TK_enum },
-    { "extern", TK_extern },
-    { "float", TK_float },
+    { "enum", TK_ENUM },
+    { "extern", TK_EXTERN },
+    { "float", TK_FLOAT },
     { "for", TK_FOR },
     { "goto", TK_GOTO },
     { "if", TK_IF },
-    { "inline", TK_inline },
-    { "int", TK_int },
-    { "long", TK_long },
-    { "register", TK_register },
-    { "restrict", TK_restrict },
+    { "inline", TK_INLINE },
+    { "int", TK_INT },
+    { "long", TK_LONG },
+    { "register", TK_REGISTER },
+    { "restrict", TK_RESTRICT },
     { "return", TK_RETURN },
-    { "short", TK_short },
-    { "signed", TK_signed },
+    { "short", TK_SHORT },
+    { "signed", TK_SIGNED },
     { "sizeof", TK_SIZEOF },
-    { "static", TK_static },
-    { "struct", TK_struct },
+    { "static", TK_STATIC },
+    { "struct", TK_STRUCT },
     { "switch", TK_SWITCH },
-    { "typedef", TK_typedef },
-    { "union", TK_union },
-    { "unsigned", TK_unsigned },
-    { "void", TK_void },
-    { "volatile", TK_volatile },
+    { "typedef", TK_TYPEDEF },
+    { "union", TK_UNION },
+    { "unsigned", TK_UNSIGNED },
+    { "void", TK_VOID },
+    { "volatile", TK_VOLATILE },
     { "while", TK_WHILE },
-    { "_Alignas", TK__Alignas },
-    { "_Alignof", TK__Alignof },
-    { "_Atomic", TK__Atomic },
-    { "_Bool", TK__Bool },
-    { "_Complex", TK__Complex },
-    { "_Generic", TK__Generic },
-    { "_Imaginary", TK__Imaginary },
-    { "_Noreturn", TK__Noreturn },
-    { "_Static_assert", TK__Static_assert },
-    { "_Thread_local", TK__Thread_local },
+    { "_Alignas", TK__ALIGNAS },
+    { "_Alignof", TK__ALINGOF },
+    { "_Atomic", TK__ATOMIC },
+    { "_Bool", TK__BOOL },
+    { "_Complex", TK__COMPLEX },
+    { "_Generic", TK__GENERIC },
+    { "_Imaginary", TK__IMAGINARY },
+    { "_Noreturn", TK__NORETURN },
+    { "_Static_assert", TK__STATIC_ASSERT },
+    { "_Thread_local", TK__THREAD_LOCAL },
     //
-    { "__asm", TK__Asm } //visual studio
+    { "__asm", TK__ASM } //visual studio
 
 
 };
@@ -644,7 +644,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         {
             ch = BasicScanner_Match(scanner); //L
         }
-        scanner->currentItem.token = TK_string_literal;
+        scanner->currentItem.token = TK_STRING_LITERAL;
         ch = BasicScanner_Match(scanner);
         for(;;)
         {
@@ -676,7 +676,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         {
             ch = BasicScanner_Match(scanner); //L
         }
-        scanner->currentItem.token = TK_char_literal;
+        scanner->currentItem.token = TK_CHAR_LITERAL;
         ch = BasicScanner_Match(scanner); //'
         if(ch == '\\')
         {
@@ -697,7 +697,7 @@ void BasicScanner_Next(BasicScanner* scanner)
             (ch >= 'A' && ch <= 'Z') ||
             ch == '_')
     {
-        scanner->currentItem.token = TK_identifier;
+        scanner->currentItem.token = TK_IDENTIFIER;
         ch = BasicScanner_Match(scanner);
         while((ch >= 'a' && ch <= 'z') ||
                 (ch >= 'A' && ch <= 'Z') ||
