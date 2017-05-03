@@ -194,6 +194,13 @@ void TCastExpressionType_Destroy(TCastExpressionType* p)
 	TParameterDeclaration_Destroy(&p->TypeName);
 }
 
+void TTernaryExpression_Destroy(TTernaryExpression* p)
+{
+	TExpression_Delete(p->pExpressionLeft);
+	TExpression_Delete(p->pExpressionMiddle);
+	TExpression_Delete(p->pExpressionRight);
+}
+
 void TExpression_Destroy(TExpression* p)
 {
   switch (p->type)
@@ -215,7 +222,7 @@ void TExpression_Destroy(TExpression* p)
       break;
 	  
 	  CASE(TTernaryExpression) :
-		  //TCastExpressionType_Destroy((TCastExpressionType*)p);
+		  TTernaryExpression_Destroy((TTernaryExpression*)p);
 	  break;
 
     default:
