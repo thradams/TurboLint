@@ -39,6 +39,5 @@ bool PPToken_IsConcatOp(PPToken* pHead);
 bool PPToken_IsStringLit(PPToken* pHead);
 bool PPToken_IsCharLit(PPToken* pHead);
 bool PPToken_IsOpenPar(PPToken* pHead);
-bool PPToken_IsClosePar(PPToken* pHead);
 bool PPToken_IsChar(PPToken* pHead, char ch);
 bool PPToken_IsLexeme(PPToken* pHead, const char* ch);

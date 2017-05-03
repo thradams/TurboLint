@@ -99,11 +99,6 @@ bool PPToken_IsOpenPar(PPToken* pHead)
 	return pHead->Lexeme[0] == '('&&
 		   pHead->Lexeme[1] == '\0';
 }
-bool PPToken_IsClosePar(PPToken* pHead)
-{
-	return pHead->Lexeme[0] == '(' &&
-		pHead->Lexeme[1] == '\0';
-}
 
 bool PPToken_IsChar(PPToken* pHead, char ch)
 {
