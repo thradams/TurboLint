@@ -105,18 +105,6 @@ void Array_Init(Array* p)
     p->pItems = NULL;    
 }
 
-Result Array_Create(Array** pp)
-{
-    Result result = RESULT_OUT_OF_MEM;
-    Array* p = (Array*)malloc(sizeof(Array));
-    if(p)
-    {
-        Array_Init(p);        
-        *pp = p;        
-    }
-    return result;
-}
-
 void Array_Destroy(Array* st, void (*pfDestroyData)(void*))
 {
     Array_Clear(st, pfDestroyData);
@@ -134,14 +122,6 @@ void Array_Swap(Array* p1, Array* p2)
     p2->size = s;
     p2->pItems = pp;
 }
-
-void Array_Delete(Array* st, void(*pfDestroyData)(void*))
-{
-    Array_Destroy(st, pfDestroyData);
-    free(st);
-}
-
-/////////
 
 
 Result ArrayInt_Reserve(ArrayInt* p, size_t nelements)
@@ -234,37 +214,11 @@ Result ArrayInt_Init(ArrayInt* p)
     return RESULT_OK;
 }
 
-Result ArrayInt_Create(ArrayInt** pp)
-{
-    Result result = RESULT_OUT_OF_MEM;
-    ArrayInt* p = (ArrayInt*)malloc(sizeof(ArrayInt));
-    if(p)
-    {
-        result = ArrayInt_Init(p);
-        if(result == RESULT_OK)
-        {
-            *pp = p;
-        }
-        else
-        {
-            free(p);
-        }
-    }
-    return result;
-}
 
 void ArrayInt_Destroy(ArrayInt* st)
 {
     ArrayInt_Clear(st);
 }
-
-void ArrayInt_Delete(ArrayInt* st)
-{
-    ArrayInt_Destroy(st);
-    free(st);
-}
-
-
 
 Result StrArray_Reserve(StrArray* p, size_t nelements)
 {
