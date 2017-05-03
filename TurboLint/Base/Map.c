@@ -1,7 +1,6 @@
 
 #include "Map.h"
 #include <string.h>
-#include "dmalloc.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -66,7 +65,7 @@ Result BucketItem_CreateMoveKey(BucketItem** pp,
                                 void* data)
 {
     Result result = RESULT_OUT_OF_MEM;
-    BucketItem* node = (BucketItem*)Malloc(sizeof(BucketItem) * 1);
+    BucketItem* node = (BucketItem*)malloc(sizeof(BucketItem) * 1);
     if (node)
     {
         BucketItem_InitMoveKey(node,
@@ -100,7 +99,7 @@ void BucketItem_Delete(BucketItem* p, void(*pfDestroyData)(void*))
     if (p)
     {
         BucketItem_Destroy(p, pfDestroyData);
-        Free(p);
+        free(p);
     }
 }
 
@@ -122,7 +121,7 @@ Result Bucket_Init(Bucket* p, size_t capacity)
 Result Bucket_Create(Bucket** pp)
 {
     Result result = RESULT_OUT_OF_MEM;
-    Bucket*  p = (Bucket*)Malloc(sizeof(Bucket) * 1);
+    Bucket*  p = (Bucket*)malloc(sizeof(Bucket) * 1);
     if (p)
     {
         result = Bucket_Init(p, 0);
@@ -131,7 +130,7 @@ Result Bucket_Create(Bucket** pp)
             *pp = p;
             p = NULL;
         }
-        Free(p);
+        free(p);
     }
     return result;
 }
@@ -143,7 +142,7 @@ void Bucket_Destroy(Bucket* p, void(*pfDestroyData)(void*))
     {
         BucketItem_Delete(p->data[i], pfDestroyData);
     }
-    Free(p->data);
+    free(p->data);
 }
 
 
@@ -152,7 +151,7 @@ void Bucket_Delete(Bucket* p, void(*pfDestroyData)(void*))
     if (p)
     {
         Bucket_Destroy(p, pfDestroyData);
-        Free(p);
+        free(p);
     }
 }
 
@@ -163,7 +162,7 @@ Result Bucket_Reserve(Bucket* p, size_t nelements)
 
     if (nelements > p->capacity)
     {
-        BucketItem** pnew = (BucketItem**)Realloc(p->data,
+        BucketItem** pnew = (BucketItem**)realloc(p->data,
                             (nelements + 1) * sizeof(p->data[0]));
 
         if (pnew)
@@ -273,7 +272,7 @@ Result Buckets_Init(Buckets* p,
     p->data = NULL;
     p->size = size;
 
-    p->data = (Bucket**)Malloc(sizeof(Bucket*) * size);
+    p->data = (Bucket**)malloc(sizeof(Bucket*) * size);
     if (p->data)
     {
         for (size_t i = 0; i < size; i++)
@@ -293,7 +292,7 @@ void Buckets_Destroy(Buckets* p, void(*pfDestroyData)(void*))
         Bucket_Delete(p->data[i],
                       pfDestroyData);
     }
-    Free(p->data);
+    free(p->data);
 }
 
 

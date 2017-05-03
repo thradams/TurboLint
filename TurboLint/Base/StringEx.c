@@ -1,6 +1,5 @@
 
 #include "StringEx.h"
-#include "dmalloc.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdlib.h> //malloc
@@ -16,14 +15,14 @@ void String_Destroy(String*  pString)
 {
   if (pString != NULL)
   {
-    Free(*pString);
+    free(*pString);
     *pString = NULL;
   }
 }
 
 void String_Attach(String* pString, char* psz)
 {
-  Free(*pString);
+  free(*pString);
   *pString = psz;
 }
 
@@ -54,7 +53,7 @@ Result String_Init(String* pString, const char*  sourceOpt)
   if (sourceOpt != NULL)
   {
     size_t len = strlen(sourceOpt) + 1;
-    void *   snew = Malloc(sizeof(char) * len);
+    void *   snew = malloc(sizeof(char) * len);
 
     if (snew == NULL)
     {

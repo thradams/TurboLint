@@ -10,7 +10,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stddef.h>
-#include "dmalloc.h"
 #include <ctype.h>
 
 #ifdef USE_UTF8
@@ -47,7 +46,7 @@ void StrBuilder_Destroy(StrBuilder* p)
 {
   if (p)
   {
-    Free(p->c_str);
+    free(p->c_str);
     p->c_str = NULL;
     p->size = 0;
     p->capacity = 0;
@@ -60,7 +59,7 @@ Result StrBuilder_Reserve(StrBuilder* p, size_t nelements)
 
   if (nelements > p->capacity)
   {
-    char* pnew = (char*)Realloc(p->c_str,
+    char* pnew = (char*)realloc(p->c_str,
                                 (nelements + 1) * sizeof(p->c_str[0]));
 
     if (pnew)
