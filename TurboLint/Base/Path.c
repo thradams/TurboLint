@@ -14,6 +14,13 @@
 //#define _MAX_EXT 255
 //#define MAX_PATH 260
 
+/*
+ char drive[_MAX_DRIVE];
+ char dir[_MAX_DIR];
+ char fname[_MAX_FNAME];
+ char ext[_MAX_EXT];
+ SplitPath(buffer, drive, dir, fname, ext); // C4996
+*/
 void SplitPath(const char* path, char* drv, char* dir, char* name, char* ext)
 {
 	const char* end; /* end of processed string */
@@ -69,7 +76,59 @@ void SplitPath(const char* path, char* drv, char* dir, char* name, char* ext)
 }
 
 
+/*
+char drive[_MAX_DRIVE];
+char dir[_MAX_DIR];
+char fname[_MAX_FNAME];
+char ext[_MAX_EXT];
+SplitPath(buffer, drive, dir, fname, ext); // C4996
+*/
+void MakePath(char* path, char* drv, char* dir, char* name, char* ext)
+{
+  if (drv && drv[0] != '\0')
+  {
+    while (*drv)
+    {
+      *path = *drv;
+      path++;
+      drv++;
+    }
+    //*path = ':';
+    //path++;
+   // *path = '\\';
+   // path++;
+  }
 
+  if (dir && dir[0] != '\0')
+  {
+    while (*dir)
+    {
+      *path = *dir;
+      path++;
+      dir++;
+    }
+  //  *path = '\\';
+   // path++;
+  }
+
+  while (*name)
+  {
+    *path = *name;
+    path++;
+    name++;
+  }
+  
+  //*path = '.';
+  //path++;
+
+  while (*ext)
+  {
+    *path = *ext;
+    path++;
+    ext++;
+  }
+  *path = '\0';
+}
 
 bool IsInPath(const char * filePath, const char* path)
 {

@@ -259,6 +259,12 @@ void StrArray_Destroy(StrArray* p)
     Array_Destroy((Array*)p, &Array_DeleteStrVoid);
 }
 
+void StrArray_Swap(StrArray* p1, StrArray* p2)
+{
+  StrArray temp = *p1;
+  *p1 = *p2;
+  *p2 = temp;
+}
 
 
 void* Array_RemoveAt(Array* p, int index)

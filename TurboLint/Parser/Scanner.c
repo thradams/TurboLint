@@ -228,6 +228,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
   Map_Init(&pScanner->FilesIncluded, 100);
   MacroMap_Init(&pScanner->Defines2);
   StrBuilder_Init(&pScanner->DebugString, 100);
+  StrBuilder_Init(&pScanner->PreprocessorAndCommentsString, 100);
   StrBuilder_Init(&pScanner->ErrorString, 100);
   //StrBuilder_Init(&pScanner->DebugString, 100);
   //StrBuilder_Init(&pScanner->ErrorString, 100);
@@ -434,21 +435,36 @@ void Scanner_IncludeFile(Scanner* pScanner,
     //os includes lah do almagamations
 
     const char* fName = Scanner_GetStreamName(pScanner);
-
-    for (int k = 0; k < pScanner->MySourceDir.size; k++)
+    
+    if (pScanner->MySourceDir.size == 1 &&
+        strcmp(fName, pScanner->MySourceDir.pItems[0]) == 0)
     {
-      if (fName && IsInPath(fName, pScanner->MySourceDir.pItems[k]))
+      //Quando não é amalgamation 
+      //quando um arquivo é incluido diretamente
+      //pelo arquivo origem ele eh marcado 
+      //para ser incluido
+      bDirectInclude = true;
+    }
+    else
+    {
+      //quando eh amalgamation
+      
+      for (int k = 0; k < pScanner->MySourceDir.size; k++)
       {
-        if (!IsInPath(fullPath, pScanner->MySourceDir.pItems[k]))
+        if (fName && IsInPath(fName, pScanner->MySourceDir.pItems[k]))
         {
-          bDirectInclude = true;
+          if (!IsInPath(fullPath, pScanner->MySourceDir.pItems[k]))
+          {
+            bDirectInclude = true;
+          }
+        }
+        if (bDirectInclude)
+        {
+          break;
         }
       }
-      if (bDirectInclude)
-        break;
     }
-
-
+    
     TFile*  pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
 
     if (pFile != NULL && pFile->PragmaOnce)
@@ -510,7 +526,7 @@ void Scanner_IncludeFile(Scanner* pScanner,
 const char* Scanner_GetStreamName(Scanner* pScanner)
 {
   BasicScanner* p = Scanner_Top(pScanner);
-  return p ?  p->stream.NameOrFullPath : NULL;
+  return p ? p->stream.NameOrFullPath : NULL;
 }
 
 Result Scanner_Init(Scanner* pScanner)
@@ -528,6 +544,7 @@ void Scanner_Destroy(Scanner* pScanner)
 
   MacroMap_Destroy(&pScanner->Defines2);
   StrBuilder_Destroy(&pScanner->DebugString);
+  StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
   StrBuilder_Destroy(&pScanner->ErrorString);
   ArrayInt_Destroy(&pScanner->StackIfDef);
   Array_Destroy(&pScanner->stack, &Delete_Scanner);
@@ -666,19 +683,22 @@ void SkipSpaces(Scanner* pScanner)
     BasicScanner_Next(Scanner_Top(pScanner));
   }
 
-  /*  
-   #define A(x) M(x) 
-   #define B A 
-   B(10) 
+  /*
+   #define A(x) M(x)
+   #define B A
+   B(10)
   */
+  //TODO 
   //Arranca também o EOF se nao for o ultimo
-  while (Scanner_Top(pScanner) != NULL && 
-         Scanner_Top(pScanner)->currentItem.token == TK_EOF)
+  while (Scanner_Top(pScanner) != NULL &&
+    Scanner_Top(pScanner)->currentItem.token == TK_EOF)
   {
     if (pScanner->stack.size > 1)
     {
       Array_Pop(&pScanner->stack, &Delete_Scanner);
     }
+    //e se tiver mais espacos?
+    //TODO fazer um modo melhor
   }
 }
 
@@ -1003,13 +1023,10 @@ void ParsePreDefine(Scanner* pScanner)
   //nome da macro
   const char* lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
 
-  if (strcmp(lexeme, "__ANNOTATION") == 0)
-  {
-    String_Set(&pNewMacro->Name, lexeme);
-  }
+  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "#define ");
+  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, lexeme);
 
-  else
-    String_Set(&pNewMacro->Name, lexeme);
+  String_Set(&pNewMacro->Name, lexeme);
 
 
   //AQUI NAO PODE IGNORAR ESPACOS
@@ -1055,7 +1072,18 @@ void ParsePreDefine(Scanner* pScanner)
     }
   }
 
+
+  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, " ");
   GetPPTokens(pScanner, &pNewMacro->TokenSequence);
+  
+  for (int i = 0; i < pNewMacro->TokenSequence.Size; i++)
+  {  
+    StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, pNewMacro->TokenSequence.pItems[i]->Lexeme);
+  }
+
+  
+  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "\n");
+
 
   MacroMap_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
 
@@ -1491,10 +1519,6 @@ void Scanner_SkipCore(Scanner* pScanner)
 
       if (pMacro2 != NULL)
       {
-        if (strcmp(pMacro2->Name, "__declspec") == 0)
-        {
-          pMacro2 = pMacro2;
-        }
         StrBuilder strBuilder = STRBUILDER_INIT;
         TokenArray ppTokenArray = TOKENARRAY_INIT;
 
@@ -1685,8 +1709,8 @@ void PrintPreprocessedToFile(const char* fileIn,
   Scanner_IncludeFile(&scanner, fullFileNamePath, FileIncludeTypeFullPath);
   Scanner_IncludeFile(&scanner, configFullPath, FileIncludeTypeFullPath);
   Scanner_Skip(&scanner);
-  
-  
+
+
   FILE* fp = fopen(fileNameOut, "w");
 
   while (Scanner_Token(&scanner) != TK_EOF)

@@ -6,7 +6,8 @@
 
 
 void TProgram_PrintAstToFile(TProgram* pProgram,
-                          const char* fileName);
+                          const char* fileName,
+                         const char* inputFileName);
 
 
 

@@ -447,17 +447,24 @@ static bool TExpression_CodePrint(TExpression *  p,
       TPrimaryExpressionValue* pPrimaryExpressionValue =
         (TPrimaryExpressionValue*)p;
 
-      if (pPrimaryExpressionValue->pExpressionOpt != NULL)
+      if (pPrimaryExpressionValue->MacroExpansion != NULL)
       {
-        fprintf(fp, "(");
-        b = TExpression_CodePrint(pPrimaryExpressionValue->pExpressionOpt, "expr", b, fp);
-        fprintf(fp, ")");
+        fprintf(fp, "%s", pPrimaryExpressionValue->MacroExpansion);
       }
       else
       {
-        fprintf(fp, "%s", pPrimaryExpressionValue->lexeme);
-      }
 
+        if (pPrimaryExpressionValue->pExpressionOpt != NULL)
+        {
+          fprintf(fp, "(");
+          b = TExpression_CodePrint(pPrimaryExpressionValue->pExpressionOpt, "expr", b, fp);
+          fprintf(fp, ")");
+        }
+        else
+        {
+          fprintf(fp, "%s", pPrimaryExpressionValue->lexeme);
+        }
+      }
       b = true;
     }
     break;
@@ -733,21 +740,29 @@ static bool TDesignator_CodePrint(TDesignator* p, bool b, FILE* fp)
   return b;
 }
 
-static bool TInitializerList_CodePrint(TInitializerList*p, bool b, FILE* fp)
+static bool TInitializerList_CodePrint(TInitializerListType*p, bool b, FILE* fp)
 {
-  b = false;
-  fprintf(fp, "{");
-
-  for (size_t i = 0; i < p->size; i++)
+  if (p->MacroExpansion != NULL)
   {
-    if (i > 0)
-      fprintf(fp, ",");
+    fprintf(fp, "%s", p->MacroExpansion);
+  }
+  else
+  {
+    b = false;
+    fprintf(fp, "{");
 
-    TInitializerListItem* pItem = p->pItems[i];
-    b = TInitializerListItem_CodePrint(pItem, b, fp);
+    for (size_t i = 0; i < p->InitializerList.size; i++)
+    {
+      if (i > 0)
+        fprintf(fp, ",");
+
+      TInitializerListItem* pItem = p->InitializerList.pItems[i];
+      b = TInitializerListItem_CodePrint(pItem, b, fp);
+    }
+
+    fprintf(fp, "}");
   }
 
-  fprintf(fp, "}");
   return true;
 }
 
@@ -760,7 +775,7 @@ static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
   }
   if (p->type == TInitializerListType_ID)
   {
-    b = TInitializerList_CodePrint(&((TInitializerListType*)p)->InitializerList, b, fp);
+    b = TInitializerList_CodePrint((TInitializerListType*)p, b, fp);
   }
   else
   {
@@ -1032,20 +1047,24 @@ static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclaratio
 
 static bool TDeclaration_CodePrint(TDeclaration* p, bool b, FILE* fp)
 {
-    //Isso aqui coloca o "static" nas funcoes geradas
-	//mesmo que elas nao sejam static
-	//eh interessante pq eh possivel ver um monte de coisas nao usadas
-	//ou declaradas e nao implementadas
-	if (p->Declarators.size > 0 &&
-		p->Declarators.pItems[0]->pDeclaratorOpt != NULL &&		
-		p->Declarators.pItems[0]->pDeclaratorOpt->token == TK_LEFT_PARENTHESIS)
-	{
-		if (!p->Specifiers.StorageSpecifiers.bIsStatic)
-		{
-			p->Specifiers.StorageSpecifiers.bIsStatic = true;
-		}
-	}
-	
+
+
+
+
+  //Isso aqui coloca o "static" nas funcoes geradas
+//mesmo que elas nao sejam static
+//eh interessante pq eh possivel ver um monte de coisas nao usadas
+//ou declaradas e nao implementadas
+  if (p->Declarators.size > 0 &&
+    p->Declarators.pItems[0]->pDeclaratorOpt != NULL &&
+    p->Declarators.pItems[0]->pDeclaratorOpt->token == TK_LEFT_PARENTHESIS)
+  {
+    if (!p->Specifiers.StorageSpecifiers.bIsStatic)
+    {
+      p->Specifiers.StorageSpecifiers.bIsStatic = true;
+    }
+  }
+
 
   b = TDeclarationSpecifiers_CodePrint(&p->Specifiers, false, fp);
 
@@ -1058,6 +1077,12 @@ static bool TDeclaration_CodePrint(TDeclaration* p, bool b, FILE* fp)
   else
   {
     fprintf(fp, ";");
+  }
+
+  if (p->PreprocessorAndCommentsString.size > 0)
+  {
+    fprintf(fp, "\n");
+    fprintf(fp, p->PreprocessorAndCommentsString.c_str);
   }
 
   return true;
@@ -1181,10 +1206,10 @@ static void TProgram_PrintFiles(TProgram* pProgram,
 
 
 void TProgram_PrintCodeToFile(TProgram* pProgram,
-  const char* fileName,
-  const char* userpath)
+  const char* outFileName,
+  const char* inputFileName)
 {
-  FILE * fp = fopen(fileName, "w");
+  FILE * fp = fopen(outFileName, "w");
   bool b = false;
 
   int k = 0;
@@ -1195,7 +1220,7 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     printf("\"%s\"\n", pFile->FullPath);
   }
 
-  TProgram_PrintFiles(pProgram, fp,  userpath);
+  TProgram_PrintFiles(pProgram, fp, inputFileName);
 
   for (size_t i = 0; i < pProgram->Declarations.size; i++)
   {
@@ -1204,8 +1229,29 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     TFile *pFile = pProgram->Files2.pItems[fileIndex];
     const char * path = pFile->FullPath;
 
-
-    if (IsInPath(pFile->FullPath, userpath))
+    bool bPrintThisDeclaration = false;
+    if (inputFileName == NULL)
+    {
+      //Gerando amalgamation
+      for (int i = 0; i < pProgram->MySourceDir.size; i++)
+      {
+        const char* mydir = pProgram->MySourceDir.pItems[i];
+        if (IsInPath(pFile->FullPath, mydir))
+        {
+          bPrintThisDeclaration = true;
+          break;
+        }
+      }
+    }
+    else
+    {
+      //Gerando 1 arquivo
+      if (strcmp(pFile->FullPath, inputFileName) == 0)
+      {
+        bPrintThisDeclaration = true;
+      }
+    }
+    if (bPrintThisDeclaration)
     {
       b = TAnyDeclaration_CodePrint(pItem, b, fp);
       fprintf(fp, "\n\n");

@@ -137,13 +137,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Teste.txt">
-      <Filter>Source Files</Filter>
-    </Text>
     <Text Include="vs2015.txt">
       <Filter>Source Files</Filter>
     </Text>
     <Text Include="vs2017.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="Teste.c">
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>

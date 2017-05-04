@@ -670,6 +670,9 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
 
 void TProgram_Destroy(TProgram * p)
 {
+  
+  StrArray_Destroy(&p->MySourceDir);
+
   Map_Destroy(&p->EnumMap, NULL);
   TDeclarations_Destroy(&p->Declarations);
   TFileArray_Destroy(&p->Files2);

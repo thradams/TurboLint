@@ -48,7 +48,7 @@ Result StrArray_Push(StrArray* p, const char* pItem);
 void StrArray_Clear(StrArray* p);
 void StrArray_Init(StrArray* p);
 void StrArray_Destroy(StrArray* st);
-
+void StrArray_Swap(StrArray* p1, StrArray* p2);
 
 typedef struct
 {

@@ -28,6 +28,8 @@ typedef struct
 
   Map EnumMap;
 
+  //0 nada 1 comecou 2 terminou
+  int MacroExpansionFlag;
 } Parser;
 
 Result Parser_InitFile(Parser* parser, const char* fileName);
@@ -46,6 +48,6 @@ bool GetAST(const char * filename,
             const char * configFileName,
             TProgram* pProgram);
 
-Result MatchAndGet(Parser* parser, ScannerItem* scannerItem);
+
 Tokens MatchToken(Parser* parser, Tokens tk);
 void ConstantExpression(Parser* ctx, TExpression** ppExpression);

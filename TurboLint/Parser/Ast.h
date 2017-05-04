@@ -172,8 +172,10 @@ typedef struct
   Tokens token;
   String lexeme;
   TExpression*  pExpressionOpt;
+  String MacroExpansion;
 } TPrimaryExpressionValue;
-#define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL}
+
+#define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, STRING_INIT}
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
 
 //struct TInitializerList_;
@@ -536,9 +538,10 @@ typedef struct
 {
   TTypePointer Type;
   TInitializerList InitializerList;
+  String MacroExpansion;
 } TInitializerListType;
 
-#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, TINITIALIZER_LIST_INIT}
+#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, TINITIALIZER_LIST_INIT, STRING_INIT}
 CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 
@@ -640,8 +643,10 @@ typedef struct
   int FileIndex;
   int Line;
 
+  StrBuilder PreprocessorAndCommentsString;
+
 } TDeclaration;
-#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, TDECLARATOR_LIST_INIT, NULL, -1, -1}
+#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, TDECLARATOR_LIST_INIT, NULL, -1, -1, STRBUILDER_INIT}
 CREATETYPE(TDeclaration, TFUNCVARDECLARATION_INIT)
 bool TDeclaration_Is_StructOrUnionDeclaration(TDeclaration* p);
 bool TDeclaration_Is_FunctionDeclaration(TDeclaration* p);
@@ -709,8 +714,12 @@ typedef struct
 {
   //declaracoes
   TDeclarations Declarations;
+
   //arquivos na qual declaracao tem indice
   TFileArray Files2;
+
+  //Diretorios de codigo do usuario
+  StrArray MySourceDir;
 
   //multimap dos simbolos
   DeclarationsMap Symbols;
@@ -722,7 +731,7 @@ typedef struct
 
 } TProgram;
 
-#define TPROGRAM_INIT {TDECLARATIONS_INIT, STRARRAY_INIT, DECLARATIONSMAP_INIT, MACROMAP_INIT, MAP_INIT}
+#define TPROGRAM_INIT {TDECLARATIONS_INIT, STRARRAY_INIT, STRARRAY_INIT, DECLARATIONSMAP_INIT, MACROMAP_INIT, MAP_INIT}
 void TProgram_Destroy(TProgram* p);
 TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName);
 TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name);

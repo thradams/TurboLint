@@ -50,10 +50,12 @@ typedef struct
     //Lista de diretorios de include
     StrArray IncludeDir;
 
+    //Lista de diretorios considerados codigo do usuario
     StrArray MySourceDir;
 
     //string para debug
     StrBuilder DebugString;
+
 
     //String que mantem o erro
     StrBuilder ErrorString;
@@ -72,6 +74,9 @@ typedef struct
 
     //Valor lido na leitura especulativa
     ScannerItem LookAhead;
+
+    //string para debug
+    StrBuilder PreprocessorAndCommentsString;
 
 } Scanner;
 
