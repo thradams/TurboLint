@@ -196,7 +196,7 @@ Result BasicScanner_Init(BasicScanner* pScanner,
                          const char* name,
                          const char* text);
 void BasicScanner_Destroy(BasicScanner* pScanner);
-
+/*
 typedef struct
 {
     ScannerItem* strings;
@@ -215,3 +215,4 @@ bool   ScannerItemStack_IsEmpty(ScannerItemStack* st);
 Tokens ScannerItemStack_TopToken(ScannerItemStack* st);
 void   ScannerItemStack_Print(ScannerItemStack* st);
 void ScannerItemStack_Swap(ScannerItemStack* p1, ScannerItemStack* p2);
+*/

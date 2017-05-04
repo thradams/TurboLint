@@ -206,12 +206,11 @@ void ArrayInt_Clear(ArrayInt* p)
     p->capacity = 0;
 }
 
-Result ArrayInt_Init(ArrayInt* p)
+void ArrayInt_Init(ArrayInt* p)
 {
     p->capacity = 0;
     p->size = 0;
-    p->pItems = NULL;
-    return RESULT_OK;
+    p->pItems = NULL;    
 }
 
 

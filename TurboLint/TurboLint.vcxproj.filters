@@ -22,9 +22,6 @@
     <ClCompile Include="Base\Array.c">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="Base\dmalloc.c">
-      <Filter>Source Files\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Base\Map.c">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
@@ -82,9 +79,6 @@
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="Base\config.h">
-      <Filter>Source Files\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="Base\dmalloc.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="Base\Map.h">

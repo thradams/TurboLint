@@ -191,15 +191,6 @@ Result MatchAndGet(Parser* parser, ScannerItem* scannerItem)
 	return RESULT_OK;
 }
 
-Result MatchAndPush(Parser* parser, ScannerItemStack* stack)
-{
-	ScannerItem item;
-	ScannerItem_Init(&item);
-	MatchAndGet(parser, &item);
-	ScannerItemStack_PushMove(stack, &item);
-	ScannerItem_Destroy(&item);
-	return RESULT_OK;
-}
 
 int GetCurrentLine(Parser* parser)
 {

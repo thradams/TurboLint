@@ -70,7 +70,7 @@ Result ArrayInt_Push(ArrayInt* p, int pItem);
 
 void ArrayInt_Clear(ArrayInt* p);
 
-Result ArrayInt_Init(ArrayInt* p);
+void ArrayInt_Init(ArrayInt* p);
 
 void ArrayInt_Destroy(ArrayInt* st);
 
