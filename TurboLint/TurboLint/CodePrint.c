@@ -1056,12 +1056,10 @@ static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclaratio
   return b;
 }
 
-static bool TDeclaration_CodePrint(TDeclaration* p, bool b, FILE* fp)
+static bool TDeclaration_CodePrint(TDeclaration* p,
+  bool b,
+  FILE* fp)
 {
-
-
-
-
   //Isso aqui coloca o "static" nas funcoes geradas
 //mesmo que elas nao sejam static
 //eh interessante pq eh possivel ver um monte de coisas nao usadas
@@ -1212,9 +1210,9 @@ static void TProgram_PrintFiles(TProgram* pProgram,
       char drive[_MAX_DRIVE];
       char dir[_MAX_DIR];
       char fname[_MAX_FNAME];
-      char ext[_MAX_EXT];      
+      char ext[_MAX_EXT];
       SplitPath(pFile->FullPath, drive, dir, fname, ext); // C4996
-      
+
 
       fprintf(fp, "#include <%s%s>\n", fname, ext);
     }

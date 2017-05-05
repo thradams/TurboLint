@@ -85,6 +85,8 @@ typedef struct
     //string para debug
     StrBuilder PreprocessorAndCommentsString;
 
+    bool bAmalgamationMode;
+
 } Scanner;
 
 void Scanner_SetError(Scanner* pScanner, const char* message);

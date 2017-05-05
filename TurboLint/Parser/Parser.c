@@ -4236,6 +4236,7 @@ static void TFileMapToStrArray(TFileMap* map, TFileArray* arr)
 
 bool GetAST(const char*  filename,
   const char* configFileName,
+  bool bAmalgamationMode,
   TProgram* pProgram)
 {
   bool bResult = false;
@@ -4245,10 +4246,22 @@ bool GetAST(const char*  filename,
   GetFullPath(configFileName, &fullConfigFilePath);
 
   Parser parser;
+  
   Parser_InitFile(&parser, fullConfigFilePath);
   Parser_Main(&parser, &pProgram->Declarations);
 
   StrBuilder_Clear(& parser.Scanner.PreprocessorAndCommentsString);
+
+  parser.Scanner.bAmalgamationMode = bAmalgamationMode;
+  if (!parser.Scanner.bAmalgamationMode)
+  {
+    StrArray_Clear(&parser.Scanner.MySourceDir);
+    StrArray_Push(&parser.Scanner.MySourceDir, fullFileNamePath);
+  }
+  else
+  {
+    //usar #pragma mydir para definir diretorio do usuario
+  }
 
   //parser.scanner.bPrintIncludes = true;
   if (filename != NULL)

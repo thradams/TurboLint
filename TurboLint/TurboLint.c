@@ -10,11 +10,15 @@
 #include "..\TurboLint\Base\Path.h"
 
 void RunLint(const char* configFileName,
-  const char* inputFileName)
+  const char* inputFileName,
+  bool bAmalgamationMode)
 {
   TProgram program = TPROGRAM_INIT;
+
+  
+
   printf("Parsing...\n");
-  if (GetAST(inputFileName, configFileName, &program))
+  if (GetAST(inputFileName, configFileName, bAmalgamationMode, &program))
   {
     printf("Running Code Analysis...\n");
 
@@ -65,24 +69,13 @@ int main(int argc, char* argv[])
 
   if (argc < 2)
   {
-    printf("TurboLint.exe configFile.txt [file.c]");
+    printf("TurboLint.exe configFile.txt file.c");
     return 1;
   }
   const char* configFileName = argv[1];
-  const char* filename = NULL;
+  const char* inputFileName = argv[2];
 
-
-  if (argc > 2)
-  {
-
-    filename = argv[2];
-
-  }
-  if (argc >= 4)
-  {
-    printf("%s\n\n", argv[3]);
-  }
-
+  bool bAmalgamationMode = false;
   bool bPrintPreprocessed = false;
   for (int i = 3; i < argc; i++)
   {
@@ -94,16 +87,20 @@ int main(int argc, char* argv[])
     else if (strcmp(option, "/F") == 0)
     {
     }
+    else if (strcmp(option, "/A") == 0)
+    {
+      bAmalgamationMode = true;
+    }
   }
 
   if (bPrintPreprocessed)
   {
-    PrintPreprocessedToFile(filename, configFileName, "pre.txt");
+    PrintPreprocessedToFile(inputFileName, configFileName, "pre.txt");
   }
-  String fullpath = NULL;
-  GetFullPath(filename, &fullpath);
-  RunLint(configFileName, fullpath);
-  String_Destroy(&fullpath);
+  String inputFullPath = NULL;
+  GetFullPath(inputFileName, &inputFullPath);
+  RunLint(configFileName, inputFullPath, bAmalgamationMode);
+  String_Destroy(&inputFullPath);
   return 0;
 }
 

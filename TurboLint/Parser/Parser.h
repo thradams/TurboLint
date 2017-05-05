@@ -46,6 +46,7 @@ const char* GetCompletationMessage(Parser* parser);
 
 bool GetAST(const char * filename,
             const char * configFileName,
+            bool bAmalgamationMode,
             TProgram* pProgram);
 
 

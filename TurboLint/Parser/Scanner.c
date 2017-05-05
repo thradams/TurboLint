@@ -223,6 +223,7 @@ static Result AddStandardMacro(Scanner* pScanner,
 
 static Result Scanner_InitCore(Scanner* pScanner)
 {
+  pScanner->bAmalgamationMode = false;
   //TFileMap_init
   //pScanner->IncludeDir
   Map_Init(&pScanner->FilesIncluded, 100);
@@ -441,18 +442,18 @@ void Scanner_IncludeFile(Scanner* pScanner,
 
     const char* fName = Scanner_GetStreamName(pScanner);
     
-    if (pScanner->MySourceDir.size == 1 &&
+    if (!pScanner->bAmalgamationMode &&
+        pScanner->MySourceDir.size > 0 &&
         strcmp(fName, pScanner->MySourceDir.pItems[0]) == 0)
     {
-      //Quando não é amalgamation 
-      //quando um arquivo é incluido diretamente
-      //pelo arquivo origem ele eh marcado 
-      //para ser incluido
+      //Quando NAO é amalgamation verifica se o atual é 
+      //o arquivo sendo parseado o proximo arquivo
+      //incluido ser direct include
       bDirectInclude = true;
     }
     else
     {
-      //quando eh amalgamation
+      //quando eh amalgamation vai verificar os diretorios
       
       for (int k = 0; k < pScanner->MySourceDir.size; k++)
       {
@@ -1290,6 +1291,7 @@ void Scanner_SkipCore(Scanner* pScanner)
 
         else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "mydir"))
         {
+          pScanner->bAmalgamationMode = true;
           Scanner_Match(pScanner);
           String fileName;
           String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
