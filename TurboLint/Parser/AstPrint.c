@@ -347,6 +347,9 @@ bool TBlockItem_Print(TBlockItem *  p, bool b, FILE* fp)
 			break;
 
 		case TCompoundStatement_ID:
+      fprintf(fp, "{");
+      b = TCompoundStatement_Print((TCompoundStatement*)p, false, fp);
+      fprintf(fp, "}");
 			break;
 
 		case TExpressionStatement_ID:

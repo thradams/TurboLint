@@ -162,6 +162,16 @@ PPToken* TokenArray_Find(const TokenArray *pArray, const char * lexeme)
   return pFound;
 }
 
+void TokenArray_ToStrBuilder(const TokenArray* tokens, 
+  StrBuilder* strBuidler)
+{
+  StrBuilder_Clear(strBuidler);
+  for (int i = 0; i < tokens->Size; i++)
+  {
+    StrBuilder_Append(strBuidler, tokens->pItems[i]->Lexeme);
+  }
+}
+
 void TokenArray_Print(const TokenArray* tokens)
 {
   if (tokens->Size == 0)

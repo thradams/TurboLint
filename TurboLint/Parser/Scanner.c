@@ -244,6 +244,10 @@ static Result Scanner_InitCore(Scanner* pScanner)
 
   //Indica que foi feita uma leitura especulativa
   pScanner->bHasLookAhead = false;
+  pScanner->LookAheadStackSize = 0;
+  pScanner->LookAheadMacroOnTop = false;
+  String_Init(&pScanner->LookAheadStreamName, NULL);
+
   //Valor lido na leitura especulativa
   ScannerItem_Init(&pScanner->LookAhead);
   //__FILE__ __LINE__ __DATE__ __STDC__  __STD_HOSTED__  __TIME__  __STD_VERSION__
@@ -272,11 +276,12 @@ Result Scanner_InitString(Scanner* pScanner,
 
 static Result PushExpandedMacro(Scanner* pScanner,
   const char* defineName,
+  const char* callString,
   const char* defineContent)
 {
   BasicScanner* pNewScanner;
   Result result = BasicScanner_Create(&pNewScanner,
-    defineName,
+    callString, /*defineName*/
     defineContent);
 
   if (result == RESULT_OK)
@@ -523,10 +528,29 @@ void Scanner_IncludeFile(Scanner* pScanner,
   String_Destroy(&fullPath);
 }
 
+const char* Scanner_GetApparentStreamName(Scanner* pScanner)
+{
+  const char* streamName = NULL;
+  if (pScanner->bHasLookAhead)
+  {
+    streamName = pScanner->LookAheadStreamName;
+  }
+  else
+  {
+    BasicScanner* p = Scanner_Top(pScanner);
+    streamName = p ? p->stream.NameOrFullPath : NULL;
+  }
+  return streamName;
+}
+
 const char* Scanner_GetStreamName(Scanner* pScanner)
 {
-  BasicScanner* p = Scanner_Top(pScanner);
-  return p ? p->stream.NameOrFullPath : NULL;
+  const char* streamName = NULL;
+  
+    BasicScanner* p = Scanner_Top(pScanner);
+    streamName = p ? p->stream.NameOrFullPath : NULL;
+  
+  return streamName;  
 }
 
 Result Scanner_Init(Scanner* pScanner)
@@ -676,6 +700,8 @@ int Scanner_Col(Scanner* pScanner)
   return Scanner_Top(pScanner)->stream.currentCol;
 }
 
+
+
 void SkipSpaces(Scanner* pScanner)
 {
   while (Scanner_Top(pScanner)->currentItem.token == TK_SPACES)
@@ -695,6 +721,9 @@ void SkipSpaces(Scanner* pScanner)
   {
     if (pScanner->stack.size > 1)
     {
+      //se nao usou nao vai ficar para o proximo
+      StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+
       Array_Pop(&pScanner->stack, &Delete_Scanner);
     }
     //e se tiver mais espacos?
@@ -830,7 +859,8 @@ int EvalExpression(const char* s, Scanner* pScanner)
 
 bool GetNewMacroCallString(Scanner* pScanner,
   Macro* pMacro,
-  TokenArray* ppTokenArray)
+  TokenArray* ppTokenArray,
+  StrBuilder* strBuilder)
 {
   //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
 
@@ -951,6 +981,16 @@ bool GetNewMacroCallString(Scanner* pScanner,
     }
   }
 
+  if (bIsMacro)
+  {
+    StrBuilder_Append(strBuilder, pMacro->Name);
+    if (nArgsExpected > 0)
+    {
+      //StrBuilder_Append(strBuilder, pMacro->Name);
+      TokenArray_ToStrBuilder(ppTokenArray, strBuilder);
+      //StrBuilder_Append(strBuilder, pMacro->Name);
+    }
+  }
   return bIsMacro;
   //return false;
 }
@@ -1072,6 +1112,22 @@ void ParsePreDefine(Scanner* pScanner)
     }
   }
 
+  if (pNewMacro->FormalArguments.Size > 0)
+  {
+    StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "(");
+    
+    for (int i = 0; i < pNewMacro->FormalArguments.Size; i++)
+    {
+      if (i > 0)
+      {
+        StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, ", ");
+      }
+      
+      StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, 
+        pNewMacro->FormalArguments.pItems[i]->Lexeme);
+    }
+    StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, ")");    
+  }
 
   StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, " ");
   GetPPTokens(pScanner, &pNewMacro->TokenSequence);
@@ -1522,10 +1578,12 @@ void Scanner_SkipCore(Scanner* pScanner)
         StrBuilder strBuilder = STRBUILDER_INIT;
         TokenArray ppTokenArray = TOKENARRAY_INIT;
 
+        StrBuilder callString = STRBUILDER_INIT;
         //confirma realmente se eh p expandir
         bool bIsMacro = GetNewMacroCallString(pScanner,
           pMacro2,
-          &ppTokenArray);
+          &ppTokenArray,
+          &callString);
 
         if (bIsMacro)
         {
@@ -1545,21 +1603,21 @@ void Scanner_SkipCore(Scanner* pScanner)
             StrBuilder_Append(&strBuilder, " ");
           }
 
-
           PushExpandedMacro(pScanner,
             pMacro2->Name,
+            callString.c_str,
             strBuilder.c_str);
-
         }
 
         else
         {
           //ASSERT(false);
         }
-
+        
         TokenArray_Destroy(&ppTokenArray);
         StrBuilder_Destroy(&strBuilder);
-
+        StrBuilder_Destroy(&callString);
+        
         if (!bIsMacro)
         {
           break;
@@ -1585,6 +1643,9 @@ void Scanner_SkipCore(Scanner* pScanner)
       }
       else if (pScanner->stack.size > 0)
       {
+        //se nao usou nao vai ficar para o proximo
+        StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+
         Array_Pop(&pScanner->stack, &Delete_Scanner);
       }
     }
@@ -1657,6 +1718,9 @@ void Scanner_Skip(Scanner* pScanner)
 
       else if (pScanner->stack.size > 1)
       {
+        //se nao usou nao vai ficar para o proximo
+        StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+
         Array_Pop(&pScanner->stack, &Delete_Scanner);
       }
     }
@@ -1757,6 +1821,40 @@ void Scanner_GetScannerItemCopy(Scanner* pScanner, ScannerItem* scannerItem)
 }
 
 
+
+bool Scanner_GetApparentMacroOnTop(Scanner* pScanner)
+{
+  bool result = 0;
+  if (pScanner->bHasLookAhead)
+  {
+    result = pScanner->LookAheadMacroOnTop;
+  }
+  else
+  {
+    if (pScanner->stack.size > 0)
+    {
+      BasicScanner* pBasicScanner =
+        (BasicScanner*)Array_Top(&pScanner->stack);
+      result = pBasicScanner->bMacroExpanded;
+    }    
+  }
+  return result;
+}
+
+size_t Scanner_GetApparentStackSize(Scanner* pScanner)
+{
+  size_t result = 0;
+  if (pScanner->bHasLookAhead)
+  {
+    result = pScanner->LookAheadStackSize;
+  }
+  else
+  {   
+    result = pScanner->stack.size;
+  }
+  return result;
+}
+
 ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
 {
   if (!pScanner->bHasLookAhead)
@@ -1766,9 +1864,25 @@ ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
     ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
     ScannerItem_Copy(&pScanner->LookAhead,
       &Scanner_Top(pScanner)->currentItem);
+    pScanner->LookAheadStackSize = pScanner->stack.size;
+
+    bool bIsMacroOnTop = false;
+    if (pScanner->stack.size > 0)
+    {
+      BasicScanner* pBasicScanner =
+        (BasicScanner*)Array_Top(&pScanner->stack);
+      bIsMacroOnTop = pBasicScanner->bMacroExpanded;
+    }
+    pScanner->LookAheadMacroOnTop = bIsMacroOnTop;
+    const char* streamName = Scanner_GetStreamName(pScanner);
+    String_Set(&pScanner->LookAheadStreamName, streamName);
+
+    /////////////////////////////////////////
     //Mover scanner p proximo
     BasicScanner_Next(Scanner_Top(pScanner));
     Scanner_Skip(pScanner);
+    //////////////////////////////////////////
+
     //So no fim para que o mover seja normal
     pScanner->bHasLookAhead = true;
     ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);

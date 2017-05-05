@@ -160,41 +160,31 @@ static void Next(Parser* parser)
   //0 nada 1 comecou 2 terminou
   parser->MacroExpansionFlag = 0;
 
-  bool bIsMacroOnTop = false;
-  if (parser->Scanner.stack.size > 0)
-  {
-    BasicScanner* pBasicScanner =
-      (BasicScanner*)Array_Top(&parser->Scanner.stack);
-    bIsMacroOnTop = pBasicScanner->bMacroExpanded;
-  }
+  bool bIsMacroOnTop = 
+    Scanner_GetApparentMacroOnTop(&parser->Scanner);
 
-  int s = (int)parser->Scanner.stack.size;
+  int s1 = Scanner_GetApparentStackSize(&parser->Scanner);
 
   Scanner_Next(&parser->Scanner);
 
-  ////TODO look ahead! problem
-  if ((s + 1) == parser->Scanner.stack.size)
+  int s2 = Scanner_GetApparentStackSize(&parser->Scanner);
+  
+  if ((s1 + 1) == s2)
   {
-    if (parser->Scanner.stack.size > 0)
+    bool bIsMacroOnTop2 =
+      Scanner_GetApparentMacroOnTop(&parser->Scanner);
+    if (bIsMacroOnTop2)
     {
-      BasicScanner* pBasicScanner =
-        (BasicScanner*)Array_Top(&parser->Scanner.stack);
-      if (pBasicScanner->bMacroExpanded)
-      {
-        //TODO look ahead! problem
 
-        //comecou a expandir macro
-        //printf("start macro expansion %s\n", pBasicScanner->stream.NameOrFullPath);
+      //comecou a expandir macro
+      //printf("start macro expansion %s\n", pBasicScanner->stream.NameOrFullPath);
 
-        //0 nada 1 comecou 2 terminou
-        parser->MacroExpansionFlag = 1;
-
-      }
+      //0 nada 1 comecou 2 terminou
+      parser->MacroExpansionFlag = 1;
     }
+    
   }
-  else if (s > 1 &&
-    (s - 1) == parser->Scanner.stack.size &&
-    bIsMacroOnTop)
+  else if (s1 > 1 && (s1 - 1) ==s2 && bIsMacroOnTop)
   {
     //0 nada 1 comecou 2 terminou
     parser->MacroExpansionFlag = 2;
@@ -475,7 +465,8 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     int i1 = ctx->MacroExpansionFlag;
     if (i1 == 1)
     {
-      const char* fName = Scanner_GetStreamName(&ctx->Scanner);
+     
+      const char* fName = Scanner_GetApparentStreamName(&ctx->Scanner);
       String_Set(&pPrimaryExpressionValue->MacroExpansion, fName);
     }
 
@@ -506,7 +497,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     int i1 = ctx->MacroExpansionFlag;
     if (i1 == 1)
     {
-      const char* fName = Scanner_GetStreamName(&ctx->Scanner);
+      const char* fName = Scanner_GetApparentStreamName(&ctx->Scanner);
       String_Set(&pPrimaryExpressionValue->MacroExpansion, fName);
     }
 
@@ -3139,35 +3130,6 @@ bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator* pTDeclarator2)
 }
 
 
-void DirectAbstractDeclarator(Parser* ctx)
-{
-  ASSERT(false);
-  /*
-  direct-abstract-declarator:
-   ( abstract-declarator )
-   direct-abstract-declaratoropt [ type-qualifier-listopt
-   assignment-expressionopt ]
-   direct-abstract-declaratoropt [ static type-qualifier-listopt
-   assignment-expression ]
-   direct-abstract-declaratoropt [ type-qualifier-list static
-   assignment-expression ]
-   direct-abstract-declaratoropt [ * ]
-   direct-abstract-declaratoropt ( parameter-type-listopt )
-  */
-
-  Tokens token = Token(ctx);
-
-  switch (token)
-  {
-  case TK_LEFT_PARENTHESIS:
-    //AbstractDeclarator(ctx, pTDeclarator2);
-    break;
-
-  case TK_LEFT_SQUARE_BRACKET:
-
-    break;
-  }
-}
 
 
 void Parameter_Declaration(Parser* ctx,
@@ -3900,7 +3862,7 @@ void Initializer(Parser* ctx,
     int i1 = ctx->MacroExpansionFlag;
     if (i1 == 1)
     {
-      const char* fName = Scanner_GetStreamName(&ctx->Scanner);
+      const char* fName = Scanner_GetApparentStreamName(&ctx->Scanner);
       String_Set(&pTInitializerList->MacroExpansion, fName);
     }
 

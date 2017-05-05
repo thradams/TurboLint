@@ -6,6 +6,7 @@
 #include "..\Base\Path.h"
 
 static bool TInitializerList_CodePrint(TInitializerList*p, bool b, FILE* fp);
+static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, FILE* fp);
 static bool TDeclarator_CodePrint(TDeclarator* p, bool b, FILE* fp);
 static bool TAnyDeclaration_CodePrint(TAnyDeclaration *pDeclaration, bool b, FILE* fp);
 static bool TTypeSpecifier_CodePrint(TTypeSpecifier* p, bool b, FILE* fp);
@@ -49,7 +50,7 @@ static bool TLabeledStatement_CodePrint(TLabeledStatement * p, bool b, FILE* fp)
     {
       b = TExpression_CodePrint(p->pExpression, "", false, fp);
     }
-    fprintf(fp, " :\n");
+    fprintf(fp, ":\n");
     b = TStatement_CodePrint(p->pStatementOpt, false, fp);
   }
   else if (p->token == TK_DEFAULT)
@@ -148,14 +149,14 @@ static bool TJumpStatement_CodePrint(TJumpStatement * p, bool b, FILE* fp)
     b = TExpression_CodePrint(p->pExpression, "statement", false, fp);
   }
 
-  if (p->token == TK_BREAK ||
-    p->token == TK_DEFAULT)
+  if (p->token == TK_BREAK)
   {
-    // fprintf(fp, "\n");
+    fprintf(fp, ";\n");
   }
-
-
-  fprintf(fp, ";");
+  else
+  {
+    fprintf(fp, ";");
+  }
 
   return true;
 }
@@ -171,7 +172,7 @@ static bool TSwitchStatement_CodePrint(TSwitchStatement * p, bool b, FILE* fp)
   b = true;
   fprintf(fp, "switch (");
   b = TExpression_CodePrint(p->pConditionExpression, "expr", false, fp);
-  fprintf(fp, ")\n");
+  fprintf(fp, ")");
   b = TStatement_CodePrint(p->pExpression, false, fp);
   return b;
 }
@@ -322,6 +323,7 @@ static bool TBlockItem_CodePrint(TBlockItem *  p, bool b, FILE* fp)
     break;
 
   case TCompoundStatement_ID:
+    b = TCompoundStatement_CodePrint((TCompoundStatement*)p, false, fp);
     break;
 
   case TExpressionStatement_ID:
@@ -636,7 +638,8 @@ static bool TSingleTypeSpecifier_CodePrint(TSingleTypeSpecifier* p, bool b, FILE
 
   if (p->bIsBool)
   {
-    fprintf(fp, " _Bool");
+    //fprintf(fp, " _Bool");
+    fprintf(fp, " bool");
     b = true;
   }
 
@@ -740,7 +743,28 @@ static bool TDesignator_CodePrint(TDesignator* p, bool b, FILE* fp)
   return b;
 }
 
-static bool TInitializerList_CodePrint(TInitializerListType*p, bool b, FILE* fp)
+
+static bool TInitializerList_CodePrint(TInitializerList*p, bool b, FILE* fp)
+{
+
+  b = false;
+  fprintf(fp, "{");
+
+  for (size_t i = 0; i < p->size; i++)
+  {
+    if (i > 0)
+      fprintf(fp, ",");
+
+    TInitializerListItem* pItem = p->pItems[i];
+    b = TInitializerListItem_CodePrint(pItem, b, fp);
+  }
+
+  fprintf(fp, "}");
+
+  return true;
+}
+
+static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, FILE* fp)
 {
   if (p->MacroExpansion != NULL)
   {
@@ -748,24 +772,11 @@ static bool TInitializerList_CodePrint(TInitializerListType*p, bool b, FILE* fp)
   }
   else
   {
-    b = false;
-    fprintf(fp, "{");
-
-    for (size_t i = 0; i < p->InitializerList.size; i++)
-    {
-      if (i > 0)
-        fprintf(fp, ",");
-
-      TInitializerListItem* pItem = p->InitializerList.pItems[i];
-      b = TInitializerListItem_CodePrint(pItem, b, fp);
-    }
-
-    fprintf(fp, "}");
+    b = TInitializerList_CodePrint(&p->InitializerList, b, fp);
   }
 
   return true;
 }
-
 
 static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
 {
@@ -775,7 +786,7 @@ static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
   }
   if (p->type == TInitializerListType_ID)
   {
-    b = TInitializerList_CodePrint((TInitializerListType*)p, b, fp);
+    b = TInitializerListType_CodePrint((TInitializerListType*)p, b, fp);
   }
   else
   {
@@ -1198,7 +1209,14 @@ static void TProgram_PrintFiles(TProgram* pProgram,
     TFile *pFile = pProgram->Files2.pItems[i];
     if (pFile->bDirectInclude)
     {
-      fprintf(fp, "#include <%s>\n", pFile->FullPath);
+      char drive[_MAX_DRIVE];
+      char dir[_MAX_DIR];
+      char fname[_MAX_FNAME];
+      char ext[_MAX_EXT];      
+      SplitPath(pFile->FullPath, drive, dir, fname, ext); // C4996
+      
+
+      fprintf(fp, "#include <%s%s>\n", fname, ext);
     }
   }
   fprintf(fp, "\n");

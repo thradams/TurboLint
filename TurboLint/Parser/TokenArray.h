@@ -1,6 +1,7 @@
 #pragma once
 
 #include "..\Base\StringEx.h"
+#include "..\Base\StrBuilder.h"
 
 typedef struct PPToken PPToken;
 
@@ -39,6 +40,7 @@ bool TokenArray_Contain(TokenArray *pArray, PPToken* pToken);
 void TokenArray_AppendCopy(TokenArray *pArrayTo, const TokenArray *pArrayFrom);
 void TokenArray_AppendMove(TokenArray *pArrayTo, TokenArray *pArrayFrom);
 void TokenArray_Print(const TokenArray* tokens);
+void TokenArray_ToStrBuilder(const TokenArray* tokens, StrBuilder* strBuidler);
 
 PPToken* TokenArray_Find(const TokenArray *pArray, const char * lexeme);
 void TokenArray_Erase(TokenArray *pArray, int begin, int end);

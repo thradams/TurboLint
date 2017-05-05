@@ -3,11 +3,7 @@
 #include <stdlib.h>
 
 
-void PPToken_Init(PPToken * p)
-{
-	PPToken temp = TOKEN_INIT;
-	*p = temp;
-}
+
 
 void PPToken_Destroy(PPToken * p)
 {

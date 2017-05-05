@@ -69,11 +69,18 @@ typedef struct
     //Quando true o scanner retorna tambem espacos
     bool bIncludeSpaces;
 
+    ///////////////////////////////////////////////////
     //Indica que foi feita uma leitura especulativa
     bool bHasLookAhead;
 
     //Valor lido na leitura especulativa
     ScannerItem LookAhead;
+
+    size_t LookAheadStackSize;
+    bool LookAheadMacroOnTop;
+    String LookAheadStreamName;
+    ///////////////////////////////////////////////////
+
 
     //string para debug
     StrBuilder PreprocessorAndCommentsString;
@@ -104,6 +111,8 @@ void Scanner_IncludeFile(Scanner* pScanner,
                          const char* fileName,
                          FileIncludeType fileIncludeType);
 
+const char * Scanner_GetApparentStreamName(Scanner * pScanner);
+
 void Scanner_Destroy(Scanner* pScanner);
 int Scanner_GetCurrentLine(Scanner * pScanner);
 int Scanner_GetFileIndex(Scanner * pScanner);
@@ -127,5 +136,11 @@ void PrintPreprocessedToFile(const char* fileIn,
 
 void Scanner_GetScannerItemCopy(Scanner* pScanner,
                                 ScannerItem* scannerItem);
+
+
+
+bool Scanner_GetApparentMacroOnTop(Scanner * pScanner);
+
+size_t Scanner_GetApparentStackSize(Scanner * pScanner);
 
 ScannerItem* Scanner_GetLookAhead(Scanner* pScanner);

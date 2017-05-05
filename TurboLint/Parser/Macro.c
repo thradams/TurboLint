@@ -1123,26 +1123,6 @@ void MacroMap_Destroy(MacroMap* p)
   Map2_Destroy((Map2*)p);
 }
 
-MacroMap* MacroMap_Create()
-{
-  MacroMap* p = (MacroMap*)malloc(sizeof * p);
-
-  if (p)
-  {
-    MacroMap_Init(p);
-  }
-
-  return p;
-}
-
-void MacroMap_Delete(MacroMap * p)
-{
-  if (p != NULL)
-  {
-    MacroMap_Destroy(p);
-    free(p);
-  }
-}
 
 void MacroMap_Swap(MacroMap * pA, MacroMap * pB)
 {

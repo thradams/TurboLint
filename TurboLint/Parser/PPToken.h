@@ -22,7 +22,7 @@ typedef struct PPToken
 
 #define TOKEN_INIT { PPTokenType_Other, STRING_INIT, TOKENSET_INIT }
 
-void PPToken_Init(PPToken* p);
+
 void PPToken_Destroy(PPToken* p);
 
 PPToken*  PPToken_Create(const char* s, PPTokenType token);

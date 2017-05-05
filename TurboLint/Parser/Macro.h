@@ -50,9 +50,6 @@ bool MacroMap_RemoveKey(MacroMap* pMap,
 void MacroMap_Init(MacroMap* p);
 void MacroMap_Destroy(MacroMap* p);
 
-MacroMap*  MacroMap_Create();
-void MacroMap_Delete(MacroMap * p);
-
 void MacroMap_Swap(MacroMap * pA, MacroMap * pB);
 
 Macro* MacroMap_Find(const MacroMap* pMap, const char*  Key);
