@@ -24,7 +24,7 @@ static bool TInitializerListItem_CodePrint(TInitializerListItem* p, bool b, FILE
 static bool TCompoundStatement_CodePrint(TCompoundStatement * p, bool b, FILE* fp)
 {
 
-
+	//
   b = true;
   fprintf(fp, "\n{\n");
 
@@ -1060,10 +1060,9 @@ static bool TDeclaration_CodePrint(TDeclaration* p,
   bool b,
   FILE* fp)
 {
-  //Isso aqui coloca o "static" nas funcoes geradas
-//mesmo que elas nao sejam static
-//eh interessante pq eh possivel ver um monte de coisas nao usadas
-//ou declaradas e nao implementadas
+ 
+  //para amalgamation eh util transformar a funcao em static
+#ifdef amalgamation 
   if (p->Declarators.size > 0 &&
     p->Declarators.pItems[0]->pDeclaratorOpt != NULL &&
     p->Declarators.pItems[0]->pDeclaratorOpt->token == TK_LEFT_PARENTHESIS)
@@ -1073,7 +1072,7 @@ static bool TDeclaration_CodePrint(TDeclaration* p,
       p->Specifiers.StorageSpecifiers.bIsStatic = true;
     }
   }
-
+#endif
 
   b = TDeclarationSpecifiers_CodePrint(&p->Specifiers, false, fp);
 
