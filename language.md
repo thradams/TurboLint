@@ -1,6 +1,13 @@
 # C language extensions
 
 
+# Include 
+
+1) Similar of original
+2) Original with expanded includes
+3) Amalgamation
+
+
 ## Operator new
 
 Syntaxe:
