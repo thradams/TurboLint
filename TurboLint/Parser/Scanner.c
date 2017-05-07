@@ -483,6 +483,9 @@ void Scanner_IncludeFile(Scanner* pScanner,
       {
         pFile = TFile_Create();
         pFile->bDirectInclude = bDirectInclude;
+		pFile->bSystemLikeInclude = 
+			(fileIncludeType == FileIncludeTypeIncludes);
+		String_Set(&pFile->IncludePath, includeFileName);
         TFileMap_Set(&pScanner->FilesIncluded, fullPath, pFile); //pfile Moved
       }
 

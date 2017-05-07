@@ -10,97 +10,97 @@
 #include "..\TurboLint\Base\Path.h"
 
 void RunLint(const char* configFileName,
-  const char* inputFileName,
-  bool bAmalgamationMode)
+	const char* inputFileName,
+	bool bAmalgamationMode)
 {
-  TProgram program = TPROGRAM_INIT;
-
-  
-
-  printf("Parsing...\n");
-  if (GetAST(inputFileName, configFileName, bAmalgamationMode, &program))
-  {
-    printf("Running Code Analysis...\n");
+	TProgram program = TPROGRAM_INIT;
 
 
-    TProgram_Analize(&program);
+
+	printf("Parsing...\n");
+	if (GetAST(inputFileName, configFileName, bAmalgamationMode, &program))
+	{
+		printf("Running Code Analysis...\n");
 
 
-    char drive[_MAX_DRIVE];
-    char dir[_MAX_DIR];
-    char fname[_MAX_FNAME];
-    char ext[_MAX_EXT];
-    SplitPath(inputFileName, drive, dir, fname, ext); // C4996
+		TProgram_Analize(&program);
 
-    char outjs[_MAX_DRIVE + _MAX_DIR + _MAX_FNAME + _MAX_EXT + 1];
-    MakePath(outjs, drive, dir, fname, ".json");
- 
-    if (inputFileName != NULL && 
-        program.MySourceDir.size == 1 &&
-        strcmp(program.MySourceDir.pItems[0], inputFileName) == 0)
-    {
-      //nao passa o nome eh considera o dir
-      inputFileName = NULL;
-    }
 
-    if (program.MySourceDir.size != 0)
-    {
-      //nao passa o nome eh considera o dir
-      inputFileName = NULL;
-    }
- 
+		char drive[_MAX_DRIVE];
+		char dir[_MAX_DIR];
+		char fname[_MAX_FNAME];
+		char ext[_MAX_EXT];
+		SplitPath(inputFileName, drive, dir, fname, ext); // C4996
 
-    TProgram_PrintAstToFile(&program, outjs, inputFileName);
+		char outjs[_MAX_DRIVE + _MAX_DIR + _MAX_FNAME + _MAX_EXT + 1];
+		MakePath(outjs, drive, dir, fname, ".json");
 
-    strcat(fname, "_gen");
-    MakePath(outjs, drive, dir, fname, ext);
+		if (inputFileName != NULL &&
+			program.MySourceDir.size == 1 &&
+			strcmp(program.MySourceDir.pItems[0], inputFileName) == 0)
+		{
+			//nao passa o nome eh considera o dir
+			inputFileName = NULL;
+		}
 
-    TProgram_PrintCodeToFile(&program, outjs, inputFileName);
+		if (program.MySourceDir.size != 0)
+		{
+			//nao passa o nome eh considera o dir
+			inputFileName = NULL;
+		}
 
-    printf("Complete\n");
-  }
-  TProgram_Destroy(&program);
+
+		TProgram_PrintAstToFile(&program, outjs, inputFileName);
+
+		strcat(fname, "_gen");
+		MakePath(outjs, drive, dir, fname, ext);
+
+		TProgram_PrintCodeToFile(&program, outjs, inputFileName);
+
+		printf("Complete\n");
+	}
+	TProgram_Destroy(&program);
 }
 
 
 int main(int argc, char* argv[])
 {
-  printf("Turbo lint " __DATE__ "\n");
+	printf("Turbo lint " __DATE__ "\n");
 
-  if (argc < 2)
-  {
-    printf("TurboLint.exe configFile.txt file.c");
-    return 1;
-  }
-  const char* configFileName = argv[1];
-  const char* inputFileName = argv[2];
+	if (argc < 2)
+	{
+		printf("TurboLint.exe configFile.txt file.c");
+		return 1;
+	}
+	const char* configFileName = argv[1];
+	const char* inputFileName = argv[2];
 
-  bool bAmalgamationMode = false;
-  bool bPrintPreprocessed = false;
-  for (int i = 3; i < argc; i++)
-  {
-    const char * option = argv[i];
-    if (strcmp(option, "/E") == 0)
-    {
-      bPrintPreprocessed = true;
-    }
-    else if (strcmp(option, "/F") == 0)
-    {
-    }
-    else if (strcmp(option, "/A") == 0)
-    {
-      bAmalgamationMode = true;
-    }
-  }
+	bool bAmalgamationMode = false;
+	bool bPrintPreprocessed = false;
+	for (int i = 3; i < argc; i++)
+	{
+		const char * option = argv[i];
+		if (strcmp(option, "/E") == 0)
+		{
+			bPrintPreprocessed = true;
+		}
+		else if (strcmp(option, "/F") == 0)
+		{
+		}
+		else if (strcmp(option, "/A") == 0)
+		{
+			bAmalgamationMode = true;
+		}
+	}
 
-  if (bPrintPreprocessed)
-  {
-    PrintPreprocessedToFile(inputFileName, configFileName, "pre.txt");
-  }
-  String inputFullPath = NULL;
-  GetFullPath(inputFileName, &inputFullPath);
-  RunLint(configFileName, inputFullPath, bAmalgamationMode);
-  String_Destroy(&inputFullPath);
-  return 0;
+	if (bPrintPreprocessed)
+	{
+		PrintPreprocessedToFile(inputFileName, configFileName, "pre.txt");
+	}
+	String inputFullPath = NULL;
+	GetFullPath(inputFileName, &inputFullPath);
+	RunLint(configFileName, inputFullPath, bAmalgamationMode);
+	String_Destroy(&inputFullPath);
+	return 0;
 }
 

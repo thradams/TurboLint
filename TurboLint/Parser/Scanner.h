@@ -10,11 +10,13 @@
 typedef struct
 {
     String FullPath;
+	String IncludePath;
     int FileIndex;
     bool PragmaOnce;    
     bool bDirectInclude;
+	bool bSystemLikeInclude;
 } TFile;
-#define TFILE_INIT {STRING_INIT, 0, false, false}
+#define TFILE_INIT {STRING_INIT, STRING_INIT, 0, false, false, false}
 
 typedef Map TFileMap;
 

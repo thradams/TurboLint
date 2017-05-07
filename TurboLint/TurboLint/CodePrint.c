@@ -1206,14 +1206,21 @@ static void TProgram_PrintFiles(TProgram* pProgram,
     TFile *pFile = pProgram->Files2.pItems[i];
     if (pFile->bDirectInclude)
     {
-      char drive[_MAX_DRIVE];
-      char dir[_MAX_DIR];
-      char fname[_MAX_FNAME];
-      char ext[_MAX_EXT];
-      SplitPath(pFile->FullPath, drive, dir, fname, ext); // C4996
+      //char drive[_MAX_DRIVE];
+      //char dir[_MAX_DIR];
+      //char fname[_MAX_FNAME];
+      //char ext[_MAX_EXT];
+      //SplitPath(pFile->IncludePath, drive, dir, fname, ext); // C4996
 
-
-      fprintf(fp, "#include <%s%s>\n", fname, ext);
+	  if (pFile->bSystemLikeInclude)
+	  {
+		  fprintf(fp, "#include <%s>\n", pFile->IncludePath);
+	  }
+	  else
+	  {
+		  fprintf(fp, "#include \"%s\"\n", pFile->IncludePath);
+	  }
+      
     }
   }
   fprintf(fp, "\n");
