@@ -1,28 +1,9 @@
 
-
-#pragma mydir "C:\Users\thiago\Source\Repos\TurboLint"
-
-
-static void F(int* p)
-{
-}
-
-#define NULL  ((void*)0)
-#define A 1
-
-static int main()
-{ 
-  int i = 1 + A;
-  int* p = NULL;
-
-  F(NULL);
-  A + A;
-}
-
-
-
+int i[2] = { 1 , 2 };
 
 /*
+#pragma mydir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint"
+
 #include ".\Base\StringEx.c"
 #include ".\Base\StrBuilder.c"
 #include ".\Base\Path.c"
@@ -46,6 +27,5 @@ static int main()
 #include ".\TurboLint\TCLint2.c"
 
 #include "TurboLint.c"
-
 
 */

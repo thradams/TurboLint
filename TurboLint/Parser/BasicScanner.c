@@ -280,6 +280,7 @@ Result BasicScanner_Init(BasicScanner* pBasicScanner,
                          const char* name,
                          const char* text)
 {
+    pBasicScanner->pPrevious = NULL;
     pBasicScanner->FileIndex = -1;
     pBasicScanner->bLineStart = true;
     pBasicScanner->bMacroExpanded = false;
@@ -290,6 +291,7 @@ Result BasicScanner_Init(BasicScanner* pBasicScanner,
 
 Result BasicScanner_InitFile(BasicScanner* pBasicScanner, const char* fileName)
 {
+    pBasicScanner->pPrevious = NULL;
     pBasicScanner->FileIndex = -1;
     Result result = SStream_InitFile(&pBasicScanner->stream, fileName);
     if(result == RESULT_OK)
@@ -348,8 +350,11 @@ void BasicScanner_Destroy(BasicScanner* pBasicScanner)
 
 void BasicScanner_Delete(BasicScanner* pBasicScanner)
 {
+  if (pBasicScanner != NULL)
+  {
     BasicScanner_Destroy(pBasicScanner);
     free(pBasicScanner);
+  }
 }
 
 struct TkPair
@@ -888,3 +893,57 @@ wchar_t BasicScanner_Match(BasicScanner* scanner)
 //////////////////////////////////////////////
 
 
+
+void BasicScannerStack_Init(BasicScannerStack* stack)
+{
+  *stack = NULL;
+}
+
+void BasicScannerStack_Push(BasicScannerStack* stack, BasicScanner* pItem)
+{
+  if (*stack == NULL)
+  {
+    *stack = pItem;
+  }
+  else
+  {
+    pItem->pPrevious = *stack;
+    *stack = pItem;
+  }
+}
+
+BasicScanner* BasicScannerStack_PopGet(BasicScannerStack* stack)
+{
+  BasicScanner* pItem = NULL;
+  if (*stack != NULL)
+  {
+    pItem = *stack;
+    *stack = pItem->pPrevious;
+  }
+  return pItem;
+}
+
+void BasicScannerStack_PopIfNotLast(BasicScannerStack* stack)
+{
+  ASSERT(*stack != NULL);
+  if ((*stack)->pPrevious != NULL)
+  {
+    BasicScanner_Delete(BasicScannerStack_PopGet(stack));
+  }
+}
+
+void BasicScannerStack_Pop(BasicScannerStack* stack)
+{
+  BasicScanner_Delete(BasicScannerStack_PopGet(stack));
+}
+
+void BasicScannerStack_Destroy(BasicScannerStack* stack)
+{
+  BasicScanner* pItem = *stack;
+  while (pItem)
+  {
+    BasicScanner* p = pItem;
+    pItem = pItem->pPrevious;
+    BasicScanner_Delete(p);
+  }
+}

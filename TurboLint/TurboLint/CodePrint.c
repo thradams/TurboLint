@@ -5,28 +5,32 @@
 #include <stdlib.h>
 #include "..\Base\Path.h"
 
-static bool TInitializerList_CodePrint(TInitializerList*p, bool b, FILE* fp);
-static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, FILE* fp);
-static bool TDeclarator_CodePrint(TDeclarator* p, bool b, FILE* fp);
-static bool TAnyDeclaration_CodePrint(TAnyDeclaration *pDeclaration, bool b, FILE* fp);
-static bool TTypeSpecifier_CodePrint(TTypeSpecifier* p, bool b, FILE* fp);
-static bool TAnyStructDeclaration_CodePrint(TAnyStructDeclaration* p, bool b, FILE* fp);
-static bool TTypeQualifier_CodePrint(TTypeQualifier* p, bool b, FILE* fp);
-static bool TDeclaration_CodePrint(TDeclaration* p, bool b, FILE* fp);
-static bool TExpression_CodePrint(TExpression * p, const char* name, bool b, FILE* fp);
-static bool TStatement_CodePrint(TStatement * p, bool b, FILE* fp);
-static bool TBlockItem_CodePrint(TBlockItem * p, bool b, FILE* fp);
-static bool TInitializer_CodePrint(TInitializer* p, bool b, FILE* fp);
-static bool TPointer_CodePrint(TPointer* pPointer, bool b, FILE* fp);
-static bool TParameterDeclaration_CodePrint(TParameterDeclaration* p, bool b, FILE* fp);
-static bool TInitializerListItem_CodePrint(TInitializerListItem* p, bool b, FILE* fp);
+static bool TInitializerList_CodePrint(TInitializerList*p, bool b, StrBuilder* fp);
+static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, StrBuilder* fp);
+static bool TDeclarator_CodePrint(TDeclarator* p, bool b, StrBuilder* fp);
+static bool TAnyDeclaration_CodePrint(TAnyDeclaration *pDeclaration, bool b, StrBuilder* fp);
+static bool TTypeSpecifier_CodePrint(TTypeSpecifier* p, bool b, StrBuilder* fp);
+static bool TAnyStructDeclaration_CodePrint(TAnyStructDeclaration* p, bool b, StrBuilder* fp);
+static bool TTypeQualifier_CodePrint(TTypeQualifier* p, bool b, StrBuilder* fp);
+static bool TDeclaration_CodePrint(TDeclaration* p, bool b, StrBuilder* fp);
+static bool TExpression_CodePrint(TExpression * p, const char* name, bool b, StrBuilder* fp);
+static bool TStatement_CodePrint(TStatement * p, bool b, StrBuilder* fp);
+static bool TBlockItem_CodePrint(TBlockItem * p, bool b, StrBuilder* fp);
+static bool TInitializer_CodePrint(TInitializer* p, bool b, StrBuilder* fp);
+static bool TPointer_CodePrint(TPointer* pPointer, bool b, StrBuilder* fp);
+static bool TParameterDeclaration_CodePrint(TParameterDeclaration* p, bool b, StrBuilder* fp);
+static bool TInitializerListItem_CodePrint(TInitializerListItem* p, bool b, StrBuilder* fp);
 
-static bool TCompoundStatement_CodePrint(TCompoundStatement * p, bool b, FILE* fp)
+
+
+
+
+static bool TCompoundStatement_CodePrint(TCompoundStatement * p, bool b, StrBuilder* fp)
 {
 
 	//
   b = true;
-  fprintf(fp, "\n{\n");
+  StrBuilder_Append(fp, "\n{\n");
 
   for (size_t j = 0; j < p->BlockItemList.size; j++)
   {
@@ -34,63 +38,64 @@ static bool TCompoundStatement_CodePrint(TCompoundStatement * p, bool b, FILE* f
     TBlockItem_CodePrint(pBlockItem, j > 0, fp);
   }
 
-  fprintf(fp, "}\n");
+  StrBuilder_Append(fp, "}\n");
   return b;
 }
 
 
-static bool TLabeledStatement_CodePrint(TLabeledStatement * p, bool b, FILE* fp)
+static bool TLabeledStatement_CodePrint(TLabeledStatement * p, bool b, StrBuilder* fp)
 {
   b = true;
 
   if (p->token == TK_CASE)
   {
-    fprintf(fp, "case ");
+    StrBuilder_Append(fp, "case ");
     if (p->pStatementOpt)
     {
       b = TExpression_CodePrint(p->pExpression, "", false, fp);
     }
-    fprintf(fp, ":\n");
+    StrBuilder_Append(fp, ":\n");
     b = TStatement_CodePrint(p->pStatementOpt, false, fp);
   }
   else if (p->token == TK_DEFAULT)
   {
-    fprintf(fp, "default:\n");
+    StrBuilder_Append(fp, "default:\n");
     b = TStatement_CodePrint(p->pStatementOpt, false, fp);
   }
   else if (p->token == TK_IDENTIFIER)
   {
-    fprintf(fp, "%s:", p->Identifier);
+    StrBuilder_Append(fp, p->Identifier);
+    StrBuilder_Append(fp, ":");
   }
 
 
   return b;
 }
 
-static bool TForStatement_CodePrint(TForStatement * p, bool b, FILE* fp)
+static bool TForStatement_CodePrint(TForStatement * p, bool b, StrBuilder* fp)
 {
   b = true;
-  fprintf(fp, "for (");
+  StrBuilder_Append(fp, "for (");
   if (p->pInitDeclarationOpt) {
     TAnyDeclaration_CodePrint(p->pInitDeclarationOpt, b, fp);
     if (p->pExpression2)
     {
       b = TExpression_CodePrint(p->pExpression2, "expr2", true, fp);
     }
-    fprintf(fp, ";");
+    StrBuilder_Append(fp, ";");
     b = TExpression_CodePrint(p->pExpression3, "expr3", b, fp);
   }
   else
   {
     b = TExpression_CodePrint(p->pExpression1, "expr1", true, fp);
-    fprintf(fp, ";");
+    StrBuilder_Append(fp, ";");
     b = TExpression_CodePrint(p->pExpression2, "expr2", b, fp);
-    fprintf(fp, ";");
+    StrBuilder_Append(fp, ";");
     b = TExpression_CodePrint(p->pExpression3, "expr3", b, fp);
   }
 
 
-  fprintf(fp, ")");
+  StrBuilder_Append(fp, ")");
 
   b = TStatement_CodePrint(p->pStatement, false, fp);
 
@@ -98,51 +103,51 @@ static bool TForStatement_CodePrint(TForStatement * p, bool b, FILE* fp)
 }
 
 
-static bool TWhileStatement_CodePrint(TWhileStatement * p, bool b, FILE* fp)
+static bool TWhileStatement_CodePrint(TWhileStatement * p, bool b, StrBuilder* fp)
 {
   b = true;
-  fprintf(fp, "while (");
+  StrBuilder_Append(fp, "while (");
   b = TExpression_CodePrint(p->pExpression, "expr", false, fp);
-  fprintf(fp, ")");
+  StrBuilder_Append(fp, ")");
   b = TStatement_CodePrint(p->pStatement, false, fp);
   return b;
 }
 
 
-static bool TReturnStatement_CodePrint(TReturnStatement * p, bool b, FILE* fp)
+static bool TReturnStatement_CodePrint(TReturnStatement * p, bool b, StrBuilder* fp)
 {
-  fprintf(fp, "return ");
+  StrBuilder_Append(fp, "return ");
   TExpression_CodePrint(p->pExpression, "return-statement", false, fp);
-  fprintf(fp, ";\n");
+  StrBuilder_Append(fp, ";\n");
   return true;
 }
 
-static bool TDoStatement_CodePrint(TDoStatement * p, bool b, FILE* fp)
+static bool TDoStatement_CodePrint(TDoStatement * p, bool b, StrBuilder* fp)
 {
   b = true;
-  fprintf(fp, "do {");
+  StrBuilder_Append(fp, "do {");
   b = TStatement_CodePrint(p->pStatement, false, fp);
-  fprintf(fp, "} while (");
+  StrBuilder_Append(fp, "} while (");
   b = TExpression_CodePrint(p->pExpression, "expr", false, fp);
-  fprintf(fp, ")\n");
+  StrBuilder_Append(fp, ")\n");
 
   return b;
 }
 
 
-static bool TExpressionStatement_CodePrint(TExpressionStatement * p, bool b, FILE* fp)
+static bool TExpressionStatement_CodePrint(TExpressionStatement * p, bool b, StrBuilder* fp)
 {
   TExpression_CodePrint(p->pExpression, "", b, fp);
-  fprintf(fp, ";\n");
+  StrBuilder_Append(fp, ";\n");
   return true;
 }
 
 
-static bool TJumpStatement_CodePrint(TJumpStatement * p, bool b, FILE* fp)
+static bool TJumpStatement_CodePrint(TJumpStatement * p, bool b, StrBuilder* fp)
 {
 
 
-  fprintf(fp, "%s", TokenToString(((TBinaryExpression*)p)->token));
+  StrBuilder_Append(fp,  TokenToString(((TBinaryExpression*)p)->token));
   if (p->pExpression)
   {
 
@@ -151,44 +156,44 @@ static bool TJumpStatement_CodePrint(TJumpStatement * p, bool b, FILE* fp)
 
   if (p->token == TK_BREAK)
   {
-    fprintf(fp, ";\n");
+    StrBuilder_Append(fp, ";\n");
   }
   else
   {
-    fprintf(fp, ";");
+    StrBuilder_Append(fp, ";");
   }
 
   return true;
 }
 
-static bool TAsmStatement_CodePrint(TAsmStatement * p, bool b, FILE* fp)
+static bool TAsmStatement_CodePrint(TAsmStatement * p, bool b, StrBuilder* fp)
 {
-  fprintf(fp, "\"type\":\"asm-statement\"");
+  StrBuilder_Append(fp, "\"type\":\"asm-statement\"");
   return true;
 }
 
-static bool TSwitchStatement_CodePrint(TSwitchStatement * p, bool b, FILE* fp)
+static bool TSwitchStatement_CodePrint(TSwitchStatement * p, bool b, StrBuilder* fp)
 {
   b = true;
-  fprintf(fp, "switch (");
+  StrBuilder_Append(fp, "switch (");
   b = TExpression_CodePrint(p->pConditionExpression, "expr", false, fp);
-  fprintf(fp, ")");
+  StrBuilder_Append(fp, ")");
   b = TStatement_CodePrint(p->pExpression, false, fp);
   return b;
 }
 
 
-static bool TIfStatement_CodePrint(TIfStatement * p, bool b, FILE* fp)
+static bool TIfStatement_CodePrint(TIfStatement * p, bool b, StrBuilder* fp)
 {
   b = true;
-  fprintf(fp, "if (");
+  StrBuilder_Append(fp, "if (");
 
 
   b = TExpression_CodePrint(p->pConditionExpression, "expr", false, fp);
-  fprintf(fp, ")");
+  StrBuilder_Append(fp, ")");
 
   if (p->pStatement->type != TCompoundStatement_ID)
-    fprintf(fp, "\n");
+    StrBuilder_Append(fp, "\n");
 
   if (p->pStatement)
   {
@@ -197,14 +202,14 @@ static bool TIfStatement_CodePrint(TIfStatement * p, bool b, FILE* fp)
 
   if (p->pElseStatement)
   {
-    fprintf(fp, "else\n");
+    StrBuilder_Append(fp, "else\n");
     b = TStatement_CodePrint(p->pElseStatement, false, fp);
   }
 
   return b;
 }
 
-static bool TStatement_CodePrint(TStatement *  p, bool b, FILE* fp)
+static bool TStatement_CodePrint(TStatement *  p, bool b, StrBuilder* fp)
 {
   if (p == NULL)
   {
@@ -261,7 +266,7 @@ static bool TStatement_CodePrint(TStatement *  p, bool b, FILE* fp)
   return b;
 }
 
-static bool TBlockItem_CodePrint(TBlockItem *  p, bool b, FILE* fp)
+static bool TBlockItem_CodePrint(TBlockItem *  p, bool b, StrBuilder* fp)
 {
   if (p == NULL)
   {
@@ -313,7 +318,7 @@ static bool TBlockItem_CodePrint(TBlockItem *  p, bool b, FILE* fp)
 
   case TDeclaration_ID:
     b = TDeclaration_CodePrint((TDeclaration*)p, false, fp);
-    fprintf(fp, "\n");
+    StrBuilder_Append(fp, "\n");
     break;
 
   case TLabeledStatement_ID:
@@ -352,7 +357,7 @@ static bool TBlockItem_CodePrint(TBlockItem *  p, bool b, FILE* fp)
   return b;
 }
 
-static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b, FILE* fp)
+static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b, StrBuilder* fp)
 {
 
   b = false;
@@ -372,32 +377,34 @@ static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b,
   switch (p->token)
   {
   case TK_FULL_STOP:
-    fprintf(fp, ".%s", p->Identifier);
+    StrBuilder_Append(fp, ".");
+    StrBuilder_Append(fp, p->Identifier);
     b = true;
     break;
   case TK_ARROW:
-    fprintf(fp, "->%s", p->Identifier);
+    StrBuilder_Append(fp, "->");
+    StrBuilder_Append(fp, p->Identifier);
     b = true;
     break;
 
   case TK_LEFT_SQUARE_BRACKET:
-    fprintf(fp, "[");
+    StrBuilder_Append(fp, "[");
     b = TExpression_CodePrint(p->pExpressionRight, "r", b, fp);
-    fprintf(fp, "]");
+    StrBuilder_Append(fp, "]");
     break;
 
   case TK_LEFT_PARENTHESIS:
-    fprintf(fp, "(");
+    StrBuilder_Append(fp, "(");
     b = TExpression_CodePrint(p->pExpressionRight, "r", b, fp);
-    fprintf(fp, ")");
+    StrBuilder_Append(fp, ")");
     break;
 
   case TK_PLUSPLUS:
-    fprintf(fp, "++");
+    StrBuilder_Append(fp, "++");
     b = true;
     break;
   case TK_MINUSMINUS:
-    fprintf(fp, "--");
+    StrBuilder_Append(fp, "--");
     b = true;
     break;
     break;
@@ -417,7 +424,7 @@ static bool TPostfixExpressionCore_CodePrint(TPostfixExpressionCore * p, bool b,
 static bool TExpression_CodePrint(TExpression *  p,
   const char* name,
   bool b,
-  FILE* fp)
+  StrBuilder* fp)
 {
   if (p == NULL)
   {
@@ -431,15 +438,15 @@ static bool TExpression_CodePrint(TExpression *  p,
   {
     CASE(TBinaryExpression) :
       b = TExpression_CodePrint(((TBinaryExpression*)p)->pExpressionLeft, "l-expr", b, fp);
-    fprintf(fp, "%s", TokenToString(((TBinaryExpression*)p)->token));
+    StrBuilder_Append(fp, TokenToString(((TBinaryExpression*)p)->token));
     b = TExpression_CodePrint(((TBinaryExpression*)p)->pExpressionRight, "r-expr", b, fp);
     break;
 
     CASE(TTernaryExpression) :
       b = TExpression_CodePrint(((TTernaryExpression*)p)->pExpressionLeft, "l-expr", b, fp);
-    fprintf(fp, " ? ");
+    StrBuilder_Append(fp, " ? ");
     b = TExpression_CodePrint(((TTernaryExpression*)p)->pExpressionMiddle, "m-expr", b, fp);
-    fprintf(fp, " : ");
+    StrBuilder_Append(fp, " : ");
     b = TExpression_CodePrint(((TTernaryExpression*)p)->pExpressionRight, "r-expr", b, fp);
 
     break;
@@ -451,20 +458,20 @@ static bool TExpression_CodePrint(TExpression *  p,
 
       if (pPrimaryExpressionValue->MacroExpansion != NULL)
       {
-        fprintf(fp, "%s", pPrimaryExpressionValue->MacroExpansion);
+        StrBuilder_Append(fp,  pPrimaryExpressionValue->MacroExpansion);
       }
       else
       {
 
         if (pPrimaryExpressionValue->pExpressionOpt != NULL)
         {
-          fprintf(fp, "(");
+          StrBuilder_Append(fp, "(");
           b = TExpression_CodePrint(pPrimaryExpressionValue->pExpressionOpt, "expr", b, fp);
-          fprintf(fp, ")");
+          StrBuilder_Append(fp, ")");
         }
         else
         {
-          fprintf(fp, "%s", pPrimaryExpressionValue->lexeme);
+          StrBuilder_Append(fp, pPrimaryExpressionValue->lexeme);
         }
       }
       b = true;
@@ -489,23 +496,23 @@ static bool TExpression_CodePrint(TExpression *  p,
 
         if (pTUnaryExpressionOperator->TypeName.Specifiers.pTypeSpecifierOpt != NULL)
         {
-          fprintf(fp, "sizeof (");
+          StrBuilder_Append(fp, "sizeof (");
           b = TTypeQualifier_CodePrint(&pTUnaryExpressionOperator->TypeName.Specifiers.TypeQualifiers, false, fp);
           b = TTypeSpecifier_CodePrint(pTUnaryExpressionOperator->TypeName.Specifiers.pTypeSpecifierOpt, b, fp);
           b = TDeclarator_CodePrint(&pTUnaryExpressionOperator->TypeName.Declarator, b, fp);
-          fprintf(fp, ")");
+          StrBuilder_Append(fp, ")");
 
         }
         else
         {
-          fprintf(fp, "sizeof ");
+          StrBuilder_Append(fp, "sizeof ");
           b = TExpression_CodePrint(pTUnaryExpressionOperator->pExpressionLeft, "expr", b, fp);
-          fprintf(fp, "");
+          StrBuilder_Append(fp, "");
         }
       }
       else
       {
-        fprintf(fp, "%s", TokenToString(((TBinaryExpression*)p)->token));
+        StrBuilder_Append(fp, TokenToString(((TBinaryExpression*)p)->token));
         b = TExpression_CodePrint(pTUnaryExpressionOperator->pExpressionLeft, "expr", b, fp);
 
       }
@@ -519,11 +526,11 @@ static bool TExpression_CodePrint(TExpression *  p,
       TCastExpressionType * pCastExpressionType =
         (TCastExpressionType*)p;
 
-      fprintf(fp, "(");
+      StrBuilder_Append(fp, "(");
       b = TTypeQualifier_CodePrint(&pCastExpressionType->TypeName.Specifiers.TypeQualifiers, false, fp);
       b = TTypeSpecifier_CodePrint(pCastExpressionType->TypeName.Specifiers.pTypeSpecifierOpt, b, fp);
       b = TDeclarator_CodePrint(&pCastExpressionType->TypeName.Declarator, b, fp);
-      fprintf(fp, ")");
+      StrBuilder_Append(fp, ")");
       b = TExpression_CodePrint(pCastExpressionType->pExpression, "expr", b, fp);
     }
     break;
@@ -539,14 +546,14 @@ static bool TExpression_CodePrint(TExpression *  p,
 
 
 
-static   bool TEnumerator_CodePrint(TEnumerator* pTEnumerator, bool b, FILE* fp)
+static   bool TEnumerator_CodePrint(TEnumerator* pTEnumerator, bool b, StrBuilder* fp)
 {
 
-  fprintf(fp, "%s", pTEnumerator->Name);
+  StrBuilder_Append(fp,  pTEnumerator->Name);
 
   if (pTEnumerator->pExpression)
   {
-    fprintf(fp, " = ");
+    StrBuilder_Append(fp, " = ");
     TExpression_CodePrint(pTEnumerator->pExpression, "expr", true, fp);
 
     //int r;
@@ -561,12 +568,12 @@ static   bool TEnumerator_CodePrint(TEnumerator* pTEnumerator, bool b, FILE* fp)
   return true;
 }
 
-static bool TEnumSpecifier_CodePrint(TEnumSpecifier* p, bool b, FILE* fp)
+static bool TEnumSpecifier_CodePrint(TEnumSpecifier* p, bool b, StrBuilder* fp)
 {
   b = true;
-  fprintf(fp, " enum ");
-  fprintf(fp, " %s", p->Name);
-  fprintf(fp, "\n{\n");
+  StrBuilder_Append(fp, " enum ");
+  StrBuilder_Append(fp, p->Name);
+  StrBuilder_Append(fp, "\n{\n");
 
   for (size_t i = 0; i < p->EnumeratorList.size; i++)
   {
@@ -575,49 +582,49 @@ static bool TEnumSpecifier_CodePrint(TEnumSpecifier* p, bool b, FILE* fp)
     TEnumerator_CodePrint(pTEnumerator, false, fp);
 
     if (i + 1 < p->EnumeratorList.size)
-      fprintf(fp, ",\n");
+      StrBuilder_Append(fp, ",\n");
     else
-      fprintf(fp, "\n");
+      StrBuilder_Append(fp, "\n");
 
   }
 
 
-  fprintf(fp, "}");
+  StrBuilder_Append(fp, "}");
   return true;
 }
 
 
-static bool TStructUnionSpecifier_CodePrint(TStructUnionSpecifier* p, bool b, FILE* fp)
+static bool TStructUnionSpecifier_CodePrint(TStructUnionSpecifier* p, bool b, StrBuilder* fp)
 {
   b = true;
 
   if (p->bIsStruct)
-    fprintf(fp, " struct ");
+    StrBuilder_Append(fp, " struct ");
 
   else
-    fprintf(fp, " union");
+    StrBuilder_Append(fp, " union ");
 
-  fprintf(fp, " %s", p->Name);
+  StrBuilder_Append(fp, p->Name);
   //struct point pt = {}
   if (p->StructDeclarationList.size > 0)
   {
-    fprintf(fp, " {\n");
+    StrBuilder_Append(fp, " {\n");
 
     for (size_t i = 0; i < p->StructDeclarationList.size; i++)
     {
       TAnyStructDeclaration * pStructDeclaration = p->StructDeclarationList.pItems[i];
       b = TAnyStructDeclaration_CodePrint(pStructDeclaration, b, fp);
-      fprintf(fp, ";\n");
+      StrBuilder_Append(fp, ";\n");
     }
 
 
-    fprintf(fp, "}");
+    StrBuilder_Append(fp, "}");
   }
 
   return true;
 }
 
-static bool TSingleTypeSpecifier_CodePrint(TSingleTypeSpecifier* p, bool b, FILE* fp)
+static bool TSingleTypeSpecifier_CodePrint(TSingleTypeSpecifier* p, bool b, StrBuilder* fp)
 {
 
   b = true;
@@ -626,62 +633,63 @@ static bool TSingleTypeSpecifier_CodePrint(TSingleTypeSpecifier* p, bool b, FILE
 
   if (p->bIsVoid)
   {
-    fprintf(fp, " void");
+    StrBuilder_Append(fp, " void");
     b = true;
   }
 
   if (p->bIsUnsigned)
   {
-    fprintf(fp, " unsigned");
+    StrBuilder_Append(fp, " unsigned");
     b = true;
   }
 
   if (p->bIsBool)
   {
-    //fprintf(fp, " _Bool");
-    fprintf(fp, " bool");
+    //StrBuilder_Append(fp, " _Bool");
+    StrBuilder_Append(fp, " bool");
     b = true;
   }
 
   if (p->bIsChar)
   {
-    fprintf(fp, " char");
+    StrBuilder_Append(fp, " char");
     b = true;
   }
 
   if (p->bIsShort)
   {
-    fprintf(fp, " short");
+    StrBuilder_Append(fp, " short");
     b = true;
   }
 
   for (int j = 0; j < p->nLong; j++)
   {
-    fprintf(fp, " long");
+    StrBuilder_Append(fp, " long");
     b = true;
   }
 
   if (p->bIsInt)
   {
-    fprintf(fp, " int");
+    StrBuilder_Append(fp, " int");
     b = true;
   }
 
   if (p->bIsDouble)
   {
-    fprintf(fp, " double");
+    StrBuilder_Append(fp, " double");
     b = true;
   }
 
   if (p->bIsFloat)
   {
-    fprintf(fp, " float");
+    StrBuilder_Append(fp, " float");
     b = true;
   }
 
   if (p->bIsTypeDef)
   {
-    fprintf(fp, " %s", p->TypedefName);
+    StrBuilder_Append(fp, " ");
+    StrBuilder_Append(fp, p->TypedefName);
     b = true;
   }
 
@@ -689,7 +697,7 @@ static bool TSingleTypeSpecifier_CodePrint(TSingleTypeSpecifier* p, bool b, FILE
   return b;
 }
 
-static bool TTypeSpecifier_CodePrint(TTypeSpecifier*  p, bool b, FILE* fp)
+static bool TTypeSpecifier_CodePrint(TTypeSpecifier*  p, bool b, StrBuilder* fp)
 {
   if (p == NULL)
   {
@@ -719,18 +727,19 @@ static bool TTypeSpecifier_CodePrint(TTypeSpecifier*  p, bool b, FILE* fp)
   return b;
 }
 
-static bool TDesignator_CodePrint(TDesignator* p, bool b, FILE* fp)
+static bool TDesignator_CodePrint(TDesignator* p, bool b, StrBuilder* fp)
 {
   if (b)
-    fprintf(fp, ",");
+    StrBuilder_Append(fp, ",");
 
-  fprintf(fp, "{");
+  StrBuilder_Append(fp, "{");
 
   //
   if (p->Name)
   {
     //.identifier
-    fprintf(fp, ".%s", p->Name);
+    StrBuilder_Append(fp, ".");
+    StrBuilder_Append(fp, p->Name);
   }
 
   else
@@ -739,36 +748,36 @@ static bool TDesignator_CodePrint(TDesignator* p, bool b, FILE* fp)
     TExpression_CodePrint(p->pExpression, "index", b, fp);
   }
 
-  fprintf(fp, "}");
+  StrBuilder_Append(fp, "}");
   return b;
 }
 
 
-static bool TInitializerList_CodePrint(TInitializerList*p, bool b, FILE* fp)
+static bool TInitializerList_CodePrint(TInitializerList*p, bool b, StrBuilder* fp)
 {
 
   b = false;
-  fprintf(fp, "{");
+  StrBuilder_Append(fp, "{");
 
   for (size_t i = 0; i < p->size; i++)
   {
     if (i > 0)
-      fprintf(fp, ",");
+      StrBuilder_Append(fp, ",");
 
     TInitializerListItem* pItem = p->pItems[i];
     b = TInitializerListItem_CodePrint(pItem, b, fp);
   }
 
-  fprintf(fp, "}");
+  StrBuilder_Append(fp, "}");
 
   return true;
 }
 
-static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, FILE* fp)
+static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, StrBuilder* fp)
 {
   if (p->MacroExpansion != NULL)
   {
-    fprintf(fp, "%s", p->MacroExpansion);
+    StrBuilder_Append(fp, p->MacroExpansion);
   }
   else
   {
@@ -778,7 +787,7 @@ static bool TInitializerListType_CodePrint(TInitializerListType*p, bool b, FILE*
   return true;
 }
 
-static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
+static bool TInitializer_CodePrint(TInitializer*  p, bool b, StrBuilder* fp)
 {
   if (p == NULL)
   {
@@ -797,7 +806,8 @@ static bool TInitializer_CodePrint(TInitializer*  p, bool b, FILE* fp)
 }
 
 
-static bool TPointerList_CodePrint(TPointerList *p, bool b, FILE* fp)
+
+static bool TPointerList_CodePrint(TPointerList *p, bool b, StrBuilder* fp)
 {
   b = false;
 
@@ -810,33 +820,35 @@ static bool TPointerList_CodePrint(TPointerList *p, bool b, FILE* fp)
   return true;
 }
 
-static bool TParameterList_CodePrint(TParameterList *p, bool b, FILE* fp)
+
+
+static bool TParameterList_CodePrint(TParameterList *p, bool b, StrBuilder* fp)
 {
   b = false;
-  fprintf(fp, "(");
+  StrBuilder_Append(fp, "(");
 
   for (size_t i = 0; i < p->size; i++)
   {
     if (i > 0)
-      fprintf(fp, ",");
+      StrBuilder_Append(fp, ",");
 
     TParameterDeclaration * pItem = p->pItems[i];
     b = TParameterDeclaration_CodePrint(pItem, b, fp);
   }
 
-  fprintf(fp, ")");
+  StrBuilder_Append(fp, ")");
   return true;
 }
 
-static bool TDeclarator_PrintCore2(TDeclarator* p, bool b, FILE* fp)
+static bool TDeclarator_PrintCore(TDeclarator* p, 
+                                  bool b, 
+                                  StrBuilder * fp)
 {
-  b = false;
-
-  if (p->token == TK_LEFT_PARENTHESIS &&
+  /*if (p->token == TK_LEFT_PARENTHESIS &&
     p->pParametersOpt == NULL)
   {
     // ( declarator ) 
-    fprintf(fp, "(");
+    StrBuilder_Append(fp, "(");
   }
 
   if (p->PointerList.size > 0)
@@ -844,13 +856,29 @@ static bool TDeclarator_PrintCore2(TDeclarator* p, bool b, FILE* fp)
     b = TPointerList_CodePrint(&p->PointerList, b, fp);
   }
 
-
-
   b = TTypeQualifier_CodePrint(&p->Qualifiers, b, fp);
 
-  if (p->Name != NULL)
+  if (p->pDeclaratorOpt)
   {
-    fprintf(fp, " %s", p->Name);
+    StrBuilder local = STRBUILDER_INIT;
+    TDeclarator_PrintCore(p->pDeclaratorOpt, b, &local);
+    StrBuilder_Append(fp, local.c_str);
+    StrBuilder_Destroy(&local);
+  }
+  else
+  {
+    if (p->Name != NULL)
+    {
+      StrBuilder_Append(fp, " ");
+      StrBuilder_Append(fp, p->Name);
+    }
+  }
+
+  if (p->token == TK_LEFT_PARENTHESIS &&
+    p->pParametersOpt == NULL)
+  {
+    // ( declarator ) 
+    StrBuilder_Append(fp, ")");
   }
 
   if (p->pParametersOpt != NULL)
@@ -861,50 +889,153 @@ static bool TDeclarator_PrintCore2(TDeclarator* p, bool b, FILE* fp)
   if (p->token == TK_LEFT_SQUARE_BRACKET)
   {
     //tem que revisar..isso fica no p->pDeclaratorOpt
-    fprintf(fp, "[");
+    StrBuilder_Append(fp, "[");
     b = TExpression_CodePrint(p->pExpression, "", b, fp);
-    fprintf(fp, "]");
+    StrBuilder_Append(fp, "]");
 
   }
+  */
+}
 
+static bool TDeclarator_PrintCore2(TDeclarator* p, bool b, StrBuilder* fp)
+{
+  /*b = false;
 
-
-
-  else
+  if (p->PointerList.size > 0)
   {
-    //fprintf(fp, "\"name\": null");
+    b = TPointerList_CodePrint(&p->PointerList, b, fp);
   }
 
-  if (p->token == TK_LEFT_PARENTHESIS &&
-    p->pParametersOpt == NULL)
-  {
-    // ( declarator ) 
-    fprintf(fp, ")");
-  }
 
   if (p->pDeclaratorOpt)
   {
+    StrBuilder_Append(fp, "(");
     b = TDeclarator_PrintCore2(p->pDeclaratorOpt, b, fp);
+    StrBuilder_Append(fp, ")");
+  }
+  else
+  {
+
+  
+    b = TTypeQualifier_CodePrint(&p->Qualifiers, b, fp);
+
+    if (p->Name != NULL)
+    {
+      StrBuilder_Append(fp, " ");
+      StrBuilder_Append(fp, p->Name);
+    }
   }
 
+  
+
+  if (p->pParametersOpt != NULL)
+  {
+    b = TParameterList_CodePrint(p->pParametersOpt, b, fp);
+  }
+
+  if (p->token == TK_LEFT_SQUARE_BRACKET)
+  {
+    //tem que revisar..isso fica no p->pDeclaratorOpt
+    StrBuilder_Append(fp, "[");
+    b = TExpression_CodePrint(p->pExpression, "", b, fp);
+    StrBuilder_Append(fp, "]");
+
+  }
+  
+  else
+  {
+    //StrBuilder_Append(fp, "\"name\": null");
+  }
+
+  
 
 
+  */
   return true;
 }
-
-static bool TDeclarator_CodePrint(TDeclarator* p, bool b, FILE* fp)
+static bool TDirectDeclarator_CodePrint(TDirectDeclarator* pDirectDeclarator,
+  bool b, 
+  StrBuilder* fp)
 {
-  TDeclarator_PrintCore2(p, b, fp);
-  if (p->pInitializer != NULL)
+  if (pDirectDeclarator == NULL)
   {
-    fprintf(fp, " = ");
-    b = TInitializer_CodePrint(p->pInitializer, b, fp);
+    return false;
   }
+  //fprintf(fp, "{");
+  b = false;
+
+  if (pDirectDeclarator->Identifier)
+  {
+    //identifier
+    StrBuilder_Append(fp, " ");
+    StrBuilder_Append(fp, pDirectDeclarator->Identifier);
+    b = true;
+  }
+  else  if (pDirectDeclarator->pDeclarator)
+  {
+    //( declarator )
+    StrBuilder_Append(fp, "(");
+    b = TDeclarator_CodePrint(pDirectDeclarator->pDeclarator, b, fp);
+    StrBuilder_Append(fp, ")");
+  }
+
+  if (pDirectDeclarator->token == TK_LEFT_SQUARE_BRACKET)
+  {
+    /*
+    direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
+    direct-declarator [ static type-qualifier-listopt assignment-expression ]
+    direct-declarator [ type-qualifier-list static assignment-expression ]
+    */
+
+    StrBuilder_Append(fp, "[");
+    if (pDirectDeclarator->pExpression)
+    {
+      b = TExpression_CodePrint(pDirectDeclarator->pExpression, "assignment-expression", b, fp);
+    }
+    StrBuilder_Append(fp, "]");
+  }
+  
+
+  if (pDirectDeclarator->pParametersOpt)
+  {
+    //( parameter-type-list )
+    //fprintf(fp, ",");
+    //fprintf(fp, "\"parameter-type-list\":");
+    TParameterList_CodePrint(pDirectDeclarator->pParametersOpt, b, fp);
+  }
+
+  if (pDirectDeclarator->pDirectDeclarator)
+  {
+    //fprintf(fp, "\"direct-declarator\":");
+    TDirectDeclarator_CodePrint(pDirectDeclarator->pDirectDeclarator, b, fp);
+  }
+
+
+  //fprintf(fp, "}");
+  return b;
+}
+
+static bool TDeclarator_CodePrint(TDeclarator* p, bool b, StrBuilder* fp)
+{
+  //fprintf(fp, "{");
+  b = false;
+
+  //fprintf(fp, "\"pointer\":");
+  b = TPointerList_CodePrint(&p->PointerList, b, fp);
+
+  //if (b)
+  //{
+    //fprintf(fp, ",");
+  //}
+  //fprintf(fp, "\"direct-declarator\":");
+  b = TDirectDeclarator_CodePrint(p->pDirectDeclarator, b, fp);
+
+  //fprintf(fp, "}");
   return b;
 }
 
 
-static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, FILE* fp)
+static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, StrBuilder* fp)
 {
   b = false;
 
@@ -912,7 +1043,7 @@ static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, FILE* fp)
   for (size_t i = 0; i < p->size; i++)
   {
     if (i > 0)
-      fprintf(fp, ",");
+      StrBuilder_Append(fp, ",");
 
     TDeclarator* pItem = p->pItems[i];
     b = TDeclarator_CodePrint(pItem, b, fp);
@@ -922,7 +1053,7 @@ static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, FILE* fp)
   return true;
 }
 
-static bool TStructDeclaration_CodePrint(TStructDeclaration* p, bool b, FILE* fp)
+static bool TStructDeclaration_CodePrint(TStructDeclaration* p, bool b, StrBuilder* fp)
 {
   b = TTypeQualifier_CodePrint(&p->Qualifier, false, fp);
   b = TTypeSpecifier_CodePrint(p->pSpecifier, b, fp);
@@ -930,7 +1061,7 @@ static bool TStructDeclaration_CodePrint(TStructDeclaration* p, bool b, FILE* fp
   return true;
 }
 
-static bool TAnyStructDeclaration_CodePrint(TAnyStructDeclaration* p, bool b, FILE* fp)
+static bool TAnyStructDeclaration_CodePrint(TAnyStructDeclaration* p, bool b, StrBuilder* fp)
 {
   switch (p->type)
   {
@@ -946,30 +1077,30 @@ static bool TAnyStructDeclaration_CodePrint(TAnyStructDeclaration* p, bool b, FI
   return b;
 }
 
-static bool StorageSpecifier_CodePrint(TStorageSpecifier* p, bool b, FILE* fp)
+static bool StorageSpecifier_CodePrint(TStorageSpecifier* p, bool b, StrBuilder* fp)
 {
 
   if (p->bIsAuto)
   {
-    fprintf(fp, " auto");
+    StrBuilder_Append(fp, " auto");
     b = true;
   }
 
   if (p->bIsExtern)
   {
-    fprintf(fp, " extern");
+    StrBuilder_Append(fp, " extern");
     b = true;
   }
 
   if (p->bIsRegister)
   {
-    fprintf(fp, " register");
+    StrBuilder_Append(fp, " register");
     b = true;
   }
 
   if (p->bIsStatic)
   {
-    fprintf(fp, " static");
+    StrBuilder_Append(fp, " static");
     b = true;
   }
 
@@ -978,76 +1109,75 @@ static bool StorageSpecifier_CodePrint(TStorageSpecifier* p, bool b, FILE* fp)
 
   if (p->bIsThread_local)
   {
-    fprintf(fp, " [Thread_local]");
+    StrBuilder_Append(fp, " [Thread_local]");
     b = true;
   }
 
   if (p->bIsTypedef)
   {
-    fprintf(fp, " typedef");
+    StrBuilder_Append(fp, " typedef");
     b = true;
   }
 
   return b;
 }
 
-static bool TFunctionSpecifier_CodePrint(TFunctionSpecifier* p, bool b, FILE* fp)
+static bool TFunctionSpecifier_CodePrint(TFunctionSpecifier* p, bool b, StrBuilder* fp)
 {
   if (p->bIsInline)
   {
-    fprintf(fp, " inline");
+    StrBuilder_Append(fp, " inline");
     b = true;
   }
   if (p->bIsNoReturn)
   {
-    fprintf(fp, " [noreturn]");
+    StrBuilder_Append(fp, " [noreturn]");
     b = true;
   }
   return b;
 }
 
 
-
-static bool TTypeQualifier_CodePrint(TTypeQualifier* p, bool b, FILE* fp)
+static bool TTypeQualifier_CodePrint(TTypeQualifier* p, bool b, StrBuilder* fp)
 {
 
   if (p->bIsAtomic)
   {
-    fprintf(fp, " _Atomic");
+    StrBuilder_Append(fp, " _Atomic");
     b = true;
   }
 
   if (p->bIsConst)
   {
-    fprintf(fp, " const");
+    StrBuilder_Append(fp, " const");
     b = true;
   }
 
   if (p->bIsRestrict)
   {
-    fprintf(fp, " restrict");
+    StrBuilder_Append(fp, " restrict");
     b = true;
   }
   if (p->bIsVolatile)
   {
-    fprintf(fp, " volatile");
+    StrBuilder_Append(fp, " volatile");
     b = true;
   }
   return b;
 }
 
-static bool TPointer_CodePrint(TPointer* pPointer, bool b, FILE* fp)
+static bool TPointer_CodePrint(TPointer* pPointer, bool b, StrBuilder* fp)
 {
   if (pPointer->bPointer)
   {
-    fprintf(fp, "*");
+    StrBuilder_Append(fp, "*");
   }
   TTypeQualifier_CodePrint(&pPointer->Qualifier, false, fp);
 
   return true;
 }
 
-static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclarationSpecifiers, bool b, FILE* fp)
+static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclarationSpecifiers, bool b, StrBuilder* fp)
 {
   b = TFunctionSpecifier_CodePrint(&pDeclarationSpecifiers->FunctionSpecifiers, b, fp);
   b = StorageSpecifier_CodePrint(&pDeclarationSpecifiers->StorageSpecifiers, b, fp);
@@ -1056,9 +1186,49 @@ static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclaratio
   return b;
 }
 
+bool TInitDeclarator_CodePrint(TInitDeclarator* p, bool b, StrBuilder* fp)
+{
+
+  
+  b = false;
+
+  
+  b = TDeclarator_CodePrint(p->pDeclarator, b, fp);
+
+  if (p->pInitializer)
+  {    
+    StrBuilder_Append(fp, " = ");
+    TInitializer_CodePrint(p->pInitializer, b, fp);
+  }
+
+  
+  return true;
+}
+
+
+bool TInitDeclaratorList_CodePrint(TInitDeclaratorList *p, bool b, StrBuilder* fp)
+{
+  b = false;
+  //fprintf(fp, "[");
+  TInitDeclarator* pInitDeclarator = p->pInitDeclaratorHeap;
+  int i = 0;
+  while (pInitDeclarator)
+  {
+    if (i > 0)
+      StrBuilder_Append(fp, ",");
+
+    b = TInitDeclarator_CodePrint(pInitDeclarator, b, fp);
+    pInitDeclarator = pInitDeclarator->pInitDeclaratorNext;
+    i++;
+  }
+
+//  fprintf(fp, "]");
+  return true;
+}
+
 static bool TDeclaration_CodePrint(TDeclaration* p,
   bool b,
-  FILE* fp)
+  StrBuilder* fp)
 {
  
   //para amalgamation eh util transformar a funcao em static
@@ -1076,7 +1246,7 @@ static bool TDeclaration_CodePrint(TDeclaration* p,
 
   b = TDeclarationSpecifiers_CodePrint(&p->Specifiers, false, fp);
 
-  b = TDeclaratorList_CodePrint(&p->Declarators, b, fp);
+  b = TInitDeclaratorList_CodePrint(&p->InitDeclaratorList, b, fp);
 
   if (p->pCompoundStatementOpt != NULL)
   {
@@ -1084,20 +1254,20 @@ static bool TDeclaration_CodePrint(TDeclaration* p,
   }
   else
   {
-    fprintf(fp, ";");
+    StrBuilder_Append(fp, ";");
   }
 
   if (p->PreprocessorAndCommentsString.size > 0)
   {
-    fprintf(fp, "\n");
-    fprintf(fp, p->PreprocessorAndCommentsString.c_str);
+    StrBuilder_Append(fp, "\n");
+    StrBuilder_Append(fp, p->PreprocessorAndCommentsString.c_str);
   }
 
   return true;
 }
 
 
-static bool TParameterDeclaration_CodePrint(TParameterDeclaration* p, bool b, FILE* fp)
+static bool TParameterDeclaration_CodePrint(TParameterDeclaration* p, bool b, StrBuilder* fp)
 {
 
   b = TDeclarationSpecifiers_CodePrint(&p->Specifiers, false, fp);
@@ -1108,7 +1278,7 @@ static bool TParameterDeclaration_CodePrint(TParameterDeclaration* p, bool b, FI
   return b;
 }
 
-static bool TAnyDeclaration_CodePrint(TAnyDeclaration *pDeclaration, bool b, FILE* fp)
+static bool TAnyDeclaration_CodePrint(TAnyDeclaration *pDeclaration, bool b, StrBuilder* fp)
 {
   switch (pDeclaration->type)
   {
@@ -1127,7 +1297,7 @@ static bool TAnyDeclaration_CodePrint(TAnyDeclaration *pDeclaration, bool b, FIL
   return b;
 }
 
-static bool TDesignatorList_CodePrint(TDesignatorList *p, bool b, FILE* fp)
+static bool TDesignatorList_CodePrint(TDesignatorList *p, bool b, StrBuilder* fp)
 {
   b = false;
 
@@ -1135,7 +1305,7 @@ static bool TDesignatorList_CodePrint(TDesignatorList *p, bool b, FILE* fp)
   for (size_t i = 0; i < p->size; i++)
   {
     if (i > 0)
-      fprintf(fp, ",");
+      StrBuilder_Append(fp, ",");
 
     TDesignator* pItem = p->pItems[i];
     b = TDesignator_CodePrint(pItem, b, fp);
@@ -1146,7 +1316,7 @@ static bool TDesignatorList_CodePrint(TDesignatorList *p, bool b, FILE* fp)
 }
 
 
-static bool TInitializerListItem_CodePrint(TInitializerListItem* p, bool b, FILE* fp)
+static bool TInitializerListItem_CodePrint(TInitializerListItem* p, bool b, StrBuilder* fp)
 {
 
   b = false;
@@ -1162,7 +1332,7 @@ static bool TInitializerListItem_CodePrint(TInitializerListItem* p, bool b, FILE
 }
 
 
-static bool TDeclarations_CodePrint(TDeclarations *p, bool b, FILE* fp)
+static bool TDeclarations_CodePrint(TDeclarations *p, bool b, StrBuilder* fp)
 {
   b = false;
 
@@ -1170,7 +1340,7 @@ static bool TDeclarations_CodePrint(TDeclarations *p, bool b, FILE* fp)
   for (size_t i = 0; i < p->size; i++)
   {
     if (i > 0)
-      fprintf(fp, ",");
+      StrBuilder_Append(fp, ",");
 
     TAnyDeclaration* pItem = p->pItems[i];
     b = TAnyDeclaration_CodePrint(pItem, b, fp);
@@ -1184,14 +1354,14 @@ static bool TDeclarations_CodePrint(TDeclarations *p, bool b, FILE* fp)
 static void TProgram_PrintToFile(TProgram* pProgram,
                         const char* fileName)
 {
-  FILE * fp = fopen(fileName, "w");
+  StrBuilder * fp = fopen(fileName, "w");
   TDeclarations_CodePrint(&pProgram->Declarations, false, fp);
   fclose(fp);
 }*/
 
 
 static void TProgram_PrintFiles(TProgram* pProgram,
-  FILE* fp,
+  StrBuilder* fp,
   const char* userpath)
 {
   //TODO tem que ter um teste especial..
@@ -1200,7 +1370,7 @@ static void TProgram_PrintFiles(TProgram* pProgram,
   //deve ser incluido..se ele foi incluido por outro nao.
   //tem que marcar se foi incluido por um da lista de includes e nao incluir
 
-  fprintf(fp, "/*external files*/\n");
+  StrBuilder_Append(fp, "/*external files*/\n");
   for (int i = 0; i < pProgram->Files2.size; i++)
   {
     TFile *pFile = pProgram->Files2.pItems[i];
@@ -1214,16 +1384,20 @@ static void TProgram_PrintFiles(TProgram* pProgram,
 
 	  if (pFile->bSystemLikeInclude)
 	  {
-		  fprintf(fp, "#include <%s>\n", pFile->IncludePath);
+      StrBuilder_Append(fp, "#include <");
+      StrBuilder_Append(fp, pFile->IncludePath);
+      StrBuilder_Append(fp, ">\n");		  
 	  }
 	  else
 	  {
-		  fprintf(fp, "#include \"%s\"\n", pFile->IncludePath);
+      StrBuilder_Append(fp, "#include \"");
+      StrBuilder_Append(fp, pFile->IncludePath);
+      StrBuilder_Append(fp, "\"\n");		  
 	  }
       
     }
   }
-  fprintf(fp, "\n");
+  StrBuilder_Append(fp, "\n");
 }
 
 
@@ -1241,11 +1415,15 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     TFile *pFile = pProgram->Files2.pItems[i];
     printf("\"%s\"\n", pFile->FullPath);
   }
-
-  TProgram_PrintFiles(pProgram, fp, inputFileName);
+  StrBuilder sb = STRBUILDER_INIT;
+  TProgram_PrintFiles(pProgram, &sb, inputFileName);
+  fprintf(fp, "%s", sb.c_str);
+  StrBuilder_Clear(&sb);
 
   for (size_t i = 0; i < pProgram->Declarations.size; i++)
   {
+    
+
     TAnyDeclaration* pItem = pProgram->Declarations.pItems[i];
     int fileIndex = TAnyDeclaration_GetFileIndex(pItem);
     TFile *pFile = pProgram->Files2.pItems[fileIndex];
@@ -1275,12 +1453,14 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     }
     if (bPrintThisDeclaration)
     {
-      b = TAnyDeclaration_CodePrint(pItem, b, fp);
-      fprintf(fp, "\n\n");
+      b = TAnyDeclaration_CodePrint(pItem, b, &sb);
+      StrBuilder_Append(&sb, "\n\n");
+      fprintf(fp, "%s", sb.c_str);
+      StrBuilder_Clear(&sb);
       k++;
     }
   }
-
+  StrBuilder_Destroy(&sb);
   fclose(fp);
 }
 

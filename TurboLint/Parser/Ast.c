@@ -74,89 +74,89 @@ void TStatement_Destroy(TStatement* p)
 {
   switch (p->type)
   {
-    case TExpressionStatement_ID:
-      TExpressionStatement_Destroy((TExpressionStatement*)p);
-      break;
-    case TSwitchStatement_ID:
-      TSwitchStatement_Destroy((TSwitchStatement*)p);
-      break;
-    case TLabeledStatement_ID:
-      TLabeledStatement_Destroy((TLabeledStatement*)p);
-      break;
-    case TForStatement_ID:
-      TForStatement_Destroy((TForStatement*)p);
-      break;
-    case TJumpStatement_ID:
-      TJumpStatement_Destroy((TJumpStatement*)p);
-      break;
-    case TAsmStatement_ID:
-      TAsmStatement_Destroy((TAsmStatement*)p);
-      break;
-    case TCompoundStatement_ID:
-      TCompoundStatement_Destroy((TCompoundStatement*)p);
-      break;
-    case TIfStatement_ID:
-      TIfStatement_Destroy((TIfStatement*)p);
-      break;
-    case TDoStatement_ID:
-      TDoStatement_Destroy((TDoStatement*)p);
-      break;
-    case TReturnStatement_ID:
-      TReturnStatement_Destroy((TReturnStatement*)p);
-      break;
-    default:
-      ASSERT(false);
-      break;
+  case TExpressionStatement_ID:
+    TExpressionStatement_Destroy((TExpressionStatement*)p);
+    break;
+  case TSwitchStatement_ID:
+    TSwitchStatement_Destroy((TSwitchStatement*)p);
+    break;
+  case TLabeledStatement_ID:
+    TLabeledStatement_Destroy((TLabeledStatement*)p);
+    break;
+  case TForStatement_ID:
+    TForStatement_Destroy((TForStatement*)p);
+    break;
+  case TJumpStatement_ID:
+    TJumpStatement_Destroy((TJumpStatement*)p);
+    break;
+  case TAsmStatement_ID:
+    TAsmStatement_Destroy((TAsmStatement*)p);
+    break;
+  case TCompoundStatement_ID:
+    TCompoundStatement_Destroy((TCompoundStatement*)p);
+    break;
+  case TIfStatement_ID:
+    TIfStatement_Destroy((TIfStatement*)p);
+    break;
+  case TDoStatement_ID:
+    TDoStatement_Destroy((TDoStatement*)p);
+    break;
+  case TReturnStatement_ID:
+    TReturnStatement_Destroy((TReturnStatement*)p);
+    break;
+  default:
+    ASSERT(false);
+    break;
   }
 }
 
 void TBlockItem_Destroy(TBlockItem* p)
 {
-  
-    switch (p->type)
-    {
-      case TDeclaration_ID:
-        TDeclaration_Destroy((TDeclaration*)p);
-        break;
-      case TJumpStatement_ID:
-        TJumpStatement_Destroy((TJumpStatement*)p);
-        break;
-      case TAsmStatement_ID:
-        TAsmStatement_Destroy((TAsmStatement*)p);
-        break;
-      case TSwitchStatement_ID:
-        TSwitchStatement_Destroy((TSwitchStatement*)p);
-        break;
-      case TExpressionStatement_ID:
-        TExpressionStatement_Destroy((TExpressionStatement*)p);
-        break;
-      case TCompoundStatement_ID:
-        TCompoundStatement_Destroy((TCompoundStatement*)p);
-        break;
-      case TLabeledStatement_ID:
-        TLabeledStatement_Destroy((TLabeledStatement*)p);
-        break;
-      case TForStatement_ID:
-        TForStatement_Destroy((TForStatement*)p);
-        break;
-      case TWhileStatement_ID:
-        TWhileStatement_Destroy((TWhileStatement*)p);
-        break;
-      case TIfStatement_ID:
-        TIfStatement_Destroy((TIfStatement*)p);
-        break;
-      case TReturnStatement_ID:
-        TReturnStatement_Destroy((TReturnStatement*)p);
-        break;
-      case TDoStatement_ID:
-        TDoStatement_Destroy((TDoStatement*)p);
-        break;
-        //Statement
-      default:
-        ASSERT(false);
-        break;
-    }
-  
+
+  switch (p->type)
+  {
+  case TDeclaration_ID:
+    TDeclaration_Destroy((TDeclaration*)p);
+    break;
+  case TJumpStatement_ID:
+    TJumpStatement_Destroy((TJumpStatement*)p);
+    break;
+  case TAsmStatement_ID:
+    TAsmStatement_Destroy((TAsmStatement*)p);
+    break;
+  case TSwitchStatement_ID:
+    TSwitchStatement_Destroy((TSwitchStatement*)p);
+    break;
+  case TExpressionStatement_ID:
+    TExpressionStatement_Destroy((TExpressionStatement*)p);
+    break;
+  case TCompoundStatement_ID:
+    TCompoundStatement_Destroy((TCompoundStatement*)p);
+    break;
+  case TLabeledStatement_ID:
+    TLabeledStatement_Destroy((TLabeledStatement*)p);
+    break;
+  case TForStatement_ID:
+    TForStatement_Destroy((TForStatement*)p);
+    break;
+  case TWhileStatement_ID:
+    TWhileStatement_Destroy((TWhileStatement*)p);
+    break;
+  case TIfStatement_ID:
+    TIfStatement_Destroy((TIfStatement*)p);
+    break;
+  case TReturnStatement_ID:
+    TReturnStatement_Destroy((TReturnStatement*)p);
+    break;
+  case TDoStatement_ID:
+    TDoStatement_Destroy((TDoStatement*)p);
+    break;
+    //Statement
+  default:
+    ASSERT(false);
+    break;
+  }
+
 }
 
 void TPrimaryExpressionValue_Destroy(TPrimaryExpressionValue* p)
@@ -185,20 +185,20 @@ void TUnaryExpressionOperator_Destroy(TUnaryExpressionOperator* p)
 {
   TExpression_Delete(p->pExpressionLeft);
   TParameterDeclaration_Destroy(&p->TypeName);
- // TExpression_Delete(p->pExpressionRight);
+  // TExpression_Delete(p->pExpressionRight);
 }
 
 void TCastExpressionType_Destroy(TCastExpressionType* p)
 {
-	TExpression_Delete(p->pExpression);
-	TParameterDeclaration_Destroy(&p->TypeName);
+  TExpression_Delete(p->pExpression);
+  TParameterDeclaration_Destroy(&p->TypeName);
 }
 
 void TTernaryExpression_Destroy(TTernaryExpression* p)
 {
-	TExpression_Delete(p->pExpressionLeft);
-	TExpression_Delete(p->pExpressionMiddle);
-	TExpression_Delete(p->pExpressionRight);
+  TExpression_Delete(p->pExpressionLeft);
+  TExpression_Delete(p->pExpressionMiddle);
+  TExpression_Delete(p->pExpressionRight);
 }
 
 void TExpression_Destroy(TExpression* p)
@@ -207,26 +207,26 @@ void TExpression_Destroy(TExpression* p)
   {
     CASE(TPrimaryExpressionValue) :
       TPrimaryExpressionValue_Destroy((TPrimaryExpressionValue*)p);
-      break;
-      CASE(TPostfixExpressionCore) :
-        TPostfixExpressionCore_Destroy((TPostfixExpressionCore*)p);
-      break;
-      CASE(TBinaryExpression) :
-        TBinaryExpression_Destroy((TBinaryExpression*)p);
-      break;
-      CASE(TUnaryExpressionOperator) :
-        TUnaryExpressionOperator_Destroy((TUnaryExpressionOperator*)p);
-      break;
-    CASE(TCastExpressionType): 
+    break;
+    CASE(TPostfixExpressionCore) :
+      TPostfixExpressionCore_Destroy((TPostfixExpressionCore*)p);
+    break;
+    CASE(TBinaryExpression) :
+      TBinaryExpression_Destroy((TBinaryExpression*)p);
+    break;
+    CASE(TUnaryExpressionOperator) :
+      TUnaryExpressionOperator_Destroy((TUnaryExpressionOperator*)p);
+    break;
+    CASE(TCastExpressionType) :
       TCastExpressionType_Destroy((TCastExpressionType*)p);
-      break;
-	  
-	  CASE(TTernaryExpression) :
-		  TTernaryExpression_Destroy((TTernaryExpression*)p);
-	  break;
+    break;
 
-    default:
-      ASSERT(false);
+    CASE(TTernaryExpression) :
+      TTernaryExpression_Destroy((TTernaryExpression*)p);
+    break;
+
+  default:
+    ASSERT(false);
     break;
   }
 
@@ -267,41 +267,99 @@ void TTypeSpecifier_Destroy(TTypeSpecifier* p)
 {
   switch (p->type)
   {
-    case TSingleTypeSpecifier_ID:
-      TSingleTypeSpecifier_Destroy((TSingleTypeSpecifier*)p);
-      break;
-    case TEnumSpecifier_ID:
-      TEnumSpecifier_Destroy((TEnumSpecifier*)p);
-      break;
-    case TStructUnionSpecifier_ID:
-      TStructUnionSpecifier_Destroy((TStructUnionSpecifier*)p);
-      break;
-    default:
-      ASSERT(false);
-      break;
+  case TSingleTypeSpecifier_ID:
+    TSingleTypeSpecifier_Destroy((TSingleTypeSpecifier*)p);
+    break;
+  case TEnumSpecifier_ID:
+    TEnumSpecifier_Destroy((TEnumSpecifier*)p);
+    break;
+  case TStructUnionSpecifier_ID:
+    TStructUnionSpecifier_Destroy((TStructUnionSpecifier*)p);
+    break;
+  default:
+    ASSERT(false);
+    break;
   }
 }
 
 void TDeclarator_Destroy(TDeclarator* p)
 {
-  String_Destroy(&p->Name);
-  TParameterList_Delete(p->pParametersOpt);
   TPointerList_Destroy(&p->PointerList);
-  TDeclarator_Delete(p->pDeclaratorOpt);
-  TInitializer_Delete(p->pInitializer);
-  TExpression_Delete(p->pExpression);
+  TDirectDeclarator_Delete(p->pDirectDeclarator);
 }
+
+void TInitDeclarator_Destroy(TInitDeclarator* p)
+{
+  //nao deletar aqui
+  //TInitDeclarator_Delete(p->pInitDeclaratorNext);
+  TDeclarator_Delete(p->pDeclarator);
+  TInitializer_Delete(p->pInitializer);  
+}
+
+void TInitDeclaratorList_Destroy(TInitDeclaratorList* pList)
+{
+  for (TInitDeclarator * p = pList->pInitDeclaratorHeap; p != NULL; )
+  {
+    TInitDeclarator* pCurrent = p;
+    p = p->pInitDeclaratorNext;
+    TInitDeclarator_Delete(pCurrent);
+  }
+}
+
+void TInitDeclaratorList_Push(TInitDeclaratorList* pList, TInitDeclarator* pItem)
+{
+  if (pList->pInitDeclaratorHeap == NULL)
+  {
+    pList->pInitDeclaratorHeap = pItem;
+  }
+  else
+  {
+    pList->pInitDeclaratorTail->pInitDeclaratorNext = pItem;
+  }
+
+  pList->pInitDeclaratorTail = pItem;
+}
+
+void TDirectDeclarator_Destroy(TDirectDeclarator* p)
+{
+  String_Destroy(&p->Identifier);
+  //TParameterList_Delete(p->pParametersOpt);
+  //T/PointerList_Destroy(&p->PointerList);
+  TDeclarator_Delete(p->pDeclarator);
+  //TInitializer_Delete(p->pInitializer);
+  //TExpression_Delete(p->pExpression);
+}
+
 
 const char* TDeclarator_FindName(TDeclarator*   p)
 {
-  while (p != NULL)
+  TDirectDeclarator* pDirectDeclarator = p->pDirectDeclarator;
+  while (pDirectDeclarator != NULL)
   {
-    if (p->Name != NULL)
-      return p->Name;
-    p = p->pDeclaratorOpt;
+    if (pDirectDeclarator->Identifier != NULL)
+      return pDirectDeclarator->Identifier;
+    if (pDirectDeclarator->pDeclarator)
+    {
+      const char* name =
+        TDeclarator_FindName(pDirectDeclarator->pDeclarator);
+      if (name != NULL)
+      {
+        return name;
+      }      
+    }
+    pDirectDeclarator =
+      pDirectDeclarator->pDirectDeclarator;
   }
   return NULL;
 }
+
+const char* TInitDeclarator_FindName(TInitDeclarator* p)
+{
+  ASSERT(p->pDeclarator != NULL);
+  return TDeclarator_FindName(p->pDeclarator);
+}
+
+
 
 void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p)
 {
@@ -319,15 +377,15 @@ void TAnyStructDeclaration_Destroy(TAnyStructDeclaration* p)
 {
   switch (p->type)
   {
-    case TStructDeclaration_ID:
-      TStructDeclaration_Destroy((TStructDeclaration*)p);
-      break;
-    case TStaticAssertDeclaration_ID:
-      TStaticAssertDeclaration_Destroy((TStaticAssertDeclaration*)p);
-      break;
-    default:
-      ASSERT(false);
-      break;
+  case TStructDeclaration_ID:
+    TStructDeclaration_Destroy((TStructDeclaration*)p);
+    break;
+  case TStaticAssertDeclaration_ID:
+    TStaticAssertDeclaration_Destroy((TStaticAssertDeclaration*)p);
+    break;
+  default:
+    ASSERT(false);
+    break;
   }
 }
 
@@ -342,43 +400,45 @@ void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifie
   TTypeSpecifier_Delete(pDeclarationSpecifiers->pTypeSpecifierOpt);
 }
 
-TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
+/*TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
 {
-	if (p == NULL)
-	{
-		return NULL;
-	}
+  if (p == NULL)
+  {
+    return NULL;
+  }
 
-	TDeclarator*  pResult = NULL;
-	for (int i = 0; i < p->Declarators.size; i++)
-	{
-		if (p->Declarators.pItems[i]->Name != NULL)
-		{
-			if (strcmp(p->Declarators.pItems[i]->Name, name) == 0)
-			{
-				pResult = p->Declarators.pItems[i];
-				break;
-			}
-		}
-	}
-	return pResult;
+  TDeclarator*  pResult = NULL;
+  for (int i = 0; i < p->Declarators.size; i++)
+  {
+    if (p->Declarators.pItems[i]->Name != NULL)
+    {
+      if (strcmp(p->Declarators.pItems[i]->Name, name) == 0)
+      {
+        pResult = p->Declarators.pItems[i];
+        break;
+      }
+    }
+  }
+  return pResult;
 }
-
+*/
+/*
 bool TDeclaration_Is_FunctionDeclaration(TDeclaration*  p)
 {
   if (p != NULL && p->Declarators.size == 1)
   {
-    if (p->Declarators.pItems[0]->pParametersOpt != NULL) 
+    if (p->Declarators.pItems[0]->pParametersOpt != NULL)
     {
       if (p->pCompoundStatementOpt == NULL)
       {
         return true;
-      }      
+      }
     }
   }
   return false;
 }
-
+*/
+/*
 const char* TDeclaration_GetFunctionThis(TDeclaration*  p)
 {
   const char*  thisName = NULL;
@@ -386,12 +446,13 @@ const char* TDeclaration_GetFunctionThis(TDeclaration*  p)
   {
     if (p->Declarators.pItems[0]->pParametersOpt != NULL &&
         p->Declarators.pItems[0]->pParametersOpt->size >= 1)
-    {           
-        thisName = p->Declarators.pItems[0]->pParametersOpt->pItems[0]->Declarator.Name;     
+    {
+        thisName = p->Declarators.pItems[0]->pParametersOpt->pItems[0]->Declarator.Name;
     }
   }
   return thisName;
 }
+*/
 
 bool TDeclaration_Is_FunctionDefinition(TDeclaration*  p)
 {
@@ -400,7 +461,7 @@ bool TDeclaration_Is_FunctionDefinition(TDeclaration*  p)
 
 bool TDeclaration_Is_StructOrUnionDeclaration(TDeclaration* p)
 {
-  return 
+  return
     TTypeSpecifier_As_TStructUnionSpecifier(p->Specifiers.pTypeSpecifierOpt) != NULL;
 }
 
@@ -416,14 +477,15 @@ void TDeclaration_Destroy(TDeclaration* p)
 {
   TCompoundStatement_Delete(p->pCompoundStatementOpt);
   TDeclarationSpecifiers_Destroy(&p->Specifiers);
-  TDeclaratorList_Destroy(&p->Declarators);
+  TInitDeclaratorList_Destroy(&p->InitDeclaratorList);
+
 }
 
 void TParameterDeclaration_Swap(TParameterDeclaration* a, TParameterDeclaration* b)
 {
-	TParameterDeclaration temp = *a;
-	*a = *b;
-	*b = temp;
+  TParameterDeclaration temp = *a;
+  *a = *b;
+  *b = temp;
 }
 
 void TParameterDeclaration_Destroy(TParameterDeclaration* p)
@@ -449,15 +511,15 @@ bool TAnyDeclaration_IsTypedef(TAnyDeclaration* pDeclaration)
   bool bResult = false;
   switch (pDeclaration->type)
   {
-    case TDeclaration_ID:
-    {
-      TDeclaration* p = (TDeclaration*)pDeclaration;
-      bResult = p->Specifiers.StorageSpecifiers.bIsTypedef;
-    }
+  case TDeclaration_ID:
+  {
+    TDeclaration* p = (TDeclaration*)pDeclaration;
+    bResult = p->Specifiers.StorageSpecifiers.bIsTypedef;
+  }
+  break;
+  default:
+    ASSERT(false);
     break;
-    default:
-      ASSERT(false);
-      break;
   }
   return bResult;
 }
@@ -467,14 +529,14 @@ int TAnyDeclaration_GetFileIndex(TAnyDeclaration* pDeclaration)
   int result = -1;
   switch (pDeclaration->type)
   {
-    case TDeclaration_ID:
-      result = ((TDeclaration*)pDeclaration)->FileIndex;
-      break;
-    case TStaticAssertDeclaration_ID:
-      break;
-    default:
-      ASSERT(false);
-      break;
+  case TDeclaration_ID:
+    result = ((TDeclaration*)pDeclaration)->FileIndex;
+    break;
+  case TStaticAssertDeclaration_ID:
+    break;
+  default:
+    ASSERT(false);
+    break;
   }
   return result;
 }
@@ -482,19 +544,19 @@ void TAnyDeclaration_Destroy(TAnyDeclaration* pDeclaration)
 {
   switch (pDeclaration->type)
   {
-    case TDeclaration_ID:
-      TDeclaration_Destroy((TDeclaration*)pDeclaration);
-      break;
-    default:
-      ASSERT(false);
-      break;
+  case TDeclaration_ID:
+    TDeclaration_Destroy((TDeclaration*)pDeclaration);
+    break;
+  default:
+    ASSERT(false);
+    break;
   }
 }
 
 
 void TDesignator_Destroy(TDesignator* p)
 {
-	TExpression_Delete(p->pExpression);
+  TExpression_Delete(p->pExpression);
   String_Destroy(&p->Name);
 }
 
@@ -505,16 +567,16 @@ void  TInitializerListType_Destroy(TInitializerListType* pTInitializerListType)
 
 void TInitializer_Destroy(TInitializer* p)
 {
-	if (p->type == TInitializerListType_ID)
-	{
-		TInitializerListType_Destroy((TInitializerListType*)p);
-		
-	}
-	else
-	{
-		TExpression_Destroy((TExpression*)p);
-	}
-  
+  if (p->type == TInitializerListType_ID)
+  {
+    TInitializerListType_Destroy((TInitializerListType*)p);
+
+  }
+  else
+  {
+    TExpression_Destroy((TExpression*)p);
+  }
+
 }
 
 void TInitializerListItem_Destroy(TInitializerListItem* p)
@@ -526,46 +588,46 @@ void TInitializerListItem_Destroy(TInitializerListItem* p)
 
 Result DeclarationsMap_Add(DeclarationsMap* p, const char* name, TAnyDeclaration* pData)
 {
-	return MultiMap_Add(p, name, pData);
+  return MultiMap_Add(p, name, pData);
 }
 
 TDeclaration* DeclarationsMap_FindDeclaration(DeclarationsMap* p, const char* name)
 {
-	Bucket *  pBucket = 
-		MultiMap_FindBucket(p, name);
-	if (pBucket)
-	{
-		for (size_t j = 0; j < pBucket->size; j++)
-		{
-			if (strcmp(pBucket->data[j]->key, name) == 0)
-			{
-				return TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
-			}
-		}
-	}
-	return NULL;
-}
-
-TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name)
-{
-	return DeclarationsMap_FindDeclaration(&p->Symbols, name);
-}
-
-TDeclaration* TProgram_FindFunctionDeclaration(TProgram* p, const char* name)
-{
-  TDeclaration*  pDeclaration = NULL;
-  
-
   Bucket *  pBucket =
-	  MultiMap_FindBucket(&p->Symbols, name);
+    MultiMap_FindBucket(p, name);
   if (pBucket)
   {
     for (size_t j = 0; j < pBucket->size; j++)
     {
       if (strcmp(pBucket->data[j]->key, name) == 0)
       {
-        TDeclaration*  pDeclaration0 = 
-			TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
+        return TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
+      }
+    }
+  }
+  return NULL;
+}
+
+TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name)
+{
+  return DeclarationsMap_FindDeclaration(&p->Symbols, name);
+}
+
+TDeclaration* TProgram_FindFunctionDeclaration(TProgram* p, const char* name)
+{
+  TDeclaration*  pDeclaration = NULL;
+
+
+  Bucket *  pBucket =
+    MultiMap_FindBucket(&p->Symbols, name);
+  if (pBucket)
+  {
+    for (size_t j = 0; j < pBucket->size; j++)
+    {
+      if (strcmp(pBucket->data[j]->key, name) == 0)
+      {
+        TDeclaration*  pDeclaration0 =
+          TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
 
         if (pDeclaration0 != NULL /* &&
             pDeclaration0->pCompoundStatementOpt == NULL*/)
@@ -591,14 +653,14 @@ TDeclaration* TProgram_FindFunctionDefinition(TProgram* p, const char* name)
       if (strcmp(pBucket->data[j]->key, name) == 0)
       {
         TDeclaration*  pDeclaration0 =
-			TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
+          TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
 
-        if (pDeclaration0 != NULL && 
-            pDeclaration0->pCompoundStatementOpt != NULL)
+        if (pDeclaration0 != NULL &&
+          pDeclaration0->pCompoundStatementOpt != NULL)
         {
           pDeclaration = pDeclaration0;
           break;
-        }        
+        }
       }
     }
   }
@@ -613,7 +675,7 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
   for (;;)
   {
     Bucket *  pBucket =
-		MultiMap_FindBucket(&p->Symbols, typeName);
+      MultiMap_FindBucket(&p->Symbols, typeName);
     if (pBucket)
     {
       TDeclaration*  pDeclaration = NULL;
@@ -624,7 +686,7 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
         {
           pDeclaration = TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
           if (pDeclaration != NULL &&
-              pDeclaration->Specifiers.pTypeSpecifierOpt != NULL)
+            pDeclaration->Specifiers.pTypeSpecifierOpt != NULL)
           {
             TSingleTypeSpecifier *  pSingleTypeSpecifier = TTypeSpecifier_As_TSingleTypeSpecifier(pDeclaration->Specifiers.pTypeSpecifierOpt);
             if (pSingleTypeSpecifier != NULL)
@@ -670,7 +732,7 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
 
 void TProgram_Destroy(TProgram * p)
 {
-  
+
   StrArray_Destroy(&p->MySourceDir);
 
   Map_Destroy(&p->EnumMap, NULL);
@@ -685,273 +747,283 @@ void TProgram_Destroy(TProgram * p)
 ///////////////////////////////////////////
 
 static bool TPostfixExpressionCore_CodePrint2(TPostfixExpressionCore * p,
-	int *pResult)
+  int *pResult)
 {
 
-	int result = *pResult;
+  int result = *pResult;
 
-	if (p->pExpressionLeft)
-	{
-		int left;
-		 EvaluateConstantExpression(p->pExpressionLeft, &left);
-	}
+  if (p->pExpressionLeft)
+  {
+    int left;
+    EvaluateConstantExpression(p->pExpressionLeft, &left);
+  }
 
-	if (p->pInitializerList)
-	{
-		//falta imprimeir typename
-		//TTypeName_Print*
-		//b = TInitializerList_CodePrint(p->pInitializerList, b, fp);
-	}
+  if (p->pInitializerList)
+  {
+    //falta imprimeir typename
+    //TTypeName_Print*
+    //b = TInitializerList_CodePrint(p->pInitializerList, b, fp);
+  }
 
-	switch (p->token)
-	{
-		case TK_FULL_STOP:
-			//fprintf(fp, ".%s", p->Identifier);
-			ASSERT(false);
-			break;
-		case TK_ARROW:
-			//fprintf(fp, "->%s", p->Identifier);
-			//b = true;
-			ASSERT(false);
-			break;
+  switch (p->token)
+  {
+  case TK_FULL_STOP:
+    //fprintf(fp, ".%s", p->Identifier);
+    ASSERT(false);
+    break;
+  case TK_ARROW:
+    //fprintf(fp, "->%s", p->Identifier);
+    //b = true;
+    ASSERT(false);
+    break;
 
-		case TK_LEFT_SQUARE_BRACKET:
-		{
-			int index;
-			//fprintf(fp, "[");
-			EvaluateConstantExpression(p->pExpressionRight,  &index);
-			//fprintf(fp, "]");
-			ASSERT(false);
-		}
-		break;
+  case TK_LEFT_SQUARE_BRACKET:
+  {
+    int index;
+    //fprintf(fp, "[");
+    EvaluateConstantExpression(p->pExpressionRight, &index);
+    //fprintf(fp, "]");
+    ASSERT(false);
+  }
+  break;
 
-		case TK_LEFT_PARENTHESIS:
-		{						
-			EvaluateConstantExpression(p->pExpressionRight,  &result);						
-		}
-		break;
+  case TK_LEFT_PARENTHESIS:
+  {
+    EvaluateConstantExpression(p->pExpressionRight, &result);
+  }
+  break;
 
-		case TK_PLUSPLUS:
-			ASSERT(false);
-			break;
-		case TK_MINUSMINUS:
-			ASSERT(false);
-			break;
-	}
+  case TK_PLUSPLUS:
+    ASSERT(false);
+    break;
+  case TK_MINUSMINUS:
+    ASSERT(false);
+    break;
+  }
 
 
 
-	if (p->pNext)
-	{
-		int result2 = result;
-		TPostfixExpressionCore_CodePrint2(p->pNext, &result2);
-		result = result2;
-	}
+  if (p->pNext)
+  {
+    int result2 = result;
+    TPostfixExpressionCore_CodePrint2(p->pNext, &result2);
+    result = result2;
+  }
 
-	return true;
+  return true;
 }
 
 //Criado para avaliacao do #if
 //Tem que arrumar para fazer os casts do enum
 bool EvaluateConstantExpression(TExpression *  p, int *pResult)
 {
-	int result = -987654321;
+  int result = -987654321;
 
-	if (p == NULL)
-	{
-		return false;
-	}
-	bool b = false;
+  if (p == NULL)
+  {
+    return false;
+  }
+  bool b = false;
 
-	switch (p->type)
-	{
-		CASE(TBinaryExpression) :
-		{
-			TBinaryExpression* pBinaryExpression =
-				(TBinaryExpression*)p;
+  switch (p->type)
+  {
+    CASE(TBinaryExpression) :
+    {
+      TBinaryExpression* pBinaryExpression =
+        (TBinaryExpression*)p;
 
-			int left;			
-			b = EvaluateConstantExpression(pBinaryExpression->pExpressionLeft,  &left);
-			
-			int right;
-			b = EvaluateConstantExpression(pBinaryExpression->pExpressionRight,  &right);
+      int left;
+      b = EvaluateConstantExpression(pBinaryExpression->pExpressionLeft, &left);
 
-			switch (pBinaryExpression->token)
-			{
-				case TK_ASTERISK:
-					result = (left * right); 
-					break;
-				case TK_PLUS_SIGN: 
-					result = (left + right);
-					break;
-				case TK_HYPHEN_MINUS:
-					result = (left - right); 
-					break;
-				case TK_ANDAND:
-					result = (left && right);
-					break;
-				case TK_OROR: 
-					result = (left || right);
-					break;
-				case TK_NOTEQUAL:
-					result = (left != right); 
-					break;
-				case TK_EQUALEQUAL:
-					result = (left == right); 
-					break;
-				case TK_GREATEREQUAL:
-					result = (left >= right);
-					break;
-				case TK_LESSEQUAL:
-					result = (left <= right); 
-					break;
-				case TK_GREATER_THAN_SIGN: 
-					result = (left > right);
-					break;
-				case TK_LESS_THAN_SIGN:
-					result = (left < right); 
-					break;
-				case TK_AMPERSAND:
-					result = (left & right);
-					break;
-				case TK_GREATERGREATER:
-					result = (left >> right);
-					break;
-				case TK_LESSLESS:
-					result = (left << right);
-					break;
-				case TK_VERTICAL_LINE:
-					result = (left | right);
-					break;
-				default:
-					//TODO ADD THE OPERADOR?
-					ASSERT(false);
-			}
+      int right;
+      b = EvaluateConstantExpression(pBinaryExpression->pExpressionRight, &right);
 
-			//if (pBinaryExpression->)
-		}
-		break;
+      switch (pBinaryExpression->token)
+      {
+      case TK_ASTERISK:
+        result = (left * right);
+        break;
+      case TK_PLUS_SIGN:
+        result = (left + right);
+        break;
+      case TK_HYPHEN_MINUS:
+        result = (left - right);
+        break;
+      case TK_ANDAND:
+        result = (left && right);
+        break;
+      case TK_OROR:
+        result = (left || right);
+        break;
+      case TK_NOTEQUAL:
+        result = (left != right);
+        break;
+      case TK_EQUALEQUAL:
+        result = (left == right);
+        break;
+      case TK_GREATEREQUAL:
+        result = (left >= right);
+        break;
+      case TK_LESSEQUAL:
+        result = (left <= right);
+        break;
+      case TK_GREATER_THAN_SIGN:
+        result = (left > right);
+        break;
+      case TK_LESS_THAN_SIGN:
+        result = (left < right);
+        break;
+      case TK_AMPERSAND:
+        result = (left & right);
+        break;
+      case TK_GREATERGREATER:
+        result = (left >> right);
+        break;
+      case TK_LESSLESS:
+        result = (left << right);
+        break;
+      case TK_VERTICAL_LINE:
+        result = (left | right);
+        break;
+      default:
+        //TODO ADD THE OPERADOR?
+        ASSERT(false);
+      }
 
-		CASE(TTernaryExpression) :
-		{
-			int e1, e2, e3;
-			b = EvaluateConstantExpression(((TTernaryExpression*)p)->pExpressionLeft, &e1);
+      //if (pBinaryExpression->)
+    }
+    break;
 
-			b = EvaluateConstantExpression(((TTernaryExpression*)p)->pExpressionMiddle, &e2);
+    CASE(TTernaryExpression) :
+    {
+      int e1, e2, e3;
+      b = EvaluateConstantExpression(((TTernaryExpression*)p)->pExpressionLeft, &e1);
 
-			b = EvaluateConstantExpression(((TTernaryExpression*)p)->pExpressionRight, &e3);
-			ASSERT(false);
-		}
-		break;
+      b = EvaluateConstantExpression(((TTernaryExpression*)p)->pExpressionMiddle, &e2);
 
-		CASE(TPrimaryExpressionValue) :
-		{
-			TPrimaryExpressionValue* pPrimaryExpressionValue =
-				(TPrimaryExpressionValue*)p;
+      b = EvaluateConstantExpression(((TTernaryExpression*)p)->pExpressionRight, &e3);
+      ASSERT(false);
+    }
+    break;
 
-			if (pPrimaryExpressionValue->pExpressionOpt != NULL)
-			{
-				b = EvaluateConstantExpression(pPrimaryExpressionValue->pExpressionOpt, &result);
-			}
-			else
-			{
-				switch (pPrimaryExpressionValue->token)
-				{
-					case TK_IDENTIFIER:
-						result = 0; //para macro
-						break;
+    CASE(TPrimaryExpressionValue) :
+    {
+      TPrimaryExpressionValue* pPrimaryExpressionValue =
+        (TPrimaryExpressionValue*)p;
 
-					case TK_DECIMAL_INTEGER:
-						result = atoi(pPrimaryExpressionValue->lexeme);
-						break;
+      if (pPrimaryExpressionValue->pExpressionOpt != NULL)
+      {
+        b = EvaluateConstantExpression(pPrimaryExpressionValue->pExpressionOpt, &result);
+      }
+      else
+      {
+        switch (pPrimaryExpressionValue->token)
+        {
+        case TK_IDENTIFIER:
+          result = 0; //para macro
+          break;
 
-					case TK_HEX_INTEGER:
-						result = strtol(pPrimaryExpressionValue->lexeme, NULL, 16);
-						break;
+        case TK_DECIMAL_INTEGER:
+          result = atoi(pPrimaryExpressionValue->lexeme);
+          break;
 
-					case TK_CHAR_LITERAL:
-					default:
-						ASSERT(0);
-						break;
-				}
+        case TK_HEX_INTEGER:
+          result = strtol(pPrimaryExpressionValue->lexeme, NULL, 16);
+          break;
 
-			}						
-		}
-		break;
+        case TK_CHAR_LITERAL:
+          if (pPrimaryExpressionValue->lexeme != NULL)
+          {
+            //vem com 'A'
+            result = pPrimaryExpressionValue->lexeme[1];
+          }
+          else
+          {
+            result = 0;
+          }
+          break;
+        default:
+          ASSERT(0);
+          break;
+        }
 
-		CASE(TPostfixExpressionCore) :
-		{
-			TPostfixExpressionCore* pPostfixExpressionCore =
-				(TPostfixExpressionCore*)p;			
-			b = TPostfixExpressionCore_CodePrint2(pPostfixExpressionCore, &result);			
-			ASSERT(false);
-		}
-		break;
+      }
+    }
+    break;
 
-		CASE(TUnaryExpressionOperator) :
-		{
-		
-			TUnaryExpressionOperator* pTUnaryExpressionOperator =
-				(TUnaryExpressionOperator*)p;
+    CASE(TPostfixExpressionCore) :
+    {
+      TPostfixExpressionCore* pPostfixExpressionCore =
+        (TPostfixExpressionCore*)p;
+      b = TPostfixExpressionCore_CodePrint2(pPostfixExpressionCore, &result);
+      ASSERT(false);
+    }
+    break;
 
-			if (pTUnaryExpressionOperator->token == TK_SIZEOF)
-			{
+    CASE(TUnaryExpressionOperator) :
+    {
 
-				if (pTUnaryExpressionOperator->TypeName.Specifiers.pTypeSpecifierOpt != NULL)
-				{
+      TUnaryExpressionOperator* pTUnaryExpressionOperator =
+        (TUnaryExpressionOperator*)p;
 
-					//b = TTypeQualifier_CodePrint2(&pTUnaryExpressionOperator->TypeName.qualifiers, false, fp);
-					//b = TTypeSpecifier_CodePrint2(pTUnaryExpressionOperator->TypeName.pTypeSpecifier, b, fp);
-					// b = TDeclarator_CodePrint(&pTUnaryExpressionOperator->TypeName.declarator, b, fp);
+      if (pTUnaryExpressionOperator->token == TK_SIZEOF)
+      {
 
+        if (pTUnaryExpressionOperator->TypeName.Specifiers.pTypeSpecifierOpt != NULL)
+        {
 
-				}
-				else
-				{
-					b = EvaluateConstantExpression(pTUnaryExpressionOperator->pExpressionLeft, &result);
-				}
-			}
-			else
-			{
-				int localResult;
-				b = EvaluateConstantExpression(pTUnaryExpressionOperator->pExpressionLeft,  &localResult);
-				switch (pTUnaryExpressionOperator->token)
-				{
-					case TK_EXCLAMATION_MARK:
-						result = !localResult;
-						break;
-					default:
-						ASSERT(false);
-				}
-			}
+          //b = TTypeQualifier_CodePrint2(&pTUnaryExpressionOperator->TypeName.qualifiers, false, fp);
+          //b = TTypeSpecifier_CodePrint2(pTUnaryExpressionOperator->TypeName.pTypeSpecifier, b, fp);
+          // b = TDeclarator_CodePrint(&pTUnaryExpressionOperator->TypeName.declarator, b, fp);
 
 
-		}
-		break;
+        }
+        else
+        {
+          b = EvaluateConstantExpression(pTUnaryExpressionOperator->pExpressionLeft, &result);
+        }
+      }
+      else
+      {
+        int localResult;
+        b = EvaluateConstantExpression(pTUnaryExpressionOperator->pExpressionLeft, &localResult);
+        switch (pTUnaryExpressionOperator->token)
+        {
+        case TK_EXCLAMATION_MARK:
+          result = !localResult;
+          break;
+        default:
+          ASSERT(false);
+        }
+      }
 
-		CASE(TCastExpressionType) :
-		{
-			TCastExpressionType * pCastExpressionType =
-				(TCastExpressionType*)p;
+
+    }
+    break;
+
+    CASE(TCastExpressionType) :
+    {
+      TCastExpressionType * pCastExpressionType =
+        (TCastExpressionType*)p;
 
 
-			//b = TTypeQualifier_CodePrint2(&pCastExpressionType->TypeName.qualifiers, false, fp);
-			//b = TTypeSpecifier_CodePrint2(pCastExpressionType->TypeName.pTypeSpecifier, b, fp);
-			//b = TDeclarator_CodePrint(&pCastExpressionType->TypeName.declarator, b, fp);
+      //b = TTypeQualifier_CodePrint2(&pCastExpressionType->TypeName.qualifiers, false, fp);
+      //b = TTypeSpecifier_CodePrint2(pCastExpressionType->TypeName.pTypeSpecifier, b, fp);
+      //b = TDeclarator_CodePrint(&pCastExpressionType->TypeName.declarator, b, fp);
 
-		
-			EvaluateConstantExpression(pCastExpressionType->pExpression,  &result);
-			ASSERT(false);
 
-		}
-		break;
+      EvaluateConstantExpression(pCastExpressionType->pExpression, &result);
+      ASSERT(false);
 
-		default:
-			ASSERT(false);
-	}
-	
-	ASSERT(result != -987654321);
-	*pResult = result;
-	return b;
+    }
+    break;
+
+  default:
+    ASSERT(false);
+  }
+
+  ASSERT(result != -987654321);
+  *pResult = result;
+  return b;
 }
 

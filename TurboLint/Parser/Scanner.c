@@ -169,10 +169,9 @@ void Scanner_GetError(Scanner* pScanner, StrBuilder* str)
 {
   StrBuilder_Append(str, pScanner->DebugString.c_str);
   StrBuilder_Append(str, "\n");
-
-  for (size_t i = 0; i < pScanner->stack.size; i++)
-  {
-    BasicScanner* p = (BasicScanner*)pScanner->stack.pItems[i];
+  
+  ForEachBasicScanner(p , pScanner->stack)  
+  {    
     StrBuilder_Append(str, p->stream.NameOrFullPath);
     StrBuilder_Append(str, "(");
     StrBuilder_AppendInt(str, p->stream.currentLine);
@@ -198,10 +197,10 @@ void Scanner_PrintDebug(Scanner* pScanner)
 {
   printf("\ndebug---\n");
 
-  for (size_t i = 0; i < pScanner->stack.size; i++)
-  {
-    BasicScanner* p = (BasicScanner*)pScanner->stack.pItems[i];
-    printf("stream %d %s\n", (int)i, p->stream.NameOrFullPath);
+  
+  ForEachBasicScanner(p , pScanner->stack)
+  {    
+    printf("stream %s\n", p->stream.NameOrFullPath);
     printf("line, col = %d %d\n", p->stream.currentLine, p->stream.currentCol);
   }
 
@@ -238,16 +237,14 @@ static Result Scanner_InitCore(Scanner* pScanner)
   pScanner->bPrintIncludes = false;
 
   pScanner->bIncludeSpaces = false;
-  Array_Init(&pScanner->stack);
+  BasicScannerStack_Init(&pScanner->stack);
 
   StrArray_Init(&pScanner->IncludeDir);
   StrArray_Init(&pScanner->MySourceDir);
 
   //Indica que foi feita uma leitura especulativa
   pScanner->bHasLookAhead = false;
-  pScanner->LookAheadStackSize = 0;
-  pScanner->LookAheadMacroOnTop = false;
-  String_Init(&pScanner->LookAheadStreamName, NULL);
+//  pScanner->pLookAheadPreviousScanner = NULL;
 
   //Valor lido na leitura especulativa
   ScannerItem_Init(&pScanner->LookAhead);
@@ -270,7 +267,7 @@ Result Scanner_InitString(Scanner* pScanner,
 
   BasicScanner* pNewScanner;
   Result result = BasicScanner_Create(&pNewScanner, name, text);
-  Array_Push(&pScanner->stack, pNewScanner);
+  BasicScannerStack_Push(&pScanner->stack, pNewScanner);
   return result;
 }
 
@@ -289,7 +286,7 @@ static Result PushExpandedMacro(Scanner* pScanner,
   {
     pNewScanner->bMacroExpanded = true;
     BasicScanner_Next(pNewScanner);//inicia
-    Array_Push(&pScanner->stack, pNewScanner);
+    BasicScannerStack_Push(&pScanner->stack, pNewScanner);
   }
 
   return result;
@@ -327,14 +324,15 @@ bool Scanner_GetFullPath(Scanner* pScanner,
 
     else
     {
-      if (pScanner->stack.size > 0)
+      if (pScanner->stack != NULL)
       {
         //tenta nos diretorios ja abertos
         StrBuilder path = STRBUILDER_INIT;
 
-        for (int i = (int)pScanner->stack.size - 1; i >= 0; i--)
+        //for (int i = (int)pScanner->stack.size - 1; i >= 0; i--)
+        ForEachBasicScanner(p, pScanner->stack)
         {
-          BasicScanner* p = (BasicScanner*)pScanner->stack.pItems[i];
+          //BasicScanner* p = (BasicScanner*)pScanner->stack.pItems[i];
           StrBuilder_Set(&path, p->stream.FullDir2);
           StrBuilder_Append(&path, fileName);
           bool bFileExists = FileExists(path.c_str);
@@ -503,7 +501,7 @@ void Scanner_IncludeFile(Scanner* pScanner,
         {
           pNewScanner->FileIndex = pFile->FileIndex;
           BasicScanner_Next(pNewScanner);
-          Array_Push(&pScanner->stack, pNewScanner);
+          BasicScannerStack_Push(&pScanner->stack, pNewScanner);
         }
 
         else
@@ -532,20 +530,6 @@ void Scanner_IncludeFile(Scanner* pScanner,
   String_Destroy(&fullPath);
 }
 
-const char* Scanner_GetApparentStreamName(Scanner* pScanner)
-{
-  const char* streamName = NULL;
-  if (pScanner->bHasLookAhead)
-  {
-    streamName = pScanner->LookAheadStreamName;
-  }
-  else
-  {
-    BasicScanner* p = Scanner_Top(pScanner);
-    streamName = p ? p->stream.NameOrFullPath : NULL;
-  }
-  return streamName;
-}
 
 const char* Scanner_GetStreamName(Scanner* pScanner)
 {
@@ -575,7 +559,7 @@ void Scanner_Destroy(Scanner* pScanner)
   StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
   StrBuilder_Destroy(&pScanner->ErrorString);
   ArrayInt_Destroy(&pScanner->StackIfDef);
-  Array_Destroy(&pScanner->stack, &Delete_Scanner);
+  BasicScannerStack_Destroy(&pScanner->stack);
   TFileMap_Destroy(&pScanner->FilesIncluded);
   StrArray_Destroy(&pScanner->IncludeDir);
   StrArray_Destroy(&pScanner->MySourceDir);
@@ -592,17 +576,13 @@ int Scanner_GetCurrentLine(Scanner* pScanner)
     return -1;
   }
 
-  if (pScanner->stack.size == 0)
-  {
-    return -1;
-  }
 
   int currentLine = -1;
   int fileIndex = -1;
 
-  for (int i = (int)pScanner->stack.size - 1; i >= 0; i--)
+  
+  ForEachBasicScanner(pBasicScanner, pScanner->stack)
   {
-    BasicScanner* pBasicScanner = (BasicScanner*)pScanner->stack.pItems[i];
     fileIndex = pBasicScanner->FileIndex;
 
     if (fileIndex >= 0) //macro eh -1
@@ -623,16 +603,12 @@ int Scanner_GetFileIndex(Scanner* pScanner)
     return -1;
   }
 
-  if (pScanner->stack.size == 0)
-  {
-    return -1;
-  }
 
   int fileIndex = -1;
 
-  for (int i = (int)pScanner->stack.size - 1; i >= 0; i--)
+  
+  ForEachBasicScanner(pBasicScanner, pScanner->stack)
   {
-    BasicScanner* pBasicScanner = (BasicScanner*)pScanner->stack.pItems[i];
     fileIndex = pBasicScanner->FileIndex;
 
     if (fileIndex >= 0)
@@ -657,12 +633,11 @@ Tokens Scanner_Token(Scanner* pScanner)
     return pScanner->LookAhead.token;
   }
 
-  if (pScanner->stack.size == 0)
+  Tokens token = TK_EOF;
+  if (pScanner->stack != NULL)
   {
-    return TK_EOF;
+    token = pScanner->stack->currentItem.token;
   }
-
-  Tokens token = ((BasicScanner*)Array_Top(&pScanner->stack))->currentItem.token;
 
   return token;
 }
@@ -673,23 +648,19 @@ const char* Scanner_Lexeme(Scanner* pScanner)
   {
     return pScanner->LookAhead.lexeme.c_str;
   }
-
-  if (pScanner->stack.size == 0)
+  else
   {
-    return "";
-  }
+    BasicScanner* pBasicScanner = pScanner->stack;
 
-  return ((BasicScanner*)Array_Top(&pScanner->stack))->currentItem.lexeme.c_str;
+    return pBasicScanner ?
+      pBasicScanner->currentItem.lexeme.c_str :
+      "";
+  }
 }
 
 BasicScanner* Scanner_Top(Scanner* pScanner)
 {
-  if (pScanner->stack.size == 0)
-  {
-    return NULL;
-  }
-
-  return (BasicScanner*)Array_Top(&pScanner->stack);
+  return pScanner->stack;  
 }
 
 int Scanner_Line(Scanner* pScanner)
@@ -723,15 +694,11 @@ void SkipSpaces(Scanner* pScanner)
   while (Scanner_Top(pScanner) != NULL &&
     Scanner_Top(pScanner)->currentItem.token == TK_EOF)
   {
-    if (pScanner->stack.size > 1)
-    {
-      //se nao usou nao vai ficar para o proximo
-      StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
-
-      Array_Pop(&pScanner->stack, &Delete_Scanner);
-    }
-    //e se tiver mais espacos?
-    //TODO fazer um modo melhor
+    //se nao usou nao vai ficar para o proximo
+    StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+    
+    BasicScannerStack_Pop(&pScanner->stack);    
+    
   }
 }
 
@@ -873,7 +840,12 @@ bool GetNewMacroCallString(Scanner* pScanner,
     TokenToPPToken(GetToken(pScanner)));
   TokenArray_Push(ppTokenArray, ppToken);
 
-  Scanner_Match(pScanner);
+  BasicScanner_Next(Scanner_Top(pScanner));
+  //Tem que deixar os espaços  no basic scanner antigo
+  //para que a expansao da macro seja antes
+  //#define S static
+  //S int f();
+
   //verificar se tem parametros
   int nArgsExpected = pMacro->FormalArguments.Size;// pMacro->bIsFunction;
   int nArgsFound = 0;
@@ -881,6 +853,11 @@ bool GetNewMacroCallString(Scanner* pScanner,
   //fazer uma lista com os parametros
   if (nArgsExpected > 0)
   {
+    //se a macro tem parametro pode ter espaco depois
+    //X (A)
+    //entao pular espacos
+    SkipSpaces(pScanner);
+
     Tokens token = Scanner_Token(pScanner);
 
     if (token == TK_LEFT_PARENTHESIS)
@@ -1639,20 +1616,21 @@ void Scanner_SkipCore(Scanner* pScanner)
     }
     else if (token == TK_EOF)
     {
-      if (pScanner->stack.size == 1)
+  
+      BasicScannerStack_PopIfNotLast(&pScanner->stack);
+      
+
+      //se nao usou nao vai ficar para o proximo
+      StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+
+      if (pScanner->stack->pPrevious == NULL)
       {
         //Scanner_PrintDebug(pScanner);
         //acabou
         //bResult = false;
         break;
       }
-      else if (pScanner->stack.size > 0)
-      {
-        //se nao usou nao vai ficar para o proximo
-        StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
 
-        Array_Pop(&pScanner->stack, &Delete_Scanner);
-      }
     }
 
     else
@@ -1714,20 +1692,18 @@ void Scanner_Skip(Scanner* pScanner)
 
     else if (token == TK_EOF)
     {
-      if (pScanner->stack.size == 1)
+      //se nao usou nao vai ficar para o proximo
+      StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+      
+      
+      BasicScannerStack_PopIfNotLast(&pScanner->stack);
+      
+
+      if (pScanner->stack->pPrevious == NULL)
       {
-        //acabou
-        //bResult = false;
         break;
       }
-
-      else if (pScanner->stack.size > 1)
-      {
-        //se nao usou nao vai ficar para o proximo
-        StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
-
-        Array_Pop(&pScanner->stack, &Delete_Scanner);
-      }
+      
     }
 
     break;
@@ -1742,6 +1718,7 @@ void Scanner_Next(Scanner* pScanner)
     {
       ScannerItem_Reset(&pScanner->LookAhead);
       pScanner->bHasLookAhead = false;
+//      pScanner->pLookAheadPreviousScanner = NULL;
       //Na verdade ja esta apontando para o proximo
       //so nao esta usando
       //agora vai usar
@@ -1764,8 +1741,7 @@ const char* Scanner_TokenString(Scanner* pScanner)
 
 
 void PrintPreprocessedToFile(const char* fileIn,
-  const char* configFileName,
-  const char* fileNameOut)
+  const char* configFileName)
 {
   String fullFileNamePath = STRING_INIT;
   GetFullPath(fileIn, &fullFileNamePath);
@@ -1778,6 +1754,17 @@ void PrintPreprocessedToFile(const char* fileIn,
   Scanner_IncludeFile(&scanner, fullFileNamePath, FileIncludeTypeFullPath);
   Scanner_IncludeFile(&scanner, configFullPath, FileIncludeTypeFullPath);
   Scanner_Skip(&scanner);
+
+
+  char drive[_MAX_DRIVE];
+  char dir[_MAX_DIR];
+  char fname[_MAX_FNAME];
+  char ext[_MAX_EXT];
+  SplitPath(fullFileNamePath, drive, dir, fname, ext); // C4996
+
+  char fileNameOut[_MAX_DRIVE + _MAX_DIR + _MAX_FNAME + _MAX_EXT + 1];
+  strcat(fname, "_pre");
+  MakePath(fileNameOut, drive, dir, fname, ".c");
 
 
   FILE* fp = fopen(fileNameOut, "w");
@@ -1827,38 +1814,6 @@ void Scanner_GetScannerItemCopy(Scanner* pScanner, ScannerItem* scannerItem)
 
 
 
-bool Scanner_GetApparentMacroOnTop(Scanner* pScanner)
-{
-  bool result = 0;
-  if (pScanner->bHasLookAhead)
-  {
-    result = pScanner->LookAheadMacroOnTop;
-  }
-  else
-  {
-    if (pScanner->stack.size > 0)
-    {
-      BasicScanner* pBasicScanner =
-        (BasicScanner*)Array_Top(&pScanner->stack);
-      result = pBasicScanner->bMacroExpanded;
-    }    
-  }
-  return result;
-}
-
-size_t Scanner_GetApparentStackSize(Scanner* pScanner)
-{
-  size_t result = 0;
-  if (pScanner->bHasLookAhead)
-  {
-    result = pScanner->LookAheadStackSize;
-  }
-  else
-  {   
-    result = pScanner->stack.size;
-  }
-  return result;
-}
 
 ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
 {
@@ -1866,22 +1821,13 @@ ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
   {
     //Fabricar o lookahead
     //copia o atual para o loakahead
-    ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
+    //ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
     ScannerItem_Copy(&pScanner->LookAhead,
       &Scanner_Top(pScanner)->currentItem);
-    pScanner->LookAheadStackSize = pScanner->stack.size;
 
-    bool bIsMacroOnTop = false;
-    if (pScanner->stack.size > 0)
-    {
-      BasicScanner* pBasicScanner =
-        (BasicScanner*)Array_Top(&pScanner->stack);
-      bIsMacroOnTop = pBasicScanner->bMacroExpanded;
-    }
-    pScanner->LookAheadMacroOnTop = bIsMacroOnTop;
-    const char* streamName = Scanner_GetStreamName(pScanner);
-    String_Set(&pScanner->LookAheadStreamName, streamName);
+//    pScanner->pLookAheadPreviousScanner = pScanner->stack;
 
+    
     /////////////////////////////////////////
     //Mover scanner p proximo
     BasicScanner_Next(Scanner_Top(pScanner));
@@ -1890,9 +1836,12 @@ ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
 
     //So no fim para que o mover seja normal
     pScanner->bHasLookAhead = true;
-    ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
+    //ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
   }
 
-  ASSERT(Scanner_Top(pScanner)->currentItem.token != TK_SPACES);
-  return &Scanner_Top(pScanner)->currentItem;
+  if (pScanner->stack == NULL)
+  {
+    ASSERT(false);
+  }
+  return &Scanner_Top(pScanner)->currentItem;  
 }

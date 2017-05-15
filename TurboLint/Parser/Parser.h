@@ -28,8 +28,6 @@ typedef struct
 
   Map EnumMap;
 
-  //0 nada 1 comecou 2 terminou
-  int MacroExpansionFlag;
 } Parser;
 
 Result Parser_InitFile(Parser* parser, const char* fileName);

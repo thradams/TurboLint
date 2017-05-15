@@ -24,9 +24,9 @@
 #define __declspec(x)  
 
 
-#define __int64 long long
-//typedef long long __int64;
-//typedef short wchar_t;
+
+#define __int64 long long 
+#define wchar_t short
 
 //typedef char* va_list;
 

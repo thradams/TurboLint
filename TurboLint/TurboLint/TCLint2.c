@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 
-
+#if 0
 typedef struct
 {
   TParameterDeclaration *  pParameter;
@@ -271,6 +271,7 @@ static bool IsNonNullPointer(TDeclarator *pDeclarator)
 static void CheckIfDestructorWasCalled(TProgram *pProgram,
                                        TVariablesMap* pDeclarationsMap)
 {
+#if 0
   //Passar por cada variavel do escopo
   //ver se ela tem destructor
   //e ver se o destructor foi chamado
@@ -305,16 +306,19 @@ static void CheckIfDestructorWasCalled(TProgram *pProgram,
       }
     }
   }
+#endif
 }
 
 static bool IsTypedefWithDestructor(TProgram* pProgram,
                                     TTypeSpecifier*  pTypeSpecifier)
 {
+  bool bResult = false;
+#if 0
   //Para saber se eh um tipo com destructor
   //eh preciso ver se o declarator do typedef foi
   //marcado como _dtor
   //
-  bool bResult = false;
+  
 
   TSingleTypeSpecifier *  pSingleTypeSpecifier =
     TTypeSpecifier_As_TSingleTypeSpecifier(pTypeSpecifier);
@@ -337,7 +341,7 @@ static bool IsTypedefWithDestructor(TProgram* pProgram,
       }
     }
   }
-
+#endif
   return bResult;
 }
 
@@ -387,6 +391,7 @@ static void TCompoundStatement_Analise(TProgram* pProgram,
                                        TCompoundStatement * p,
                                        TVariablesMapStack* pStackNames)
 {
+#if 0
   //variaveis locais
   TVariablesMap declarationsMap;
   TVariablesMap_Init(&declarationsMap);
@@ -435,6 +440,7 @@ static void TCompoundStatement_Analise(TProgram* pProgram,
 
   TVariablesMapStack_Pop(pStackNames);
   TVariablesMap_Destroy(&declarationsMap);
+#endif
 }
 
 
@@ -1790,7 +1796,7 @@ static void TDeclarator_PrintCore(TProgram* pProgram,
                                   TVariablesMapStack* pStackNames)
 {
 
-
+#if 0
   if (p->token == TK_LEFT_PARENTHESIS &&
       p->pParametersOpt == NULL)
   {
@@ -1875,7 +1881,7 @@ static void TDeclarator_PrintCore(TProgram* pProgram,
 
 
 
-
+#endif
 }
 
 static void TDeclarator_Analise(TProgram* pProgram,
@@ -2393,3 +2399,4 @@ void TProgram_Analize(TProgram * pProgram)
 
 
 
+#endif

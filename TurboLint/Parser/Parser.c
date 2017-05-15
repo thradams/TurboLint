@@ -12,7 +12,6 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme);
 
 
 
-
 bool DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
 {
   bool bResult = false;
@@ -45,13 +44,8 @@ Result Parser_InitString(Parser* parser,
 
   //Map_Init(&parser->TypeDefNames, SYMBOL_BUCKETS_SIZE);
   parser->bError = false;
-  
-  //0 nada 1 comecou 2 terminou
-  parser->MacroExpansionFlag = 0;
 
   StrBuilder_Init(&parser->ErrorMessage, 100);
-
-
 
 
   /////////
@@ -68,9 +62,7 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
   //Map_Init(&parser->TypeDefNames, SYMBOL_BUCKETS_SIZE);
   parser->bError = false;
-  
-  //0 nada 1 comecou 2 terminou
-  parser->MacroExpansionFlag = 0;
+
 
   StrBuilder_Init(&parser->ErrorMessage, 100);
   Scanner_Init(&parser->Scanner);
@@ -157,41 +149,7 @@ static void Next(Parser* parser)
     return;
   }
 
-  //0 nada 1 comecou 2 terminou
-  parser->MacroExpansionFlag = 0;
-
-  bool bIsMacroOnTop = 
-    Scanner_GetApparentMacroOnTop(&parser->Scanner);
-
-  int s1 = Scanner_GetApparentStackSize(&parser->Scanner);
-
   Scanner_Next(&parser->Scanner);
-
-  int s2 = Scanner_GetApparentStackSize(&parser->Scanner);
-  
-  if ((s1 + 1) == s2)
-  {
-    bool bIsMacroOnTop2 =
-      Scanner_GetApparentMacroOnTop(&parser->Scanner);
-    if (bIsMacroOnTop2)
-    {
-
-      //comecou a expandir macro
-      //printf("start macro expansion %s\n", pBasicScanner->stream.NameOrFullPath);
-
-      //0 nada 1 comecou 2 terminou
-      parser->MacroExpansionFlag = 1;
-    }
-    
-  }
-  else if (s1 > 1 && (s1 - 1) ==s2 && bIsMacroOnTop)
-  {
-    //0 nada 1 comecou 2 terminou
-    parser->MacroExpansionFlag = 2;
-
-    //terminou a expandir macro
-    //printf("end macro expansion end\n");
-  }
 }
 
 
@@ -216,10 +174,15 @@ void SetError2(Parser* parser, const char* message, const char* message2)
   }
 }
 
-void SetError(Parser* parser, const char* message)
+void SetUnexpectedError(Parser* parser, const char* message, const char* message2)
 {
-  SetError2(parser, message, "");
+  SetError2(parser, message, message2);
 }
+
+//void SetError(Parser* parser, const char* message)
+//{
+  //SetError2(parser, message, "");
+//}
 
 
 
@@ -282,8 +245,7 @@ Tokens Token(Parser* parser)
   Tokens token = Scanner_Token(&parser->Scanner);
   if (token == TK_SPACES)
   {
-    SetError(parser, "!");
-    ASSERT(false);
+    SetUnexpectedError(parser, "!", "");    
   }
   return token;
 }
@@ -370,7 +332,7 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList);
 void Specifier_Qualifier_List(Parser* ctx,
   TTypeQualifier* pQualifiers,
   TTypeSpecifier** ppTypeSpecifier);
-bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator* pTDeclarator2);
+bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator** pTDeclarator2);
 
 
 
@@ -417,11 +379,11 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
   //-2 nem eh macro
   //-1 inicio de macro
   //-3 fim de macro
-  ASSERT(IsFirstOfPrimaryExpression(token));
+  
 
   if (!IsFirstOfPrimaryExpression(token))
   {
-    SetError(ctx, "1");
+    SetUnexpectedError(ctx, "1", "IsFirstOfPrimaryExpression");
   }
 
   switch (token)
@@ -461,30 +423,12 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     TPrimaryExpressionValue *   pPrimaryExpressionValue
       = TPrimaryExpressionValue_Create();
 
-    //0 nada 1 comecou 2 terminou
-    int i1 = ctx->MacroExpansionFlag;
-    if (i1 == 1)
-    {
-     
-      const char* fName = Scanner_GetApparentStreamName(&ctx->Scanner);
-      String_Set(&pPrimaryExpressionValue->MacroExpansion, fName);
-    }
 
     pPrimaryExpressionValue->token = token;
     String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
 
     Match(ctx);
     *ppPrimaryExpression = (TExpression*)pPrimaryExpressionValue;
-
-    int i2 = ctx->MacroExpansionFlag;
-    if (i1 == 1 && i2 == 2)
-    {
-      //ok
-    }
-    else
-    {
-      String_Set(&pPrimaryExpressionValue->MacroExpansion, NULL);
-    }
   }
   break;
 
@@ -493,38 +437,17 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     TPrimaryExpressionValue *   pPrimaryExpressionValue
       = TPrimaryExpressionValue_Create();
 
-    //0 nada 1 comecou 2 terminou
-    int i1 = ctx->MacroExpansionFlag;
-    if (i1 == 1)
-    {
-      const char* fName = Scanner_GetApparentStreamName(&ctx->Scanner);
-      String_Set(&pPrimaryExpressionValue->MacroExpansion, fName);
-    }
-
     Match(ctx);
-
-
 
     TExpression* pExpression;
     Expression0(ctx, &pExpression);
     MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
 
-
-
     pPrimaryExpressionValue->token = token;
     String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
     pPrimaryExpressionValue->pExpressionOpt = pExpression;
 
-    int i2 = ctx->MacroExpansionFlag;
-    if (i1 == 1 && i2 == 2)
-    {
-      //ok
-    }
-    else
-    {
-      String_Set(&pPrimaryExpressionValue->MacroExpansion, NULL);
-    }
 
     *ppPrimaryExpression = (TExpression*)pPrimaryExpressionValue;
   }
@@ -535,10 +458,14 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     break;
 
   default:
-    ASSERT(false);
+    SetUnexpectedError(ctx, "", "");
   }
 
-  ASSERT(*ppPrimaryExpression != NULL);
+  if (*ppPrimaryExpression == NULL)
+  {
+    SetUnexpectedError(ctx, "*ppPrimaryExpression != NULL", "");
+  }
+  
 }
 
 void GenericSelection(Parser* ctx)
@@ -584,8 +511,12 @@ void TypeName(Parser* ctx, TTypeName* pTypeName)
   Specifier_Qualifier_List(ctx,
     &pTypeName->Specifiers.TypeQualifiers,
     &pTypeName->Specifiers.pTypeSpecifierOpt);
-
-  AbstractDeclaratorOpt(ctx, &pTypeName->Declarator);
+  TDeclarator* pDeclarator = NULL;
+  AbstractDeclaratorOpt(ctx, &pDeclarator);
+  if (pDeclarator)
+  {
+    pTypeName->Declarator = *pDeclarator;
+  }
 }
 
 
@@ -694,7 +625,10 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
       TPostfixExpressionCore_Create();
     PostfixExpressionCore(ctx, pPostfixExpressionCoreNext);
 
-    ASSERT(pPostfixExpressionCore->pNext == NULL);
+    if (pPostfixExpressionCore->pNext != NULL)
+    {
+      SetUnexpectedError(ctx, "", "");
+    }
     pPostfixExpressionCore->pNext = pPostfixExpressionCoreNext;
   }
   break;
@@ -1080,7 +1014,7 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
 
   default:
     //ASSERT(false);
-    SetError(ctx, "Assert");
+    SetUnexpectedError(ctx, "Assert", "");
 
     break;
   }
@@ -1891,7 +1825,7 @@ void Parameter_Declaration(Parser* ctx, TParameterDeclaration* pParameterDeclara
 bool Declaration(Parser* ctx, TAnyDeclaration** ppDeclaration);
 void Type_Qualifier_ListOpt(Parser* ctx, TTypeQualifier* pQualifier);
 bool Declaration_Specifiers(Parser* ctx, TDeclarationSpecifiers* pDeclarationSpecifiers);
-void Declarator(Parser* ctx, TDeclarator* pTDeclarator2);
+void Declarator(Parser* ctx, TDeclarator** pTDeclarator2);
 bool Type_Specifier(Parser* ctx, TTypeSpecifier** ppTypeSpecifier, int* typedefCount);
 bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier);
 void Initializer(Parser* ctx,
@@ -2465,7 +2399,8 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
     break;
 
   default:
-    ASSERT(false);
+    
+    SetUnexpectedError(ctx, "e" ,"");
     //bResult = true;
     //SetType(pStatement, "expression-statement");
     //Expression_Statement(ctx, pStatement);
@@ -2622,7 +2557,7 @@ void Specifier_Qualifier_List(Parser* ctx,
 
 void Struct_Declarator(Parser* ctx,
 
-  TStructDeclarator* pTDeclarator2)
+  TStructDeclarator** ppTDeclarator2)
 {
   /**
   struct-declarator:
@@ -2642,7 +2577,7 @@ void Struct_Declarator(Parser* ctx,
 
   else
   {
-    Declarator(ctx, pTDeclarator2);
+    Declarator(ctx, ppTDeclarator2);
     token = Token(ctx);
 
     if (token == TK_COLON)
@@ -2652,16 +2587,16 @@ void Struct_Declarator(Parser* ctx,
       ConstantExpression(ctx, &p);
       TExpression_Delete(p);
     }
-#ifdef LANGUAGE_EXTENSIONS
+#if 0 //LANGUAGE_EXTENSIONS
     else if (token == TK_EQUALS_SIGN)
     {
-      
+
       //TODO COMPILER EXTENSION! SHOW ERROR IF EXTENSIONS NOT ENABLED
       //struct { int i = 1; }
       Match(ctx);
 
-      Initializer(ctx, &pTDeclarator2->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
-      
+      Initializer(ctx, &(*ppTDeclarator2)->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
+
     }
 #endif
   }
@@ -2676,9 +2611,10 @@ void Struct_Declarator_List(Parser* ctx,
   struct-declarator
   struct-declarator-list , struct-declarator
   */
-  TStructDeclarator* pTDeclarator2 = TDeclarator_Create();
+  TStructDeclarator* pTDeclarator2 = NULL;// TDeclarator_Create();
+
+  Struct_Declarator(ctx, &pTDeclarator2);
   TDeclaratorList_Push(pStructDeclarationList, pTDeclarator2);
-  Struct_Declarator(ctx, pTDeclarator2);
 
   for (; ;)
   {
@@ -2700,7 +2636,7 @@ void Struct_Declarator_List(Parser* ctx,
 
     else
     {
-      SetError(ctx, "Struct_Declarator_List unexpected");
+      SetUnexpectedError(ctx, "Struct_Declarator_List unexpected", "");
       break;
     }
   }
@@ -2824,7 +2760,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
 
   else
   {
-    SetError(ctx, "expected name or {");
+    SetError2(ctx, "expected name or {", "");
   }
 }
 
@@ -2980,7 +2916,7 @@ void Enum_Specifier(Parser* ctx, TEnumSpecifier* pEnumSpecifier2)
 
   else
   {
-    SetError(ctx, "expected enum name or {");
+    SetError2(ctx, "expected enum name or {", "");
   }
 }
 
@@ -3103,7 +3039,7 @@ void Parameter_List(Parser* ctx,
 
 
 
-void AbstractDeclarator(Parser* ctx, TDeclarator* pTDeclarator2)
+void AbstractDeclarator(Parser* ctx, TDeclarator** ppTDeclarator2)
 {
   /*
   abstract-declarator:
@@ -3111,10 +3047,10 @@ void AbstractDeclarator(Parser* ctx, TDeclarator* pTDeclarator2)
   pointeropt direct-abstract-declarator
   */
   //TODO!!! esta sendo usado como se fosse a mesma coisa?
-  Declarator(ctx, pTDeclarator2);
+  Declarator(ctx, ppTDeclarator2);
 }
 
-bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator* pTDeclarator2)
+bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator** ppTDeclarator2)
 {
   bool bResult = false;
   Tokens token = Token(ctx);
@@ -3122,7 +3058,7 @@ bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator* pTDeclarator2)
   switch (token)
   {
   case TK_ASTERISK:
-    AbstractDeclarator(ctx, pTDeclarator2);
+    AbstractDeclarator(ctx, ppTDeclarator2);
     break;
   }
 
@@ -3143,7 +3079,12 @@ void Parameter_Declaration(Parser* ctx,
   Declaration_Specifiers(ctx,
     &pParameterDeclaration->Specifiers);
 
-  AbstractDeclarator(ctx, &pParameterDeclaration->Declarator);
+  TDeclarator *pDeclarator = NULL;
+  AbstractDeclarator(ctx, &pDeclarator);
+  if (pDeclarator)
+  {
+    pParameterDeclaration->Declarator = *pDeclarator;
+  }
 }
 
 void Parameter_Type_List(Parser* ctx,
@@ -3165,113 +3106,23 @@ void Parameter_Type_List(Parser* ctx,
   }
 }
 
-void Direct_DeclaratorCore(Parser* ctx, TDeclarator* pDeclarator2)
+void Direct_Abstract_Declarator(Parser* ctx, TDeclarator** ppDeclarator2)
 {
-
-  //ja entra aqui como sendo um direct-declarator
-
-  if (ErrorOrEof(ctx))
-    return;
-
-
-  /*
-  direct-declarator:
-  direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
-  direct-declarator [ static type-qualifier-listopt assignment-expression ]
-  direct-declarator [ type-qualifier-list static assignment-expression ]
-  direct-declarator [ type-qualifier-listopt * ]
-  direct-declarator ( parameter-type-list )
-  direct-declarator ( identifier-listopt )
-  */
-
-  Tokens token = Token(ctx);
-  switch (token)
-  {
-  case TK_LEFT_SQUARE_BRACKET:
-  {
-    /*
-    direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
-    direct-declarator [ static type-qualifier-listopt assignment-expression ]
-    direct-declarator [ type-qualifier-list static assignment-expression ]
-    direct-declarator [ type-qualifier-listopt * ]
-    */
-    pDeclarator2->token = token;
-    token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
-    if (token == TK_STATIC)
-    {
-    }
-    else
-    {
-      if (token != TK_RIGHT_SQUARE_BRACKET)
-      {
-        ASSERT(pDeclarator2->pExpression == NULL);
-        AssignmentExpression(ctx, &pDeclarator2->pExpression);
-      }
-      else
-      {
-        //array vazio é permitido se for o ultimo cara da struct          
-        //struct X { int ElementCount;  int Elements[]; };           
-      }
-    }
-
-    MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
-
-  }
-  break;
-  case TK_LEFT_PARENTHESIS:
-  {
-    /*
-    direct-declarator ( parameter-type-list )
-    direct-declarator ( identifier-listopt )
-    */
-    pDeclarator2->token = token;
-    ASSERT(pDeclarator2->pParametersOpt == NULL);
-    pDeclarator2->pParametersOpt = TParameterList_Create();
-    token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
-
-    if (token != TK_RIGHT_PARENTHESIS)
-    {
-      //opt
-      Parameter_Type_List(ctx, pDeclarator2->pParametersOpt);
-    }
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-
-  }break;
-  }
-
-  //Tem mais?
-
-  token = Token(ctx);
-  switch (token)
-  {
-  case TK_LEFT_SQUARE_BRACKET:
-    ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-    pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-    Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
-    break;
-  case TK_LEFT_PARENTHESIS:
-  {
-    Tokens token2 = LookAheadToken(ctx);
-    if (token2 == TK_ASTERISK)
-    {
-      ASSERT(false); //cai aqui?
-      MatchToken(ctx, TK_LEFT_PARENTHESIS);
-      Declarator(ctx, pDeclarator2);
-      MatchToken(ctx, TK_RIGHT_PARENTHESIS);
-    }
-    else
-    {
-      ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-      pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-      Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
-    }
-  }	break;
-
-  }
+/*
+direct-abstract-declarator:
+  ( abstract-declarator )
+  direct-abstract-declaratoropt [ type-qualifier-listopt assignment-expressionopt ]
+  direct-abstract-declaratoropt [ static type-qualifier-listopt assignment-expression ]
+  direct-abstract-declaratoropt [ type-qualifier-list static assignment-expression ]
+  direct-abstract-declaratoropt [ * ]
+  direct-abstract-declaratoropt ( parameter-type-listopt )
+*/
 }
 
-void Direct_Declarator(Parser* ctx, TDeclarator* pDeclarator2)
+void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
 {
+  *ppDeclarator2 = NULL; //out
+
   /*
   direct-declarator:
   identifier
@@ -3283,11 +3134,10 @@ void Direct_Declarator(Parser* ctx, TDeclarator* pDeclarator2)
   direct-declarator ( parameter-type-list )
   direct-declarator ( identifier-listopt )
   */
-
+  TDirectDeclarator *pDirectDeclarator = NULL;
 
   if (ErrorOrEof(ctx))
     return;
-
 
 
   Tokens token = Token(ctx);
@@ -3296,46 +3146,151 @@ void Direct_Declarator(Parser* ctx, TDeclarator* pDeclarator2)
   {
   case TK_LEFT_PARENTHESIS:
   {
-
     MatchToken(ctx, TK_LEFT_PARENTHESIS);
     //ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-    //pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-    Declarator(ctx, pDeclarator2);
-
-    pDeclarator2->token = token;
-
+    ASSERT(pDirectDeclarator == NULL);
+    pDirectDeclarator = TDirectDeclarator_Create();    
+    Declarator(ctx, &pDirectDeclarator->pDeclarator);        
     MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
+    //Para indicar que eh uma ( declarator )
+    pDirectDeclarator->token = TK_RIGHT_PARENTHESIS;
+    // ) para nao confundir com funcao (
   }
   break;
 
   case TK_IDENTIFIER:
   {
     //identifier
-    pDeclarator2->token = token;
+    pDirectDeclarator = TDirectDeclarator_Create();
+    
+    //Para indicar que eh uma identificador
+    pDirectDeclarator->token = TK_IDENTIFIER;
+    
     const char* lexeme = Lexeme(ctx);
-    String_Set(&pDeclarator2->Name, lexeme);
-    pDeclarator2->Position.Line = GetCurrentLine(ctx);
-    pDeclarator2->Position.FileIndex = GetFileIndex(ctx);
-
-    Match(ctx);
-
-  }  break;
-  }
-
-  //Tem mais?
-
-  token = Token(ctx);
-  switch (token)
-  {
-  case TK_LEFT_PARENTHESIS:
-  case TK_LEFT_SQUARE_BRACKET:
-    ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
-    pDeclarator2->pDeclaratorOpt = TDeclarator_Create();
-    Direct_DeclaratorCore(ctx, pDeclarator2->pDeclaratorOpt);
+    String_Set(&pDirectDeclarator->Identifier, lexeme);
+    pDirectDeclarator->Position.Line = GetCurrentLine(ctx);
+    pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);
+    Match(ctx);    
+  }  
+  break;
+  
+  default:
+    //assert(false);
     break;
   }
 
+  
+  
+  if (pDirectDeclarator == NULL)
+  {
+    //Por enquanto esta funcao esta sendo usada para
+    //abstract declarator que nao tem nome.
+    //vou criar aqui por enquanto um cara vazio
+    pDirectDeclarator = TDirectDeclarator_Create();
+    String_Set(&pDirectDeclarator->Identifier, "");
+    pDirectDeclarator->Position.Line = GetCurrentLine(ctx);
+    pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);    
+
+    //Para indicar que eh uma identificador
+    pDirectDeclarator->token = TK_IDENTIFIER;
+
+    //Quando tiver abstract declarator vai ser 
+    //bug cair aqui
+  }
+
+  *ppDeclarator2 = pDirectDeclarator;
+
+  for (;;)
+  {
+    ASSERT(pDirectDeclarator != NULL);
+
+    token = Token(ctx);
+    switch (token)
+    {
+    case TK_LEFT_PARENTHESIS:
+
+      /*
+      direct-declarator ( parameter-type-list )
+      direct-declarator ( identifier-listopt )
+      */
+//      pDirectDeclarator->token = token;
+      ASSERT(pDirectDeclarator->pParametersOpt == NULL);
+      pDirectDeclarator->pParametersOpt = TParameterList_Create();
+      token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
+
+      //Para indicar que eh uma funcao
+      pDirectDeclarator->token = TK_LEFT_PARENTHESIS;
+
+      if (token != TK_RIGHT_PARENTHESIS)
+      {
+        //opt
+        Parameter_Type_List(ctx, pDirectDeclarator->pParametersOpt);
+      }
+      MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+      break;
+
+    case TK_LEFT_SQUARE_BRACKET:
+      /*
+      direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
+      direct-declarator [ static type-qualifier-listopt assignment-expression ]
+      direct-declarator [ type-qualifier-list static assignment-expression ]
+      direct-declarator [ type-qualifier-listopt * ]
+      */
+
+      //ASSERT(pDirectDeclarator->pParametersOpt == NULL);
+      //pDirectDeclarator->pParametersOpt = TParameterList_Create();
+      
+      //Para indicar que eh um array
+      pDirectDeclarator->token = TK_LEFT_SQUARE_BRACKET;
+
+      token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
+      if (token == TK_STATIC)
+      {
+      }
+      else
+      {
+        if (token != TK_RIGHT_SQUARE_BRACKET)
+        {
+          ASSERT(pDirectDeclarator->pExpression == NULL);
+          AssignmentExpression(ctx, &pDirectDeclarator->pExpression);
+        }
+        else
+        {
+          //array vazio é permitido se for o ultimo cara da struct          
+          //struct X { int ElementCount;  int Elements[]; };           
+        }
+      }
+
+      MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
+
+      break;
+    }
+
+    token = Token(ctx);
+    if (token != TK_LEFT_PARENTHESIS &&   token != TK_LEFT_SQUARE_BRACKET )
+    {
+      break;
+    }
+    else
+    {
+      TDirectDeclarator *pDirectDeclaratorNext = TDirectDeclarator_Create();
+      pDirectDeclarator->pDirectDeclarator = pDirectDeclaratorNext;
+      pDirectDeclarator = pDirectDeclaratorNext;      
+    }
+  }
+
+  token = Token(ctx);
+  if (token == TK_LEFT_PARENTHESIS ||
+      token == TK_IDENTIFIER)
+  {
+    //tem mais
+    TDirectDeclarator *pDirectDeclaratorNext = NULL;
+    Direct_Declarator(ctx, &pDirectDeclaratorNext);
+    pDirectDeclarator->pDirectDeclarator = pDirectDeclaratorNext;
+  }
+
+  
 }
 
 bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
@@ -3462,16 +3417,30 @@ int PointerOpt(Parser* ctx, TPointerList* pPointerList)
   return ns;
 }
 
-//pag 123 C
-void Declarator(Parser* ctx, TDeclarator* pTDeclarator2)
+void Abstract_Declarator(Parser* ctx, TDeclarator** ppTDeclarator2)
 {
+  /*
+  abstract-declarator:
+  pointer
+  pointeropt direct-abstract-declarator
+  */
+}
+
+//pag 123 C
+void Declarator(Parser* ctx, TDeclarator** ppTDeclarator2)
+{
+  *ppTDeclarator2 = NULL; //out
+  TDeclarator* pDeclarator = TDeclarator_Create();
   /*
   declarator:
   pointeropt direct-declarator
-  */
-  PointerOpt(ctx, &pTDeclarator2->PointerList);
-
-  Direct_Declarator(ctx, pTDeclarator2);
+  */  
+  PointerOpt(ctx, &pDeclarator->PointerList);
+  
+  ASSERT(pDeclarator->pDirectDeclarator == NULL);
+  Direct_Declarator(ctx, &pDeclarator->pDirectDeclarator);     
+  
+  *ppTDeclarator2 = pDeclarator;
 }
 
 
@@ -3853,32 +3822,14 @@ void Initializer(Parser* ctx,
 
   if (token == TK_LEFT_CURLY_BRACKET)
   {
-    
+
 
     TInitializerListType* pTInitializerList = TInitializerListType_Create();
     *ppInitializer = (TInitializer*)pTInitializerList;
 
-    //0 nada 1 comecou 2 terminou
-    int i1 = ctx->MacroExpansionFlag;
-    if (i1 == 1)
-    {
-      const char* fName = Scanner_GetApparentStreamName(&ctx->Scanner);
-      String_Set(&pTInitializerList->MacroExpansion, fName);
-    }
-
     Match(ctx);
     Initializer_List(ctx, &pTInitializerList->InitializerList);
     MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
-
-    int i2 = ctx->MacroExpansionFlag;
-    if (i1 == 1 && i2 == 2)
-    {
-      //ok
-    }
-    else
-    {
-      String_Set(&pTInitializerList->MacroExpansion, NULL);
-    }
 
   }
 
@@ -4005,44 +3956,50 @@ void Designator(Parser* ctx, TDesignator* p)
 }
 
 void Init_Declarator(Parser* ctx,
-  TDeclarator* pDeclarator2)
+  TInitDeclarator** ppDeclarator2)
 {
   /*
   init-declarator:
   declarator
   declarator = initializer
   */
-  Declarator(ctx, pDeclarator2);
+  TInitDeclarator* pInitDeclarator = 
+    TInitDeclarator_Create();
+
+  ASSERT(pInitDeclarator->pDeclarator == NULL);
+  Declarator(ctx, &pInitDeclarator->pDeclarator);
   Tokens token = Token(ctx);
+
+  //Antes do =
+  *ppDeclarator2 = pInitDeclarator;
 
   if (token == TK_EQUALS_SIGN)
   {
-    //TODO COMPILER EXTENSION! SHOW ERROR IF EXTENSIONS NOT ENABLED
-    //struct { int i = 1; }
+    ASSERT(*ppDeclarator2 != NULL);
     Match(ctx);
-    Initializer(ctx, &pDeclarator2->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
-  }
+    Initializer(ctx, &pInitDeclarator->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
+  }  
 }
 
 void Init_Declarator_List(Parser* ctx,
-
-  TDeclaratorList* pDeclaratorList2)
+  TInitDeclaratorList* pInitDeclaratorList)
 {
   /*
   init-declarator-list:
   init-declarator
   init-declarator-list , init-declarator
   */
-  TDeclarator* pDeclarator2 = TDeclarator_Create();
-  TDeclaratorList_Push(pDeclaratorList2, pDeclarator2);
-  Init_Declarator(ctx, pDeclarator2);
+  
+  TInitDeclarator* pInitDeclarator = NULL;
+  Init_Declarator(ctx, &pInitDeclarator);
+  TInitDeclaratorList_Push(pInitDeclaratorList, pInitDeclarator);
 
   //Tem mais?
   Tokens token = Token(ctx);
   if (token == TK_COMMA)
   {
-    Match(ctx);
-    Init_Declarator_List(ctx, pDeclaratorList2);
+    Match(ctx);  
+    Init_Declarator_List(ctx, pInitDeclaratorList);
   }
 
 }
@@ -4103,7 +4060,7 @@ bool  Declaration(Parser* ctx,
       else
       {
         //Agora vem os declaradores que possuem os ponteiros
-        Init_Declarator_List(ctx, &pFuncVarDeclaration->Declarators);
+        Init_Declarator_List(ctx, &pFuncVarDeclaration->InitDeclaratorList);
         token = Token(ctx);
 
         if (token == TK_LEFT_CURLY_BRACKET)
@@ -4144,11 +4101,11 @@ void SetSymbolsFromDeclaration(Parser* ctx,
     TDeclaration* pTFuncVarDeclaration = (TDeclaration*)pDeclaration2;
     //if (pTFuncVarDeclaration->Specifiers.StorageSpecifiers.bIsTypedef)
     {
-
-      for (size_t i = 0; i < pTFuncVarDeclaration->Declarators.size; i++)
+      FOR_EACH_INITDECLARATOR(pDeclarator, pTFuncVarDeclaration->InitDeclaratorList)
+      //for (size_t i = 0; i < pTFuncVarDeclaration->InitDeclaratorList.size; i++)
       {
-        TDeclarator* pDeclarator = pTFuncVarDeclaration->Declarators.pItems[i];
-        const char* declaratorName = TDeclarator_FindName(pDeclarator);
+//        TDeclarator* pDeclarator = pTFuncVarDeclaration->Declarators.pItems[i];
+        const char* declaratorName = TInitDeclarator_FindName(pDeclarator);
 
         if (declaratorName == NULL)
         {
@@ -4191,7 +4148,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
       else
       {
         //nao ter mais declaracao nao eh erro
-        SetError(ctx, "declaration expected");
+        SetError2(ctx, "declaration expected", "");
       }
       break;
     }
@@ -4246,11 +4203,11 @@ bool GetAST(const char*  filename,
   GetFullPath(configFileName, &fullConfigFilePath);
 
   Parser parser;
-  
+
   Parser_InitFile(&parser, fullConfigFilePath);
   Parser_Main(&parser, &pProgram->Declarations);
 
-  StrBuilder_Clear(& parser.Scanner.PreprocessorAndCommentsString);
+  StrBuilder_Clear(&parser.Scanner.PreprocessorAndCommentsString);
 
   parser.Scanner.bAmalgamationMode = bAmalgamationMode;
   if (!parser.Scanner.bAmalgamationMode)

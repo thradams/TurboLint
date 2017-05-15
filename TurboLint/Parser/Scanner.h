@@ -38,7 +38,7 @@ ARRAYOF(TFileArray, TFile)
 typedef struct
 {
     //Stack de basicscanner
-    Array stack;
+    BasicScannerStack stack;
 
     //Mapa dos defines
     MacroMap  Defines2;
@@ -77,10 +77,8 @@ typedef struct
 
     //Valor lido na leitura especulativa
     ScannerItem LookAhead;
+    //BasicScanner* pLookAheadPreviousScanner;
 
-    size_t LookAheadStackSize;
-    bool LookAheadMacroOnTop;
-    String LookAheadStreamName;
     ///////////////////////////////////////////////////
 
 
@@ -135,8 +133,7 @@ void Scanner_GetError(Scanner* pScanner, StrBuilder* str);
 
 
 void PrintPreprocessedToFile(const char* fileIn,
-  const char* configFileName,
-  const char* fileNameOut);
+  const char* configFileName);
 
 void Scanner_GetScannerItemCopy(Scanner* pScanner,
                                 ScannerItem* scannerItem);
@@ -144,7 +141,5 @@ void Scanner_GetScannerItemCopy(Scanner* pScanner,
 
 
 bool Scanner_GetApparentMacroOnTop(Scanner * pScanner);
-
-size_t Scanner_GetApparentStackSize(Scanner * pScanner);
 
 ScannerItem* Scanner_GetLookAhead(Scanner* pScanner);

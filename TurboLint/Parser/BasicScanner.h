@@ -172,7 +172,7 @@ void ScannerItem_Swap(ScannerItem* scannerItem, ScannerItem* other);
 void ScannerItem_Destroy(ScannerItem* scannerItem);
 void ScannerItem_Copy(ScannerItem* scannerItem, ScannerItem* other);
 
-typedef struct ScannerT
+typedef struct BasicScanner
 {
     SStream stream;
     ScannerItem currentItem;
@@ -181,6 +181,8 @@ typedef struct ScannerT
     bool bLineStart;
     bool bMacroExpanded;
     int FileIndex;
+    struct BasicScanner* pPrevious;
+
 } BasicScanner;
 
 Result      BasicScanner_Create(BasicScanner** pp, const char* name, const char* text);
@@ -196,23 +198,20 @@ Result BasicScanner_Init(BasicScanner* pScanner,
                          const char* name,
                          const char* text);
 void BasicScanner_Destroy(BasicScanner* pScanner);
-/*
-typedef struct
-{
-    ScannerItem* strings;
-    size_t size;
-    size_t capacity;
-} ScannerItemStack;
-#define SCANNER_ITEM_STATCK_INIT {NULL , 0 , 0}
 
-Result ScannerItemStack_Init(ScannerItemStack* st);
-void   ScannerItemStack_Destroy(ScannerItemStack* st);
-Result ScannerItemStack_PushMove(ScannerItemStack* st, ScannerItem* item);
-void   ScannerItemStack_PopMove(ScannerItemStack* st, ScannerItem* item);
-void   ScannerItemStack_Pop(ScannerItemStack* st);
-Result ScannerItemStack_PopPushTo(ScannerItemStack* st, ScannerItemStack* other);
-bool   ScannerItemStack_IsEmpty(ScannerItemStack* st);
-Tokens ScannerItemStack_TopToken(ScannerItemStack* st);
-void   ScannerItemStack_Print(ScannerItemStack* st);
-void ScannerItemStack_Swap(ScannerItemStack* p1, ScannerItemStack* p2);
-*/
+
+
+typedef BasicScanner* BasicScannerStack;
+#define ITEM_STACK_INIT NULL
+void BasicScannerStack_Init(BasicScannerStack* stack);
+void BasicScannerStack_Push(BasicScannerStack* stack, BasicScanner* pItem);
+BasicScanner* BasicScannerStack_PopGet(BasicScannerStack* stack);
+void BasicScannerStack_Pop(BasicScannerStack* stack);
+void BasicScannerStack_PopIfNotLast(BasicScannerStack* stack);
+void BasicScannerStack_Destroy(BasicScannerStack* stack);
+
+#define ForEachBasicScanner(pItem, stack)\
+    for (BasicScanner* pItem = stack;\
+      pItem;\
+      pItem = pItem->pPrevious)
+

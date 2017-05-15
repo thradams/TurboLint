@@ -35,6 +35,10 @@ PPToken* PPToken_Create(const char* s, PPTokenType token)
 		String_Set(&p->Lexeme, s);
 		p->Token = token;
 	}
+  else
+  {
+    ASSERT(false);
+  }
 
 	return p;
 }

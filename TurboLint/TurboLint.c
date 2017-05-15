@@ -13,7 +13,7 @@ void RunLint(const char* configFileName,
 	const char* inputFileName,
 	bool bAmalgamationMode)
 {
-	TProgram program = TPROGRAM_INIT;
+  TProgram program = TPROGRAM_INIT;
 
 
 
@@ -23,7 +23,7 @@ void RunLint(const char* configFileName,
 		printf("Running Code Analysis...\n");
 
 
-		TProgram_Analize(&program);
+		//TProgram_Analize(&program);
 
 
 		char drive[_MAX_DRIVE];
@@ -66,6 +66,7 @@ void RunLint(const char* configFileName,
 int main(int argc, char* argv[])
 {
 	printf("Turbo lint " __DATE__ "\n");
+  
 
 	if (argc < 2)
 	{
@@ -93,9 +94,9 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (bPrintPreprocessed)
+	//if (bPrintPreprocessed)
 	{
-		PrintPreprocessedToFile(inputFileName, configFileName, "pre.txt");
+		PrintPreprocessedToFile(inputFileName, configFileName);
 	}
 	String inputFullPath = NULL;
 	GetFullPath(inputFileName, &inputFullPath);
