@@ -81,20 +81,20 @@ int main(int argc, char* argv[])
 	for (int i = 3; i < argc; i++)
 	{
 		const char * option = argv[i];
-		if (strcmp(option, "/E") == 0)
+		if (strcmp(option, "-E") == 0)
 		{
 			bPrintPreprocessed = true;
 		}
-		else if (strcmp(option, "/F") == 0)
+		else if (strcmp(option, "-F") == 0)
 		{
 		}
-		else if (strcmp(option, "/A") == 0)
+		else if (strcmp(option, "-A") == 0)
 		{
 			bAmalgamationMode = true;
 		}
 	}
 
-	//if (bPrintPreprocessed)
+	if (bPrintPreprocessed)
 	{
 		PrintPreprocessedToFile(inputFileName, configFileName);
 	}

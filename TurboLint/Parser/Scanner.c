@@ -836,15 +836,8 @@ bool GetNewMacroCallString(Scanner* pScanner,
   //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
 
   const char* lexeme = Scanner_Lexeme(pScanner);
-  PPToken *ppToken = PPToken_Create(lexeme,
-    TokenToPPToken(GetToken(pScanner)));
-  TokenArray_Push(ppTokenArray, ppToken);
-
-  BasicScanner_Next(Scanner_Top(pScanner));
-  //Tem que deixar os espaços  no basic scanner antigo
-  //para que a expansao da macro seja antes
-  //#define S static
-  //S int f();
+  
+  
 
   //verificar se tem parametros
   int nArgsExpected = pMacro->FormalArguments.Size;// pMacro->bIsFunction;
@@ -853,15 +846,33 @@ bool GetNewMacroCallString(Scanner* pScanner,
   //fazer uma lista com os parametros
   if (nArgsExpected > 0)
   {
-    //se a macro tem parametro pode ter espaco depois
-    //X (A)
-    //entao pular espacos
-    SkipSpaces(pScanner);
+    ScannerItem* pLookAhead = Scanner_GetLookAhead(pScanner);
+    
+    
 
-    Tokens token = Scanner_Token(pScanner);
+    Tokens token = pLookAhead->token;// Scanner_Token(pScanner);
 
     if (token == TK_LEFT_PARENTHESIS)
     {
+      PPToken *ppTokenName = PPToken_Create(lexeme,
+        TokenToPPToken(GetToken(pScanner)));
+      TokenArray_Push(ppTokenArray, ppTokenName);
+
+
+      //se a macro tem parametro pode ter espaco depois
+      //X (A)
+      //entao pular espacos
+      //SkipSpaces(pScanner);
+
+      //Nao pode fazer o match pq se nao eh macro
+      // max
+      BasicScanner_Next(Scanner_Top(pScanner));
+      //Tem que deixar os espaços  no basic scanner antigo
+      //para que a expansao da macro seja antes
+      //#define S static
+      //S int f();
+
+
       PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
       TokenArray_Push(ppTokenArray, ppToken);
       //StrBuilder_Append(strBuilderResult, Scanner_Lexeme(pScanner));
@@ -937,6 +948,9 @@ bool GetNewMacroCallString(Scanner* pScanner,
   else
   {
     //o nome eh a propria expansao
+    PPToken *ppTokenName = PPToken_Create(lexeme,
+      TokenToPPToken(GetToken(pScanner)));
+    TokenArray_Push(ppTokenArray, ppTokenName);
   }
 
   bool bIsMacro = true;
@@ -1770,10 +1784,9 @@ void PrintPreprocessedToFile(const char* fileIn,
   FILE* fp = fopen(fileNameOut, "w");
 
   while (Scanner_Token(&scanner) != TK_EOF)
-  {
-    BasicScanner* pBasicScanner = Scanner_Top(&scanner);
-    Tokens token = pBasicScanner->currentItem.token;
-    const char* lexeme = pBasicScanner->currentItem.lexeme.c_str;
+  {    
+    Tokens token = Scanner_Token(&scanner);
+    const char* lexeme = Scanner_Lexeme(&scanner);
 
     if (token == TK_BREAKLINE)
     {
