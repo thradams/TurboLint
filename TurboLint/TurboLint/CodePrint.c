@@ -1034,6 +1034,7 @@ static bool TDeclarator_CodePrint(TDeclarator* p, bool b, StrBuilder* fp)
   return b;
 }
 
+bool TInitDeclarator_CodePrint(TInitDeclarator* p, bool b, StrBuilder* fp);
 
 static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, StrBuilder* fp)
 {
@@ -1045,8 +1046,8 @@ static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, StrBuilder* fp
     if (i > 0)
       StrBuilder_Append(fp, ",");
 
-    TDeclarator* pItem = p->pItems[i];
-    b = TDeclarator_CodePrint(pItem, b, fp);
+    TInitDeclarator* pItem = p->pItems[i];
+    b = TInitDeclarator_CodePrint(pItem, b, fp);
   }
 
 
@@ -1205,6 +1206,7 @@ bool TInitDeclarator_CodePrint(TInitDeclarator* p, bool b, StrBuilder* fp)
   return true;
 }
 
+bool TInitDeclarator_CodePrint(TInitDeclarator* p, bool b, StrBuilder* fp);
 
 bool TInitDeclaratorList_CodePrint(TInitDeclaratorList *p, bool b, StrBuilder* fp)
 {

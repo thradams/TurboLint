@@ -131,6 +131,8 @@ typedef struct
 CREATETYPE(TStaticAssertDeclaration, TSTATIC_ASSERT_DECLARATION_INIT)
 
 
+
+
 typedef TTypePointer TStatement;
 typedef TTypePointer TBlockItem;
 
@@ -585,7 +587,7 @@ typedef struct TDirectDeclarator
 #define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, NULL, NULL, TK_NONE}
 CREATETYPE(TDirectDeclarator, TDIRECTDECLARATOR_INIT)
 
-typedef TDeclarator TStructDeclarator;
+
 
 
 typedef struct TInitDeclarator
@@ -598,6 +600,8 @@ typedef struct TInitDeclarator
 #define TINITDECLARATOR_INIT {NULL, NULL, NULL}
 CREATETYPE(TInitDeclarator, TINITDECLARATOR_INIT)
 
+typedef TInitDeclarator TStructDeclarator;
+
 typedef struct TInitDeclaratorList
 {
   TInitDeclarator* pInitDeclaratorHeap;
@@ -607,6 +611,9 @@ typedef struct TInitDeclaratorList
 #define TINITDECLARATORLIST_INIT {NULL, NULL}
 
 CREATETYPE(TInitDeclaratorList, TINITDECLARATORLIST_INIT)
+
+void TInitDeclaratorList_Push(TInitDeclaratorList* p, TInitDeclarator* pItem);
+
 #define FOR_EACH_INITDECLARATOR(var, list) \
  for (TInitDeclarator * var = list.pInitDeclaratorHeap; \
       var != NULL;\
@@ -614,19 +621,17 @@ CREATETYPE(TInitDeclaratorList, TINITDECLARATORLIST_INIT)
 
 
 
-void TInitDeclaratorList_Push(TInitDeclaratorList* p, TInitDeclarator* pItem);
-
 const char* TDeclarator_FindName(TDeclarator* p);
 const char* TInitDeclarator_FindName(TInitDeclarator* p);
 
 typedef struct
 {
-  TDeclarator** pItems;
+  TInitDeclarator** pItems;
   size_t size;
   size_t capacity;
 } TDeclaratorList;
 #define TDECLARATOR_LIST_INIT { NULL, 0, 0}
-ARRAYOF(TDeclaratorList, TDeclarator)
+ARRAYOF(TDeclaratorList, TInitDeclarator)
 
 
 

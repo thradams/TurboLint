@@ -2577,7 +2577,14 @@ void Struct_Declarator(Parser* ctx,
 
   else
   {
-    Declarator(ctx, ppTDeclarator2);
+    TInitDeclarator* pInitDeclarator =
+      TInitDeclarator_Create();
+
+    *ppTDeclarator2 = pInitDeclarator;
+
+    ASSERT(pInitDeclarator->pDeclarator == NULL);
+    Declarator(ctx, &pInitDeclarator->pDeclarator);
+    
     token = Token(ctx);
 
     if (token == TK_COLON)
@@ -2587,7 +2594,7 @@ void Struct_Declarator(Parser* ctx,
       ConstantExpression(ctx, &p);
       TExpression_Delete(p);
     }
-#if 0 //LANGUAGE_EXTENSIONS
+#ifdef LANGUAGE_EXTENSIONS
     else if (token == TK_EQUALS_SIGN)
     {
 
@@ -2595,7 +2602,7 @@ void Struct_Declarator(Parser* ctx,
       //struct { int i = 1; }
       Match(ctx);
 
-      Initializer(ctx, &(*ppTDeclarator2)->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
+      Initializer(ctx, &pInitDeclarator->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
 
     }
 #endif

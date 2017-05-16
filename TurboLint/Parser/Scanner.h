@@ -35,6 +35,31 @@ typedef struct
 #define TFILE_ARRAY_INIT {NULL, 0 , 0}
 ARRAYOF(TFileArray, TFile)
 
+typedef enum 
+{
+  NodeClueTypeNone,
+  NodeClueTypeDefine,
+  NodeClueTypeUndef
+} NodeClueType;
+
+typedef struct TNodeClue
+{
+  NodeClueType Type;  
+  String Text;
+  struct TNodeClue* pNext;
+} TNodeClue;
+#define TNODECLUE_INIT { NodeClueTypeNone, STRING_INIT, NULL }
+
+typedef struct TNodeClueList
+{
+  TNodeClue* pHead;
+  TNodeClue* pTail;
+} TNodeClueList;
+#define TNODECLUELIST_INIT {NULL, NULL}
+
+void TNodeClueList_Init(TNodeClueList* p);
+void TNodeClueList_Push(TNodeClueList* p, TNodeClue* );
+
 typedef struct
 {
     //Stack de basicscanner
@@ -84,7 +109,7 @@ typedef struct
 
     //string para debug
     StrBuilder PreprocessorAndCommentsString;
-
+    TNodeClueList NodeClueList;
     bool bAmalgamationMode;
 
 } Scanner;

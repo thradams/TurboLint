@@ -849,7 +849,11 @@ bool TInitializerList_Print(TInitializerList*p, bool b, FILE* fp)
 
 bool TInitializer_Print(TInitializer* p, bool b, FILE* fp)
 {
-
+  if (p == NULL)
+  {
+    return false;
+  }
+  
   switch (p->type)
   {
   case TPrimaryExpression_ID:
@@ -860,12 +864,13 @@ bool TInitializer_Print(TInitializer* p, bool b, FILE* fp)
   case TBinaryExpression_ID:
   case TTernaryExpression_ID:
 
-    fprintf(fp, "{");
-    b = TExpression_Print((TExpression*)p, "", false, fp);
-    fprintf(fp, "}");
+    //fprintf(fp, "{");
+    b = TExpression_Print((TExpression*)p, "initializer-expression", false, fp);
+    //fprintf(fp, "}");
     break;
 
   case TInitializerListType_ID:
+    fprintf(fp, "\"initializer\":");
     b = TInitializerList_Print(&((TInitializerListType*)p)->InitializerList, b, fp);
     break;
 
@@ -930,8 +935,13 @@ bool TInitDeclarator_Print(TInitDeclarator* p, bool b, FILE* fp)
 
   if (p->pInitializer)
   {
-    fprintf(fp, "\"initializer\":");
+    if (b)
+    {
+      fprintf(fp, ",");
+    }
+    //fprintf(fp, "\"initializer\":");
     TInitializer_Print(p->pInitializer, b, fp);
+    
   }
 
   fprintf(fp, "}");
@@ -1025,8 +1035,8 @@ bool TDeclaratorList_Print(TDeclaratorList *p, bool b, FILE* fp)
     if (i > 0)
       fprintf(fp, ",");
 
-    TDeclarator* pItem = p->pItems[i];
-    b = TDeclarator_Print(pItem, b, fp);
+    TInitDeclarator* pItem = p->pItems[i];
+    b = TInitDeclarator_Print(pItem, b, fp);
   }
 
   fprintf(fp, "]");
@@ -1364,8 +1374,11 @@ bool TInitializerListItem_Print(TInitializerListItem* p, bool b, FILE* fp)
   if (b)
     fprintf(fp, ",");
 
-  fprintf(fp, "\"initializer\":");
-  b = TInitializer_Print(p->pInitializer, b, fp);
+  if (p->pInitializer)
+  {
+    fprintf(fp, "\"initializer\":");
+    b = TInitializer_Print(p->pInitializer, b, fp);
+  }
   fprintf(fp, "}");
   return true;
 }

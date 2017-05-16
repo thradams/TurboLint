@@ -4,6 +4,60 @@
 #include "..\Base\Path.h"
 BasicScanner * Scanner_Top(Scanner * pScanner);;
 
+TNodeClue* TNodeClue_Create()
+{
+  TNodeClue* p = (TNodeClue*)malloc(sizeof * p);
+  if (p)
+  {
+    TNodeClue temp = TNODECLUE_INIT;
+    *p = temp;
+  }
+  return p;
+}
+
+void TNodeClue_Destroy(TNodeClue* p)
+{
+}
+
+void TNodeClue_Delete(TNodeClue* p)
+{
+  if (p)
+  {
+    TNodeClue_Destroy(p);
+    free(p);
+  }
+}
+
+void TNodeClueList_Init(TNodeClueList* p)
+{
+  TNodeClueList temp = TNODECLUELIST_INIT;
+  *p = temp;
+}
+
+void TNodeClueList_Destroy(TNodeClueList* pList)
+{
+  for (TNodeClue * p = pList->pHead; p != NULL; )
+  {
+    TNodeClue* pCurrent = p;
+    p = p->pNext;
+    TNodeClue_Delete(pCurrent);
+  }
+}
+
+void TNodeClueList_Push(TNodeClueList* pList, TNodeClue* pItem)
+{
+  if (pList->pHead == NULL)
+  {
+    pList->pHead = pItem;
+  }
+  else
+  {
+    pList->pTail->pNext = pItem;
+  }
+
+  pList->pTail= pItem;
+}
+
 PPTokenType TokenToPPToken(Tokens token)
 {
   PPTokenType result = PPTokenType_Other;
@@ -230,6 +284,8 @@ static Result Scanner_InitCore(Scanner* pScanner)
   StrBuilder_Init(&pScanner->DebugString, 100);
   StrBuilder_Init(&pScanner->PreprocessorAndCommentsString, 100);
   StrBuilder_Init(&pScanner->ErrorString, 100);
+  TNodeClueList_Init(&pScanner->NodeClueList);
+
   //StrBuilder_Init(&pScanner->DebugString, 100);
   //StrBuilder_Init(&pScanner->ErrorString, 100);
   pScanner->bError = false;
@@ -557,6 +613,7 @@ void Scanner_Destroy(Scanner* pScanner)
   MacroMap_Destroy(&pScanner->Defines2);
   StrBuilder_Destroy(&pScanner->DebugString);
   StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
+  TNodeClueList_Destroy(&pScanner->NodeClueList);
   StrBuilder_Destroy(&pScanner->ErrorString);
   ArrayInt_Destroy(&pScanner->StackIfDef);
   BasicScannerStack_Destroy(&pScanner->stack);
@@ -1135,6 +1192,8 @@ void ParsePreDefine(Scanner* pScanner)
   
   StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "\n");
 
+  //TNodeClue* TNodeClue_Create()
+  //TNodeClueList_Push(&pScanner->NodeClueList, );
 
   MacroMap_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
 
