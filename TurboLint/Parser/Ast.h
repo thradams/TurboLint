@@ -615,7 +615,7 @@ CREATETYPE(TInitDeclaratorList, TINITDECLARATORLIST_INIT)
 void TInitDeclaratorList_Push(TInitDeclaratorList* p, TInitDeclarator* pItem);
 
 #define FOR_EACH_INITDECLARATOR(var, list) \
- for (TInitDeclarator * var = list.pInitDeclaratorHeap; \
+ for (TInitDeclarator * var = (list).pInitDeclaratorHeap; \
       var != NULL;\
       var = var->pInitDeclaratorNext)
 
@@ -624,19 +624,10 @@ void TInitDeclaratorList_Push(TInitDeclaratorList* p, TInitDeclarator* pItem);
 const char* TDeclarator_FindName(TDeclarator* p);
 const char* TInitDeclarator_FindName(TInitDeclarator* p);
 
-typedef struct
-{
-  TInitDeclarator** pItems;
-  size_t size;
-  size_t capacity;
-} TDeclaratorList;
-#define TDECLARATOR_LIST_INIT { NULL, 0, 0}
-ARRAYOF(TDeclaratorList, TInitDeclarator)
 
-
-
-typedef TDeclaratorList TStructDeclaratorList;
-#define TSTRUCT_DECLARATOR_LIST_INIT TDECLARATOR_LIST_INIT
+typedef TInitDeclaratorList TStructDeclaratorList;
+#define TSTRUCT_DECLARATOR_LIST_INIT TINITDECLARATORLIST_INIT
+void TStructDeclaratorList_Push(TStructDeclaratorList* p, TInitDeclarator* pItem);
 
 typedef struct
 {

@@ -366,9 +366,33 @@ void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p)
   String_Destroy(&p->TypeName);
 }
 
+void TStructDeclaratorList_Destroy(TStructDeclaratorList* pList)
+{
+  for (TInitDeclarator * p = pList->pInitDeclaratorHeap; p != NULL; )
+  {
+    TInitDeclarator* pCurrent = p;
+    p = p->pInitDeclaratorNext;
+    TInitDeclarator_Delete(pCurrent);
+  }
+}
+
+void TStructDeclaratorList_Push(TStructDeclaratorList* pList, TInitDeclarator* pItem)
+{
+  if (pList->pInitDeclaratorHeap == NULL)
+  {
+    pList->pInitDeclaratorHeap = pItem;
+  }
+  else
+  {
+    pList->pInitDeclaratorTail->pInitDeclaratorNext = pItem;
+  }
+
+  pList->pInitDeclaratorTail = pItem;
+}
+
 void TStructDeclaration_Destroy(TStructDeclaration* p)
 {
-  TDeclaratorList_Destroy(&p->DeclaratorList);
+  TStructDeclaratorList_Destroy(&p->DeclaratorList);
   TTypeSpecifier_Delete(p->pSpecifier);
   //TTypeQualifier_Destroy(&p->Qualifier);
 }

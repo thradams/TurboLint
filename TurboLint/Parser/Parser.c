@@ -2621,7 +2621,7 @@ void Struct_Declarator_List(Parser* ctx,
   TStructDeclarator* pTDeclarator2 = NULL;// TDeclarator_Create();
 
   Struct_Declarator(ctx, &pTDeclarator2);
-  TDeclaratorList_Push(pStructDeclarationList, pTDeclarator2);
+  TStructDeclaratorList_Push(pStructDeclarationList, pTDeclarator2);
 
   for (; ;)
   {

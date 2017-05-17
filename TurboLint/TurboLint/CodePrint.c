@@ -605,7 +605,7 @@ static bool TStructUnionSpecifier_CodePrint(TStructUnionSpecifier* p, bool b, St
     StrBuilder_Append(fp, " union ");
 
   StrBuilder_Append(fp, p->Name);
-  //struct point pt = {}
+  
   if (p->StructDeclarationList.size > 0)
   {
     StrBuilder_Append(fp, " {\n");
@@ -617,9 +617,20 @@ static bool TStructUnionSpecifier_CodePrint(TStructUnionSpecifier* p, bool b, St
       StrBuilder_Append(fp, ";\n");
     }
 
-
     StrBuilder_Append(fp, "}");
   }
+ /* StrBuilder_Append(fp, "typedef struct ");
+  StrBuilder_Append(fp, p->Name);
+  StrBuilder_Append(fp, " ");
+  StrBuilder_Append(fp, p->Name);
+  StrBuilder_Append(fp, ";\n");
+
+  StrBuilder_Append(fp, "#define ");
+  StrBuilder_Append(fp, p->Name);
+  StrBuilder_Append(fp, "_INIT ");
+  
+  StrBuilder_Append(fp, "\n");
+  */
 
   return true;
 }
@@ -1036,18 +1047,33 @@ static bool TDeclarator_CodePrint(TDeclarator* p, bool b, StrBuilder* fp)
 
 bool TInitDeclarator_CodePrint(TInitDeclarator* p, bool b, StrBuilder* fp);
 
-static bool TDeclaratorList_CodePrint(TDeclaratorList *p, bool b, StrBuilder* fp)
+
+
+bool TStructDeclarator_CodePrint(TStructDeclarator* p, bool b, StrBuilder* fp)
+{
+  b = false;
+  b = TDeclarator_CodePrint(p->pDeclarator, b, fp);
+  if (p->pInitializer)
+  {
+    StrBuilder_Append(fp, " /* = ");
+    TInitializer_CodePrint(p->pInitializer, b, fp);
+    StrBuilder_Append(fp, " */");
+  }
+  return true;
+}
+
+static bool TStructDeclaratorList_CodePrint(TStructDeclaratorList *p, bool b, StrBuilder* fp)
 {
   b = false;
 
 
-  for (size_t i = 0; i < p->size; i++)
+  int i = 0;
+  FOR_EACH_INITDECLARATOR(pItem, *p)
   {
     if (i > 0)
       StrBuilder_Append(fp, ",");
-
-    TInitDeclarator* pItem = p->pItems[i];
-    b = TInitDeclarator_CodePrint(pItem, b, fp);
+    b = TStructDeclarator_CodePrint(pItem, b, fp);
+    i++;
   }
 
 
@@ -1058,7 +1084,7 @@ static bool TStructDeclaration_CodePrint(TStructDeclaration* p, bool b, StrBuild
 {
   b = TTypeQualifier_CodePrint(&p->Qualifier, false, fp);
   b = TTypeSpecifier_CodePrint(p->pSpecifier, b, fp);
-  b = TDeclaratorList_CodePrint(&p->DeclaratorList, b, fp);
+  b = TStructDeclaratorList_CodePrint(&p->DeclaratorList, b, fp);
   return true;
 }
 
@@ -1189,20 +1215,13 @@ static bool TDeclarationSpecifiers_CodePrint(TDeclarationSpecifiers* pDeclaratio
 
 bool TInitDeclarator_CodePrint(TInitDeclarator* p, bool b, StrBuilder* fp)
 {
-
-  
   b = false;
-
-  
   b = TDeclarator_CodePrint(p->pDeclarator, b, fp);
-
   if (p->pInitializer)
   {    
     StrBuilder_Append(fp, " = ");
     TInitializer_CodePrint(p->pInitializer, b, fp);
   }
-
-  
   return true;
 }
 

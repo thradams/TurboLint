@@ -924,6 +924,30 @@ bool TParameterList_Print(TParameterList *p, bool b, FILE* fp)
   return true;
 }
 
+bool TStructDeclarator_Print(TStructDeclarator* p, bool b, FILE* fp)
+{
+
+  fprintf(fp, "{");
+  b = false;
+
+  fprintf(fp, "\"declarator\":");
+  b = TDeclarator_Print(p->pDeclarator, b, fp);
+
+  if (p->pInitializer)
+  {
+    if (b)
+    {
+      fprintf(fp, ",");
+    }
+    //fprintf(fp, "\"initializer\":");
+    TInitializer_Print(p->pInitializer, b, fp);
+
+  }
+
+  fprintf(fp, "}");
+  return true;
+}
+
 bool TInitDeclarator_Print(TInitDeclarator* p, bool b, FILE* fp)
 {
 
@@ -1025,18 +1049,18 @@ bool TDeclarator_Print(TDeclarator* p, bool b, FILE* fp)
   return true;
 }
 
-bool TDeclaratorList_Print(TDeclaratorList *p, bool b, FILE* fp)
+bool TStructDeclaratorList_Print(TStructDeclaratorList *p, bool b, FILE* fp)
 {
   b = false;
   fprintf(fp, "[");
 
-  for (size_t i = 0; i < p->size; i++)
+  int i = 0;
+  FOR_EACH_INITDECLARATOR(pItem, *p)  
   {
     if (i > 0)
-      fprintf(fp, ",");
-
-    TInitDeclarator* pItem = p->pItems[i];
-    b = TInitDeclarator_Print(pItem, b, fp);
+      fprintf(fp, ",");  
+    b = TStructDeclarator_Print(pItem, b, fp);
+    i++;
   }
 
   fprintf(fp, "]");
@@ -1073,7 +1097,7 @@ bool TStructDeclarationBase_Print(TStructDeclaration* p, bool b, FILE* fp)
     fprintf(fp, ",");
 
   fprintf(fp, "\"declarators\":");
-  b = TDeclaratorList_Print(&p->DeclaratorList, b, fp);
+  b = TStructDeclaratorList_Print(&p->DeclaratorList, b, fp);
   fprintf(fp, "}");
   return true;
 }
