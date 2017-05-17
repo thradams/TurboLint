@@ -28,6 +28,8 @@ typedef struct
 
   Map EnumMap;
 
+  TDeclarations Templates;
+  TDeclarations TemplatesInstances;
 } Parser;
 
 Result Parser_InitFile(Parser* parser, const char* fileName);

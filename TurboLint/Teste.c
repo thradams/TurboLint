@@ -1,5 +1,24 @@
 
-int i[2] = { 1 , 2 };
+
+typedef struct Point
+{
+  int x = 0;
+  int y = 0;
+} Point;
+
+typedef struct Line
+{
+  Point start;
+  Point end;  
+} Line;
+
+
+int main()
+{
+  Point  * pt = Point_Create();
+  Line  * pt = {};
+}
+
 
 /*
 #pragma mydir "C:\Users\thiago\Source\Repos\TurboLint\TurboLint"

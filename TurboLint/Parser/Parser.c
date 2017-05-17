@@ -7,14 +7,144 @@
 //Define to include modications
 #define LANGUAGE_EXTENSIONS 
 
+bool IsSuffix(const char* s, const char* suffix)
+{
+  bool bResult = false;
+  int len = strlen(s);
+  int len2 = strlen(suffix);
+  if (len > len2)
+  {
+    const char* pEndPart = &s[len - len2];
+    if (strcmp(pEndPart, suffix) == 0)
+    {
+      bResult = true;
+    }
+  }
+  return bResult;
+}
+////////////////////////////////////////
+bool IsTemplateFunction(const char* lexeme)
+{
+  //_Create
+  //_Delete
+  
+  bool bResult = false;
+  if (IsSuffix(lexeme, "_Create"))
+  {
+    bResult = true;
+  }
+  else if (strcmp(lexeme, "Int_Array_Push") == 0)
+  {
+    bResult = true;
+  }
+  return bResult;
+}
+
+bool IsTemplateType(const char* lexeme)
+{
+  bool bResult = false;
+  if (strcmp(lexeme, "Int_Array") == 0)
+  {
+    bResult = true;
+  }
+  return bResult;
+}
+
+bool InstantiateTemplateType(const char *lexeme, StrBuilder* strBuilder)
+{
+  StrBuilder_Clear(strBuilder);
+
+  bool bResult = false;
+  if (strcmp(lexeme, "Int_Array") == 0)
+  {   
+    StrBuilder_Append(strBuilder,
+      "typedef struct Int_Array { int x; int y; } Int_Array;");
+    bResult = true;
+  }
+  return  bResult;
+}
+
+bool InstantiateTemplateFunction(const char *lexeme,
+  StrBuilder* strBuilder,
+  StrBuilder* strBuilder2)
+{
+  StrBuilder_Clear(strBuilder);
+
+  bool bResult = false;
+  if (IsSuffix(lexeme, "_Create"))
+  {
+    StrBuilder tname = STRBUILDER_INIT;
+    StrBuilder_SetN(&tname, lexeme, strlen(lexeme) - 7);
+
+    StrBuilder_Append(strBuilder, "static ");
+    StrBuilder_Append(strBuilder, tname.c_str);
+    StrBuilder_Append(strBuilder, "* ");
+    StrBuilder_Append(strBuilder, lexeme);
+    StrBuilder_Append(strBuilder, "();");
+
+
+    StrBuilder_Append(strBuilder2, "static ");
+    StrBuilder_Append(strBuilder2, tname.c_str);
+    StrBuilder_Append(strBuilder2, "* ");
+    StrBuilder_Append(strBuilder2, lexeme);
+    StrBuilder_Append(strBuilder2, "()");
+    StrBuilder_Append(strBuilder2, "{");
+    StrBuilder_Append(strBuilder2, tname.c_str);
+    StrBuilder_Append(strBuilder2, "* p = malloc(sizeof *p);");
+    StrBuilder_Append(strBuilder2, "if (p) {}");
+    StrBuilder_Append(strBuilder2, "return p;");
+    StrBuilder_Append(strBuilder2, "}");
+
+
+    
+    bResult = true;
+  }
+  else  if (strcmp(lexeme, "Int_Array_Push") == 0)
+  {
+    bResult = true;
+
+    StrBuilder_Append(strBuilder,
+      "static void Int_Array_Push(Int_Array* p, int i);");
+
+    StrBuilder_Append(strBuilder2,
+      "static void Int_Array_Push(Int_Array* p, int i) { return 1; } ");
+  }
+  return  bResult;
+}
+//////////////////////////////////////////////
+
+bool Declaration(Parser* ctx, TAnyDeclaration** ppDeclaration);
+void SetSymbolsFromDeclaration(Parser* ctx,
+  TAnyDeclaration* pDeclaration2);
 
 bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme);
 
 
-
-bool DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
+TDeclaration * FindDeclarationOfDeclarator(DeclarationsMap* map, const char* name)
 {
-  bool bResult = false;
+  TDeclaration *pDeclaration = NULL;
+  int bResult = 0;
+  Bucket*  p = MultiMap_FindBucket(map, name);
+
+  if (p != NULL)
+  {
+    for (size_t i = 0; i < p->size; i++)
+    {
+      if (strcmp(name, p->data[i]->key) == 0)
+      {
+        pDeclaration = 
+          TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)p->data[i]->data);
+        
+        break;
+      }
+    }
+  }
+  return pDeclaration;
+}
+
+int DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
+{
+  int bResult = 0;
   Bucket*  p = MultiMap_FindBucket(map, name);
 
   if (p != NULL)
@@ -24,7 +154,7 @@ bool DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
       if (strcmp(name, p->data[i]->key) == 0)
       {
         TAnyDeclaration *pDeclaration = (TAnyDeclaration *)p->data[i]->data;
-        bResult = TAnyDeclaration_IsTypedef(pDeclaration);
+        bResult = TAnyDeclaration_IsTypedef(pDeclaration) ? 1 : 0;
 
         if (bResult)
           break;
@@ -32,6 +162,14 @@ bool DeclarationsMap_IsTypeDef(DeclarationsMap* map, const char* name)
     }
   }
 
+  if (bResult == 0)
+  {
+    if (IsTemplateType(name))
+    {
+      //eh um tipo mas ainda nao foi instanciado
+      bResult = 2;
+    }
+  }
   return bResult;
 }
 
@@ -50,6 +188,8 @@ Result Parser_InitString(Parser* parser,
 
   /////////
   Scanner_InitString(&parser->Scanner, name, text);
+  TDeclarations_Init(&parser->Templates);
+  TDeclarations_Init(&parser->TemplatesInstances);
 
   return RESULT_OK;
 }
@@ -66,6 +206,8 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
   StrBuilder_Init(&parser->ErrorMessage, 100);
   Scanner_Init(&parser->Scanner);
+  TDeclarations_Init(&parser->Templates);
+  TDeclarations_Init(&parser->TemplatesInstances);
 
 
   ////////
@@ -121,6 +263,8 @@ void Parser_Destroy(Parser* parser)
   //Map_Destroy(&parser->TypeDefNames, NULL);
   StrBuilder_Destroy(&parser->ErrorMessage);
   Scanner_Destroy(&parser->Scanner);
+  TDeclarations_Destroy(&parser->Templates);
+  TDeclarations_Destroy(&parser->TemplatesInstances);
 }
 
 static const char* GetName()
@@ -245,7 +389,7 @@ Tokens Token(Parser* parser)
   Tokens token = Scanner_Token(&parser->Scanner);
   if (token == TK_SPACES)
   {
-    SetUnexpectedError(parser, "!", "");    
+    SetUnexpectedError(parser, "!", "");
   }
   return token;
 }
@@ -379,7 +523,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
   //-2 nem eh macro
   //-1 inicio de macro
   //-3 fim de macro
-  
+
 
   if (!IsFirstOfPrimaryExpression(token))
   {
@@ -465,7 +609,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
   {
     SetUnexpectedError(ctx, "*ppPrimaryExpression != NULL", "");
   }
-  
+
 }
 
 void GenericSelection(Parser* ctx)
@@ -715,6 +859,72 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
   switch (token)
   {
   case TK_LEFT_PARENTHESIS:
+  {
+    TPostfixExpressionCore *  pPostfixExpressionCore =
+      TPostfixExpressionCore_Create();
+    pPostfixExpressionCore->pExpressionLeft = *ppExpression;
+
+    String lexemeCopy = STRING_INIT;
+    
+    TPrimaryExpressionValue* ppri =
+      TExpression_As_TPrimaryExpressionValue(*ppExpression);
+    if (ppri)
+    {
+      String_Set(&lexemeCopy, ppri->lexeme);
+    }
+    PostfixExpressionCore(ctx, pPostfixExpressionCore);
+    *ppExpression = (TExpression*)pPostfixExpressionCore;
+
+    
+    if (ppri)
+    {
+      if (IsTemplateFunction(lexemeCopy) )
+      {
+        TDeclaration* pDecl = 
+          FindDeclarationOfDeclarator(&ctx->Symbols, lexemeCopy);
+        if (!pDecl)
+        {
+          StrBuilder sb = STRBUILDER_INIT;
+          StrBuilder sb2 = STRBUILDER_INIT;
+          InstantiateTemplateFunction(lexemeCopy, &sb, &sb2);
+
+          //nao tem a declaracao ainda
+          PushExpandedMacro(&ctx->Scanner,
+            "",
+            "",
+            sb.c_str);
+
+          TAnyDeclaration* pDeclaration;
+          bool bResult = Declaration(ctx,
+            &pDeclaration);
+          //expading == 0;
+          TDeclarations_Push(&ctx->Templates, pDeclaration);
+          SetSymbolsFromDeclaration(ctx, pDeclaration);
+
+
+          //nao tem a declaracao ainda
+          PushExpandedMacro(&ctx->Scanner,
+            "",
+            "",
+            sb2.c_str);
+          pDeclaration = NULL;
+          bResult = Declaration(ctx,
+            &pDeclaration);
+          //expading == 0;
+          TDeclarations_Push(&ctx->TemplatesInstances, pDeclaration);
+          SetSymbolsFromDeclaration(ctx, pDeclaration);
+
+          StrBuilder_Destroy(&sb);
+          StrBuilder_Destroy(&sb2);
+
+
+        }
+      }
+    }
+
+    String_Destroy(&lexemeCopy);
+  }
+    break;
   case TK_LEFT_SQUARE_BRACKET:
   case TK_FULL_STOP:
   case TK_ARROW:
@@ -2399,8 +2609,8 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
     break;
 
   default:
-    
-    SetUnexpectedError(ctx, "e" ,"");
+
+    SetUnexpectedError(ctx, "e", "");
     //bResult = true;
     //SetType(pStatement, "expression-statement");
     //Expression_Statement(ctx, pStatement);
@@ -2428,6 +2638,8 @@ void Block_Item(Parser* ctx, TBlockItem** ppBlockItem)
 
   else
   {
+
+
     TAnyDeclaration* pDeclaration;
     Declaration(ctx, &pDeclaration);
     *ppBlockItem = (TAnyDeclaration*)pDeclaration;
@@ -2584,7 +2796,7 @@ void Struct_Declarator(Parser* ctx,
 
     ASSERT(pInitDeclarator->pDeclarator == NULL);
     Declarator(ctx, &pInitDeclarator->pDeclarator);
-    
+
     token = Token(ctx);
 
     if (token == TK_COLON)
@@ -3115,15 +3327,15 @@ void Parameter_Type_List(Parser* ctx,
 
 void Direct_Abstract_Declarator(Parser* ctx, TDeclarator** ppDeclarator2)
 {
-/*
-direct-abstract-declarator:
-  ( abstract-declarator )
-  direct-abstract-declaratoropt [ type-qualifier-listopt assignment-expressionopt ]
-  direct-abstract-declaratoropt [ static type-qualifier-listopt assignment-expression ]
-  direct-abstract-declaratoropt [ type-qualifier-list static assignment-expression ]
-  direct-abstract-declaratoropt [ * ]
-  direct-abstract-declaratoropt ( parameter-type-listopt )
-*/
+  /*
+  direct-abstract-declarator:
+    ( abstract-declarator )
+    direct-abstract-declaratoropt [ type-qualifier-listopt assignment-expressionopt ]
+    direct-abstract-declaratoropt [ static type-qualifier-listopt assignment-expression ]
+    direct-abstract-declaratoropt [ type-qualifier-list static assignment-expression ]
+    direct-abstract-declaratoropt [ * ]
+    direct-abstract-declaratoropt ( parameter-type-listopt )
+  */
 }
 
 void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
@@ -3156,8 +3368,8 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     MatchToken(ctx, TK_LEFT_PARENTHESIS);
     //ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
     ASSERT(pDirectDeclarator == NULL);
-    pDirectDeclarator = TDirectDeclarator_Create();    
-    Declarator(ctx, &pDirectDeclarator->pDeclarator);        
+    pDirectDeclarator = TDirectDeclarator_Create();
+    Declarator(ctx, &pDirectDeclarator->pDeclarator);
     MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     //Para indicar que eh uma ( declarator )
@@ -3170,25 +3382,25 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
   {
     //identifier
     pDirectDeclarator = TDirectDeclarator_Create();
-    
+
     //Para indicar que eh uma identificador
     pDirectDeclarator->token = TK_IDENTIFIER;
-    
+
     const char* lexeme = Lexeme(ctx);
     String_Set(&pDirectDeclarator->Identifier, lexeme);
     pDirectDeclarator->Position.Line = GetCurrentLine(ctx);
     pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);
-    Match(ctx);    
-  }  
+    Match(ctx);
+  }
   break;
-  
+
   default:
     //assert(false);
     break;
   }
 
-  
-  
+
+
   if (pDirectDeclarator == NULL)
   {
     //Por enquanto esta funcao esta sendo usada para
@@ -3197,7 +3409,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     pDirectDeclarator = TDirectDeclarator_Create();
     String_Set(&pDirectDeclarator->Identifier, "");
     pDirectDeclarator->Position.Line = GetCurrentLine(ctx);
-    pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);    
+    pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);
 
     //Para indicar que eh uma identificador
     pDirectDeclarator->token = TK_IDENTIFIER;
@@ -3221,7 +3433,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       direct-declarator ( parameter-type-list )
       direct-declarator ( identifier-listopt )
       */
-//      pDirectDeclarator->token = token;
+      //      pDirectDeclarator->token = token;
       ASSERT(pDirectDeclarator->pParametersOpt == NULL);
       pDirectDeclarator->pParametersOpt = TParameterList_Create();
       token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
@@ -3247,7 +3459,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
 
       //ASSERT(pDirectDeclarator->pParametersOpt == NULL);
       //pDirectDeclarator->pParametersOpt = TParameterList_Create();
-      
+
       //Para indicar que eh um array
       pDirectDeclarator->token = TK_LEFT_SQUARE_BRACKET;
 
@@ -3275,7 +3487,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     }
 
     token = Token(ctx);
-    if (token != TK_LEFT_PARENTHESIS &&   token != TK_LEFT_SQUARE_BRACKET )
+    if (token != TK_LEFT_PARENTHESIS &&   token != TK_LEFT_SQUARE_BRACKET)
     {
       break;
     }
@@ -3283,13 +3495,13 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     {
       TDirectDeclarator *pDirectDeclaratorNext = TDirectDeclarator_Create();
       pDirectDeclarator->pDirectDeclarator = pDirectDeclaratorNext;
-      pDirectDeclarator = pDirectDeclaratorNext;      
+      pDirectDeclarator = pDirectDeclaratorNext;
     }
   }
 
   token = Token(ctx);
   if (token == TK_LEFT_PARENTHESIS ||
-      token == TK_IDENTIFIER)
+    token == TK_IDENTIFIER)
   {
     //tem mais
     TDirectDeclarator *pDirectDeclaratorNext = NULL;
@@ -3297,7 +3509,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     pDirectDeclarator->pDirectDeclarator = pDirectDeclaratorNext;
   }
 
-  
+
 }
 
 bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
@@ -3441,12 +3653,12 @@ void Declarator(Parser* ctx, TDeclarator** ppTDeclarator2)
   /*
   declarator:
   pointeropt direct-declarator
-  */  
+  */
   PointerOpt(ctx, &pDeclarator->PointerList);
-  
+
   ASSERT(pDeclarator->pDirectDeclarator == NULL);
-  Direct_Declarator(ctx, &pDeclarator->pDirectDeclarator);     
-  
+  Direct_Declarator(ctx, &pDeclarator->pDirectDeclarator);
+
   *ppTDeclarator2 = pDeclarator;
 }
 
@@ -3472,6 +3684,7 @@ bool Alignment_Specifier(Parser* ctx,
 
   return bResult;
 }
+
 
 bool Type_Specifier(Parser* ctx,
   TTypeSpecifier** ppTypeSpecifier, int *typedefCount)
@@ -3700,12 +3913,45 @@ bool Type_Specifier(Parser* ctx,
 
   case TK_IDENTIFIER:
   {
-    bool bIsTypedef = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
+    int bIsTypedef = DeclarationsMap_IsTypeDef(&ctx->Symbols, lexeme);
 
     if (bIsTypedef)
     {
+      const char* lexeme = Lexeme(ctx);
+      String lexemeCopy = STRING_INIT;
+      String_Set(&lexemeCopy, lexeme);
+      static int expading = 0;
+      if (bIsTypedef == 2 && expading == 0)
+      {
+        //se ainda nao foi instanciada pegar por 
+        //bIsTypedef entao criar a declaracao
+        //que fica numa lista e depois eh inserida antes
+        //da declaracao atual.
+        
+        
+        if (IsTemplateType(lexeme))
+        {
+          StrBuilder sb = STRBUILDER_INIT;
+          InstantiateTemplateType(lexeme, &sb);
+          //Match(ctx);
+          expading = 1;
+          PushExpandedMacro(&ctx->Scanner,
+            "template",
+            "",
+            sb.c_str);
+          TAnyDeclaration* pDeclaration;
+          bResult = Declaration(ctx,
+            &pDeclaration);
+          expading == 0;
+          TDeclarations_Push(&ctx->Templates, pDeclaration);
+          SetSymbolsFromDeclaration(ctx, pDeclaration);
+          StrBuilder_Destroy(&sb);
+        }
+      }
+
+      lexeme = lexemeCopy;
       if (*typedefCount == 0 /*&&
-        ppTypeSpecifier == NULL*/)
+                             ppTypeSpecifier == NULL*/)
       {
 
         if (*ppTypeSpecifier == NULL)
@@ -3751,6 +3997,9 @@ bool Type_Specifier(Parser* ctx,
       {
         bResult = false;
       }
+
+      String_Destroy(&lexemeCopy);
+
     }
 
     else
@@ -3791,6 +4040,8 @@ bool Declaration_Specifiers(Parser* ctx,
   {
     if (ErrorOrEof(ctx))
       break;
+
+
 
     if (Type_Specifier(ctx, &pDeclarationSpecifiers->pTypeSpecifierOpt, &typedefCount) ||
       Storage_Class_Specifier(ctx, &pDeclarationSpecifiers->StorageSpecifiers) ||
@@ -3970,7 +4221,7 @@ void Init_Declarator(Parser* ctx,
   declarator
   declarator = initializer
   */
-  TInitDeclarator* pInitDeclarator = 
+  TInitDeclarator* pInitDeclarator =
     TInitDeclarator_Create();
 
   ASSERT(pInitDeclarator->pDeclarator == NULL);
@@ -3985,7 +4236,7 @@ void Init_Declarator(Parser* ctx,
     ASSERT(*ppDeclarator2 != NULL);
     Match(ctx);
     Initializer(ctx, &pInitDeclarator->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
-  }  
+  }
 }
 
 void Init_Declarator_List(Parser* ctx,
@@ -3996,7 +4247,7 @@ void Init_Declarator_List(Parser* ctx,
   init-declarator
   init-declarator-list , init-declarator
   */
-  
+
   TInitDeclarator* pInitDeclarator = NULL;
   Init_Declarator(ctx, &pInitDeclarator);
   TInitDeclaratorList_Push(pInitDeclaratorList, pInitDeclarator);
@@ -4005,7 +4256,7 @@ void Init_Declarator_List(Parser* ctx,
   Tokens token = Token(ctx);
   if (token == TK_COMMA)
   {
-    Match(ctx);  
+    Match(ctx);
     Init_Declarator_List(ctx, pInitDeclaratorList);
   }
 
@@ -4099,7 +4350,6 @@ bool  Declaration(Parser* ctx,
 }
 
 void SetSymbolsFromDeclaration(Parser* ctx,
-
   TAnyDeclaration* pDeclaration2)
 {
   //Extrai as declaracoes de tipos variaveis e funcoes da declaracao
@@ -4109,9 +4359,9 @@ void SetSymbolsFromDeclaration(Parser* ctx,
     //if (pTFuncVarDeclaration->Specifiers.StorageSpecifiers.bIsTypedef)
     {
       FOR_EACH_INITDECLARATOR(pDeclarator, pTFuncVarDeclaration->InitDeclaratorList)
-      //for (size_t i = 0; i < pTFuncVarDeclaration->InitDeclaratorList.size; i++)
+        //for (size_t i = 0; i < pTFuncVarDeclaration->InitDeclaratorList.size; i++)
       {
-//        TDeclarator* pDeclarator = pTFuncVarDeclaration->Declarators.pItems[i];
+        //        TDeclarator* pDeclarator = pTFuncVarDeclaration->Declarators.pItems[i];
         const char* declaratorName = TInitDeclarator_FindName(pDeclarator);
 
         if (declaratorName == NULL)
@@ -4139,9 +4389,23 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
     bool bHasDecl = Declaration(ctx, &pDeclarationOut);
     if (bHasDecl)
     {
+      for (int i = 0; i < ctx->Templates.size; i++)
+      {
+        TDeclarations_Push(declarations, ctx->Templates.pItems[i]);
+        declarationIndex++;
+        //SetSymbolsFromDeclaration(ctx, ctx->Templates.pItems[i]);
+      }
+      ctx->Templates.size = 0;
+      
+      //TDeclarations_Destroy(&ctx->Templates);
+      //TDeclarations_Init(&ctx->Templates);
+
       //printf("%s", ctx->Scanner.PreprocessorAndCommentsString);
       StrBuilder_Clear(&ctx->Scanner.PreprocessorAndCommentsString);
 
+      //Cada Declaration poderia ter out uma lista TDeclarations
+      //publica que vai ser inserida aqui.
+      //
       TDeclarations_Push(declarations, pDeclarationOut);
       declarationIndex++;
       SetSymbolsFromDeclaration(ctx, pDeclarationOut);
@@ -4164,6 +4428,15 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
       break;
 
   }
+
+  for (int i = 0; i < ctx->TemplatesInstances.size; i++)
+  {
+    TDeclarations_Push(declarations, ctx->TemplatesInstances.pItems[i]);
+    declarationIndex++;
+    //SetSymbolsFromDeclaration(ctx, ctx->Templates.pItems[i]);
+  }
+  ctx->TemplatesInstances.size = 0;
+
 }
 
 void Parser_Main(Parser* ctx, TDeclarations* declarations)

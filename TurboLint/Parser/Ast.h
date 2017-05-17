@@ -743,7 +743,7 @@ typedef struct
 } TDeclarations;
 #define TDECLARATIONS_INIT {NULL, 0 , 0}
 ARRAYOF(TDeclarations, TAnyDeclaration)
-
+void TDeclarations_Init(TDeclarations* p);
 /////////
 typedef MultiMap DeclarationsMap;
 //Mapa de String - > TAnyDeclaration*

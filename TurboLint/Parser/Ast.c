@@ -754,6 +754,12 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
   return pDeclarationResult;
 }
 
+void TDeclarations_Init(TDeclarations* p)
+{
+  TDeclarations temp = TDECLARATIONS_INIT;
+  *p = temp;
+}
+
 void TProgram_Destroy(TProgram * p)
 {
 

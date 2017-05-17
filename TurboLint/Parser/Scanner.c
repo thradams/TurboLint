@@ -328,7 +328,7 @@ Result Scanner_InitString(Scanner* pScanner,
 }
 
 
-static Result PushExpandedMacro(Scanner* pScanner,
+Result PushExpandedMacro(Scanner* pScanner,
   const char* defineName,
   const char* callString,
   const char* defineContent)

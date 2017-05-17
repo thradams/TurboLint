@@ -121,6 +121,8 @@ Result Scanner_InitString(Scanner* pScanner,
                           const char* name,
                           const char* text);
 
+Result PushExpandedMacro(Scanner * pScanner, const char * defineName, const char * callString, const char * defineContent);
+
 const char* Scanner_TokenString(Scanner* pScanner);
 Tokens Scanner_Token(Scanner* pScanner);
 const char* Scanner_Lexeme(Scanner* pScanner);
