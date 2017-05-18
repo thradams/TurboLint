@@ -33,7 +33,11 @@ bool IsTemplateFunction(const char* lexeme)
   {
     bResult = true;
   }
-  else if (strcmp(lexeme, "Int_Array_Push") == 0)
+  else if (IsSuffix(lexeme, "Array_Push"))
+  {
+    bResult = true;
+  }
+  else if (IsSuffix(lexeme, "Array_Reserve"))
   {
     bResult = true;
   }
@@ -43,7 +47,11 @@ bool IsTemplateFunction(const char* lexeme)
 bool IsTemplateType(const char* lexeme)
 {
   bool bResult = false;
-  if (strcmp(lexeme, "Int_Array") == 0)
+  if (IsSuffix(lexeme, "Array"))
+  {
+    bResult = true;
+  }
+  else if (strcmp(lexeme, "string") == 0)
   {
     bResult = true;
   }
@@ -55,12 +63,30 @@ bool InstantiateTemplateType(const char *lexeme, StrBuilder* strBuilder)
   StrBuilder_Clear(strBuilder);
 
   bool bResult = false;
-  if (strcmp(lexeme, "Int_Array") == 0)
-  {   
+  if (IsSuffix(lexeme, "Array"))
+  { 
+    StrBuilder tname = STRBUILDER_INIT;
+    StrBuilder_SetN(&tname, lexeme, strlen(lexeme) - 5);
+
     StrBuilder_Append(strBuilder,
-      "typedef struct Int_Array { int x; int y; } Int_Array;");
+      "typedef struct ");
+
+    StrBuilder_Append(strBuilder, tname.c_str);
+    StrBuilder_Append(strBuilder, "Array {");
+    StrBuilder_Append(strBuilder, tname.c_str);
+    StrBuilder_Append(strBuilder, "** pItems; int Size; int Capacity; } ");
+    StrBuilder_Append(strBuilder, tname.c_str);
+    StrBuilder_Append(strBuilder, "Array;");
+
+    bResult = true;
+    StrBuilder_Destroy(&tname);
+  }
+  else if (strcmp(lexeme, "string") == 0)
+  {
+    StrBuilder_Append(strBuilder, "typedef char* string;");
     bResult = true;
   }
+
   return  bResult;
 }
 
@@ -91,23 +117,91 @@ bool InstantiateTemplateFunction(const char *lexeme,
     StrBuilder_Append(strBuilder2, "{");
     StrBuilder_Append(strBuilder2, tname.c_str);
     StrBuilder_Append(strBuilder2, "* p = malloc(sizeof *p);");
-    StrBuilder_Append(strBuilder2, "if (p) {}");
+    StrBuilder_Append(strBuilder2, "if (p) {");
+    
+    StrBuilder_Append(strBuilder2, tname.c_str);
+    StrBuilder_Append(strBuilder2, " temp = {};");
+    StrBuilder_Append(strBuilder2, " *p = temp;");
+
+    StrBuilder_Append(strBuilder2, "}");
     StrBuilder_Append(strBuilder2, "return p;");
     StrBuilder_Append(strBuilder2, "}");
 
-
+    StrBuilder_Destroy(&tname);
     
     bResult = true;
   }
-  else  if (strcmp(lexeme, "Int_Array_Push") == 0)
+  else if (IsSuffix(lexeme, "Array_Push"))
   {
+    StrBuilder tname = STRBUILDER_INIT;
+    StrBuilder_SetN(&tname, lexeme, strlen(lexeme) - 10);
+
     bResult = true;
 
     StrBuilder_Append(strBuilder,
-      "static void Int_Array_Push(Int_Array* p, int i);");
+      "static void ");
+    StrBuilder_Append(strBuilder,
+      tname.c_str);
+    StrBuilder_Append(strBuilder,
+      "Array_Push(");
+    StrBuilder_Append(strBuilder,
+      tname.c_str);
+    StrBuilder_Append(strBuilder,
+      "Array* pArray, ");
+    StrBuilder_Append(strBuilder,
+      tname.c_str);
+    StrBuilder_Append(strBuilder,
+      "* pItem)");
 
     StrBuilder_Append(strBuilder2,
-      "static void Int_Array_Push(Int_Array* p, int i) { return 1; } ");
+      strBuilder->c_str);
+
+    StrBuilder_Append(strBuilder,
+      ";");
+
+    StrBuilder_Append(strBuilder2, "{");
+    
+    StrBuilder_Append(strBuilder2,
+      tname.c_str);
+    StrBuilder_Append(strBuilder2, "Array_Reserve(pArray, pArray->Size + 1);");
+
+    StrBuilder_Append(strBuilder2, "}");
+
+    StrBuilder_Destroy(&tname);
+  }
+  else if (IsSuffix(lexeme, "Array_Reserve"))
+  {
+    StrBuilder tname = STRBUILDER_INIT;
+    StrBuilder_SetN(&tname, lexeme, strlen(lexeme) - 13);
+
+    bResult = true;
+
+    StrBuilder_Append(strBuilder,
+      "static void ");
+    StrBuilder_Append(strBuilder,
+      tname.c_str);
+    StrBuilder_Append(strBuilder,
+      "Array_Reserve(");
+    StrBuilder_Append(strBuilder,
+      tname.c_str);
+    StrBuilder_Append(strBuilder,
+      "Array* pArray, ");
+    StrBuilder_Append(strBuilder,
+      tname.c_str);
+    StrBuilder_Append(strBuilder,
+      "* pItem)");
+
+    StrBuilder_Append(strBuilder2,
+      strBuilder->c_str);
+
+    StrBuilder_Append(strBuilder,
+      ";");
+
+    StrBuilder_Append(strBuilder2, "{");
+
+    StrBuilder_Append(strBuilder2, "}");
+
+    StrBuilder_Destroy(&tname);
   }
   return  bResult;
 }
@@ -898,9 +992,10 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
           bool bResult = Declaration(ctx,
             &pDeclaration);
           //expading == 0;
+
           TDeclarations_Push(&ctx->Templates, pDeclaration);
           SetSymbolsFromDeclaration(ctx, pDeclaration);
-
+          //TDeclarations_Push(&ctx->TemplatesInstances, pDeclaration);
 
           //nao tem a declaracao ainda
           PushExpandedMacro(&ctx->Scanner,
@@ -1272,21 +1367,23 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
 
         TPostfixExpressionCore*  pTPostfixExpressionCore =
           TPostfixExpressionCore_Create();
+        pTPostfixExpressionCore->pTypeName = TParameterDeclaration_Create();
+        TParameterDeclaration_Swap(pTPostfixExpressionCore->pTypeName, &typeName);
 
         pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
         Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
 
-        Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
-        MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+        //Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
+        
 
 
         if (Token(ctx) == TK_COMMA)
         {
           Match(ctx);
         }
-
-
-        PostfixExpressionCore(ctx, pTPostfixExpressionCore);
+        MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+        *ppExpression = (TExpression*)pTPostfixExpressionCore;
+        //PostfixExpressionCore(ctx, pTPostfixExpressionCore);
       }
       else
       {
@@ -4352,6 +4449,10 @@ bool  Declaration(Parser* ctx,
 void SetSymbolsFromDeclaration(Parser* ctx,
   TAnyDeclaration* pDeclaration2)
 {
+  if (HasErrors(ctx))
+  {
+    return;
+  }
   //Extrai as declaracoes de tipos variaveis e funcoes da declaracao
   if (pDeclaration2->type == TDeclaration_ID)
   {
@@ -4393,7 +4494,6 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
       {
         TDeclarations_Push(declarations, ctx->Templates.pItems[i]);
         declarationIndex++;
-        //SetSymbolsFromDeclaration(ctx, ctx->Templates.pItems[i]);
       }
       ctx->Templates.size = 0;
       

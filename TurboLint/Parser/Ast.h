@@ -196,7 +196,7 @@ typedef struct TPostfixExpressionCoreTag
   struct TPostfixExpressionCoreTag*  pNext;
   struct TInitializerList_ *  pInitializerList;
   String Identifier;
-  //TTypeName TypeName;
+  struct TParameterDeclaration* pTypeName; /*typename*/
 } TPostfixExpressionCore;
 #define TPOSTFIX_EXPRESSION_CORE { {TPostfixExpressionCore_ID}, TK_NONE, STRING_INIT, NULL, NULL, NULL, NULL, STRING_INIT}
 CREATETYPE(TPostfixExpressionCore, TPOSTFIX_EXPRESSION_CORE)
@@ -710,7 +710,7 @@ bool TAnyDeclaration_Is_StructOrUnionDeclaration(TAnyDeclaration* pDeclaration);
 int TAnyDeclaration_GetFileIndex(TAnyDeclaration* pDeclaration);
 
 
-typedef struct
+typedef struct TParameterDeclaration
 {
   TDeclarationSpecifiers Specifiers;
   TDeclarator Declarator;

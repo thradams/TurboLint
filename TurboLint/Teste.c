@@ -1,22 +1,34 @@
 
+//#include <stdio.h>
 
 typedef struct Point
 {
-  int x = 0;
-  int y = 0;
+  int x;
+  int y;
 } Point;
 
+typedef Point Point2;
 typedef struct Line
 {
   Point start;
-  Point end;  
+  Point end = { 2, 4 };
+  Point2 pt;
+  string s;
+  double d;
 } Line;
 
 
 int main()
-{
-  Point  * pt = Point_Create();
-  Line  * pt = {};
+{  
+  Point* p = {};
+  PointArray points;
+  LineArray lines;
+  Line  line = {};
+  Point pt = {};
+  Point* p =  Point_Create();
+  pt = (Point){};
+  LineArray_Push(lines, Line_Create());
+  PointArray_Push(&points, Point_Create());
 }
 
 

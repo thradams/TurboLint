@@ -172,7 +172,7 @@ void TPostfixExpressionCore_Destroy(TPostfixExpressionCore* p)
   String_Destroy(&p->lexeme);
   TExpression_Delete(p->pExpressionLeft);
   TExpression_Delete(p->pExpressionRight);
-
+  TParameterDeclaration_Delete(p->pTypeName);
 }
 
 void TBinaryExpression_Destroy(TBinaryExpression* p)
