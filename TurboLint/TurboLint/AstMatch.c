@@ -55,7 +55,7 @@ bool MatchNULL(TExpression* pExpression)
 			TExpression_As_TCastExpressionType(pExpression);
 		if (pCastExpressionType != NULL)
 		{
-			if (pCastExpressionType->TypeName.Declarator.PointerList.size == 1)
+			if (List_HasOneItem(&pCastExpressionType->TypeName.Declarator.PointerList))
 			{
 				TSingleTypeSpecifier *  pSingleTypeSpecifier =
 

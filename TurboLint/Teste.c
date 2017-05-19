@@ -1,34 +1,20 @@
 
-//#include <stdio.h>
 
-typedef struct Point
+template <class T, class T2>
+struct List
 {
-  int x;
-  int y;
-} Point;
+  int i;
+};
 
-typedef Point Point2;
-typedef struct Line
+template <class T>
+void Swap(int* p, int* p2)
 {
-  Point start;
-  Point end = { 2, 4 };
-  Point2 pt;
-  string s;
-  double d;
-} Line;
-
+  //X x;
+}
 
 int main()
 {  
-  Point* p = {};
-  PointArray points;
-  LineArray lines;
-  Line  line = {};
-  Point pt = {};
-  Point* p =  Point_Create();
-  pt = (Point){};
-  LineArray_Push(lines, Line_Create());
-  PointArray_Push(&points, Point_Create());
+
 }
 
 

@@ -7,6 +7,49 @@
 #include "Scanner.h"
 #include "Macro.h"
 
+
+
+#define List(T)\
+struct {\
+    T* pHead; \
+    T* pTail; \
+}
+#define LIST_INIT { NULL, NULL }
+
+
+#define List_Destroy(T, p)\
+while ((p)->pHead) {\
+    T* pCurrent = (p)->pHead; \
+    (p)->pHead = (p)->pHead->pNext; \
+    T##_Delete(pCurrent); \
+}
+
+#define ForEachListItem(T, var, list)\
+  for (T * var = (list)->pHead ; var != NULL; var =  var->pNext)
+
+#define List_IsFirstItem(pList, pItem) ((pList)->pHead == (pItem))
+#define List_IsLastItem(pList, pItem) ((pList)->pTail == (pItem))
+
+#define List_HasItems(pList) \
+ ((pList)->pHead != NULL)
+
+#define List_IsEmpty(pList) \
+ ((pList)->pHead == NULL)
+
+#define List_HasOneItem(pList) \
+ ((pList)->pHead != NULL && (pList)->pHead == (pList)->pTail)
+
+#define List_Add(pList, pItem) \
+if ((pList)->pHead == NULL) {\
+    (pList)->pHead = (pItem); \
+    (pList)->pTail = (pItem); \
+}\
+else {\
+      (pList)->pTail->pNext = (pItem); \
+      (pList)->pTail = (pItem); \
+  }
+
+
 #define CAST(FROM, TO) \
 inline TO *  FROM##_As_##TO(FROM*  p)\
 {\
@@ -108,6 +151,8 @@ inline void TYPE##_DeleteVoid(void*  p)\
 {\
   TYPE##_Delete((TYPE*)p);\
 }
+
+
 typedef struct
 {
     int FileIndex;
@@ -125,6 +170,7 @@ typedef TTypePointer TExpression;
 typedef struct
 {
   TTypePointer Type;
+  
   TExpression* pConstantExpression;
 } TStaticAssertDeclaration;
 #define TSTATIC_ASSERT_DECLARATION_INIT { {TStaticAssertDeclaration_ID} , NULL}
@@ -153,6 +199,8 @@ typedef struct
 
 #define TBLOCKITEMLIST_INIT {NULL, 0, 0}
 ARRAYOF(TBlockItemList, TBlockItem)
+
+
 
 
 typedef struct
@@ -376,22 +424,17 @@ CAST(TStatement, TSwitchStatement)
 
 
 
-typedef struct
+typedef struct TPointer
 {
   TTypeQualifier Qualifier;
   bool bPointer;
+  struct TPointer* pNext;
 } TPointer;
-#define TPOINTER_INIT {TTYPE_QUALIFIER_INIT, false}
+#define TPOINTER_INIT {TTYPE_QUALIFIER_INIT, false, NULL}
 CREATETYPE(TPointer, TPOINTER_INIT)
 
-typedef struct
-{
-  TPointer** pItems;
-  size_t size;
-  size_t capacity;
-} TPointerList;
-#define TPOINTERLIST_INIT {NULL,0,0}
-ARRAYOF(TPointerList, TPointer)
+typedef List(TPointer) TPointerList;
+#define TPointerList_Destroy(p) List_Destroy(TPointer, (p))
 
 typedef struct
 {
@@ -426,23 +469,26 @@ void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p);
 
 
 
-typedef struct
+typedef struct TEnumerator
 {
   String Name;  
   TExpression*   pExpression;
+  struct TEnumerator *pNext;
 } TEnumerator;
 
 #define TENUMERATOR_INIT { STRING_INIT , NULL}
 CREATETYPE(TEnumerator, TENUMERATOR_INIT)
 
-typedef struct
-{
-  TEnumerator** pItems;
-  size_t size;
-  size_t capacity;
-} TEnumeratorList;
-#define ENUMERATOR_LIST_INIT {NULL, 0, 0}
-ARRAYOF(TEnumeratorList, TEnumerator)
+typedef List(TEnumerator) TEnumeratorList;
+#define TEnumeratorList_Destroy(p) List_Destroy(TEnumerator, p)
+//typedef struct
+//{
+//  TEnumerator** pItems;
+//  size_t size;
+//  size_t capacity;
+//} TEnumeratorList;
+//#define ENUMERATOR_LIST_INIT {NULL, 0, 0}
+//ARRAYOF(TEnumeratorList, TEnumerator)
 
 
 typedef struct
@@ -452,7 +498,7 @@ typedef struct
   TEnumeratorList EnumeratorList;
 } TEnumSpecifier;
 
-#define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, ENUMERATOR_LIST_INIT }
+#define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, LIST_INIT}
 CREATETYPE(TEnumSpecifier, ENUM_SPECIFIER_INIT)
 
 typedef struct
@@ -500,31 +546,26 @@ struct ParameterList_T;
 
 
 
-typedef struct
+typedef struct TDesignator
 {
   String Name;
   TExpression *  pExpression;
+  struct TDesignator *pNext;
 } TDesignator;
+
 #define TDESIGNATOR_INIT { STRING_INIT , NULL}
 CREATETYPE(TDesignator, TDESIGNATOR_INIT)
-
-typedef struct
-{
-  TDesignator** pItems;
-  size_t size;
-  size_t capacity;
-} TDesignatorList;
-#define TDESIGNATOR_LIST_INIT {NULL ,0 , 0}
-ARRAYOF(TDesignatorList, TDesignator)
+typedef List(TDesignator) TDesignatorList;
+#define TDesignatorList_Destroy(p) List_Destroy(TDesignator, p)
 
 typedef TTypePointer TInitializer;
 
 typedef struct
 {
-  TDesignatorList*   pDesignatorList;
+  TDesignatorList  DesignatorList;
   TInitializer* pInitializer;
 } TInitializerListItem;
-#define TINITIALIZER_LIST_ITEM_INIT { NULL , NULL}
+#define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL}
 CREATETYPE(TInitializerListItem, TINITIALIZER_LIST_ITEM_INIT)
 
 typedef struct TInitializerList_
@@ -560,7 +601,7 @@ typedef struct TDeclarator_S
   struct TDirectDeclarator* pDirectDeclarator;
 } TDeclarator;
 
-#define TDECLARATOR_INIT {TPOINTERLIST_INIT, NULL}
+#define TDECLARATOR_INIT {LIST_INIT, NULL}
 CREATETYPE(TDeclarator, TDECLARATOR_INIT)
 
 //typedef struct TAbstractDeclarator
@@ -675,6 +716,16 @@ CAST(TTypeSpecifier, TEnumSpecifier)
 CAST(TTypeSpecifier, TStructUnionSpecifier)
 
 
+typedef struct TTemplateParameter
+{
+  String Name;
+  struct TTemplateParameter *pNext;
+} TTemplateParameter;
+#define TTEMPLATEPARAMETER_INIT { STRING_INIT , NULL}
+CREATETYPE(TTemplateParameter, TTEMPLATEPARAMETER_INIT)
+//TTemplateParameterList
+
+typedef List(TTemplateParameter) TTemplateParameterList;
 
 typedef struct
 {
@@ -685,13 +736,14 @@ typedef struct
   //se for funcao
   TCompoundStatement* pCompoundStatementOpt;
 
+  TTemplateParameterList TemplateParameters;
   int FileIndex;
   int Line;
 
   StrBuilder PreprocessorAndCommentsString;
 
 } TDeclaration;
-#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, TINITDECLARATORLIST_INIT, NULL, -1, -1, STRBUILDER_INIT}
+#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, TINITDECLARATORLIST_INIT, NULL, LIST_INIT, -1, -1, STRBUILDER_INIT}
 CREATETYPE(TDeclaration, TFUNCVARDECLARATION_INIT)
 bool TDeclaration_Is_StructOrUnionDeclaration(TDeclaration* p);
 bool TDeclaration_Is_FunctionDeclaration(TDeclaration* p);

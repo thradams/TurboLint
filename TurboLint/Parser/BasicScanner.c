@@ -480,8 +480,9 @@ static struct TkPair keywords[] =
     { "_Static_assert", TK__STATIC_ASSERT },
     { "_Thread_local", TK__THREAD_LOCAL },
     //
-    { "__asm", TK__ASM } //visual studio
-
+    { "__asm", TK__ASM }, //visual studio
+    {"template", TK_TEMPLATE},
+    {"class", TK_CLASS}
 
 };
 

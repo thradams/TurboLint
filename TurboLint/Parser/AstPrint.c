@@ -612,14 +612,17 @@ bool TEnumSpecifier_Print(TEnumSpecifier* p, bool b, FILE* fp)
   fprintf(fp, "\"name\":\"%s\",", p->Name);
   fprintf(fp, "\"enumerator-list\":[");
 
-  for (size_t i = 0; i < p->EnumeratorList.size; i++)
+  //for (size_t i = 0; i < p->EnumeratorList.size; i++)
+  int i = 0;
+  ForEachListItem(TEnumerator, pTEnumerator, &p->EnumeratorList)
   {
-    TEnumerator *pTEnumerator = p->EnumeratorList.pItems[i];
+    //TEnumerator *pTEnumerator = p->EnumeratorList.pItems[i];
 
     if (i > 0)
       fprintf(fp, ",");
 
     TEnumerator_Print(pTEnumerator, false, fp);
+    i++;
   }
 
   fprintf(fp, "]");
@@ -889,14 +892,16 @@ bool TPointerList_Print(TPointerList *p, bool b, FILE* fp)
 
 
   fprintf(fp, "[");
-
-  for (size_t i = 0; i < p->size; i++)
+  int i = 0;
+  //for (size_t i = 0; i < p->size; i++)
+  ForEachListItem(TPointer, pItem, p)
   {
     if (i > 0)
       fprintf(fp, ",");
 
-    TPointer * pItem = p->pItems[i];
+    //TPointer * pItem = p->pItems[i];
     b = TPointer_Print(pItem, b, fp);
+    i++;
   }
 
   fprintf(fp, "]");
@@ -1370,12 +1375,12 @@ bool TDesignatorList_Print(TDesignatorList *p, bool b, FILE* fp)
   b = false;
   fprintf(fp, "[");
 
-  for (size_t i = 0; i < p->size; i++)
+  
+  ForEachListItem(TDesignator, pItem, p)
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
       fprintf(fp, ",");
 
-    TDesignator* pItem = p->pItems[i];
     b = TDesignator_Print(pItem, b, fp);
   }
 
@@ -1389,10 +1394,10 @@ bool TInitializerListItem_Print(TInitializerListItem* p, bool b, FILE* fp)
   fprintf(fp, "{");
   b = false;
 
-  if (p->pDesignatorList)
+  if (!List_IsEmpty(&p->DesignatorList))
   {
     fprintf(fp, "\"designation\":");
-    b = TDesignatorList_Print(p->pDesignatorList, b, fp);
+    b = TDesignatorList_Print(&p->DesignatorList, b, fp);
   }
 
   if (b)

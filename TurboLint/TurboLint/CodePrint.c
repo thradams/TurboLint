@@ -678,17 +678,21 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
   StrBuilder_Append(fp, p->Name);
   StrBuilder_Append(fp, "\n{\n");
 
-  for (size_t i = 0; i < p->EnumeratorList.size; i++)
+  
+  ForEachListItem(TEnumerator, pTEnumerator, &p->EnumeratorList)
   {
-    TEnumerator *pTEnumerator = p->EnumeratorList.pItems[i];
-
+  
     TEnumerator_CodePrint(program, pTEnumerator, false, fp);
 
-    if (i + 1 < p->EnumeratorList.size)
-      StrBuilder_Append(fp, ",\n");
-    else
+    if (List_IsLastItem(&p->EnumeratorList, pTEnumerator))
+    {
       StrBuilder_Append(fp, "\n");
-
+    }
+    else
+    {
+      //tem mais
+      StrBuilder_Append(fp, ",\n");
+    }        
   }
 
 
@@ -940,9 +944,8 @@ static bool TPointerList_CodePrint(TProgram* program, TPointerList *p, bool b, S
 {
   b = false;
 
-  for (size_t i = 0; i < p->size; i++)
-  {
-    TPointer * pItem = p->pItems[i];
+  ForEachListItem(TPointer, pItem, p)
+  {    
     b = TPointer_CodePrint(program, pItem, b, fp);
   }
 
@@ -1447,12 +1450,12 @@ static bool TDesignatorList_CodePrint(TProgram* program, TDesignatorList *p, boo
   b = false;
 
 
-  for (size_t i = 0; i < p->size; i++)
+  ForEachListItem(TDesignator, pItem, p)
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
+    {
       StrBuilder_Append(fp, ",");
-
-    TDesignator* pItem = p->pItems[i];
+    }
     b = TDesignator_CodePrint(program, pItem, b, fp);
   }
 
@@ -1466,9 +1469,9 @@ static bool TInitializerListItem_CodePrint(TProgram* program, TTypeSpecifier* pT
 
   b = false;
 
-  if (p->pDesignatorList)
+  if (!List_IsEmpty(&p->DesignatorList))
   {
-    b = TDesignatorList_CodePrint(program, p->pDesignatorList, b, fp);
+    b = TDesignatorList_CodePrint(program, &p->DesignatorList, b, fp);
   }
 
   b = TInitializer_CodePrint(program, pTypeSpecifier, p->pInitializer, b, fp);

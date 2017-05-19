@@ -496,13 +496,17 @@ bool TDeclaration_Is_EnumDeclaration(TDeclaration* p)
 }
 
 
+void TTemplateParameter_Destroy(TTemplateParameter* p)
+{
+  String_Destroy(&p->Name);
+}
 
 void TDeclaration_Destroy(TDeclaration* p)
 {
   TCompoundStatement_Delete(p->pCompoundStatementOpt);
   TDeclarationSpecifiers_Destroy(&p->Specifiers);
   TInitDeclaratorList_Destroy(&p->InitDeclaratorList);
-
+  List_Destroy(TTemplateParameter, &p->TemplateParameters);
 }
 
 void TParameterDeclaration_Swap(TParameterDeclaration* a, TParameterDeclaration* b)
@@ -605,7 +609,7 @@ void TInitializer_Destroy(TInitializer* p)
 
 void TInitializerListItem_Destroy(TInitializerListItem* p)
 {
-  TDesignatorList_Delete(p->pDesignatorList);
+  TDesignatorList_Destroy(&p->DesignatorList);
   TInitializer_Delete(p->pInitializer);
 }
 

@@ -3126,7 +3126,7 @@ void Enumerator_List(Parser* ctx,
   int currentValue = 0;
   //pelo menos 1
   TEnumerator* pEnumerator2 = TEnumerator_Create();
-  TEnumeratorList_Push(pEnumeratorList2, pEnumerator2);
+  List_Add(pEnumeratorList2, pEnumerator2);
 
   if (!EnumeratorC(ctx, pEnumerator2))
   {
@@ -3160,7 +3160,7 @@ void Enumerator_List(Parser* ctx,
       if (token != TK_RIGHT_CURLY_BRACKET)
       {
         TEnumerator* pEnumerator3 = TEnumerator_Create();
-        TEnumeratorList_Push(pEnumeratorList2, pEnumerator3);
+        List_Add(pEnumeratorList2, pEnumerator3);
 
         if (!EnumeratorC(ctx, pEnumerator3))
         {
@@ -3713,7 +3713,7 @@ int PointerOpt(Parser* ctx, TPointerList* pPointerList)
     token == TK_ASTERISK)   //pointer
   {
     TPointer* pPointer = TPointer_Create();
-    TPointerList_Push(pPointerList, pPointer);
+    List_Add(pPointerList, pPointer);
 
     if (IsTypeQualifierToken(token))
     {
@@ -4039,7 +4039,7 @@ bool Type_Specifier(Parser* ctx,
           TAnyDeclaration* pDeclaration;
           bResult = Declaration(ctx,
             &pDeclaration);
-          expading == 0;
+          expading = 0;
           TDeclarations_Push(&ctx->Templates, pDeclaration);
           SetSymbolsFromDeclaration(ctx, pDeclaration);
           StrBuilder_Destroy(&sb);
@@ -4221,8 +4221,7 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList)
     if (token == TK_LEFT_SQUARE_BRACKET ||
       token == TK_FULL_STOP)
     {
-      pTInitializerListItem->pDesignatorList = TDesignatorList_Create();
-      Designation(ctx, pTInitializerListItem->pDesignatorList);
+      Designation(ctx, &pTInitializerListItem->DesignatorList);
     }
 
     Initializer(ctx, &pTInitializerListItem->pInitializer, TK_COMMA, TK_RIGHT_CURLY_BRACKET);
@@ -4262,7 +4261,7 @@ void Designator_List(Parser* ctx, TDesignatorList* pDesignatorList)
   */
   TDesignator* pDesignator = TDesignator_Create();
   Designator(ctx, pDesignator);
-  TDesignatorList_Push(pDesignatorList, pDesignator);
+  List_Add(pDesignatorList, pDesignator);
 
   for (; ;)
   {
@@ -4276,7 +4275,7 @@ void Designator_List(Parser* ctx, TDesignatorList* pDesignatorList)
     {
       TDesignator* pDesignatorNew = TDesignator_Create();
       Designator(ctx, pDesignatorNew);
-      TDesignatorList_Push(pDesignatorList, pDesignatorNew);
+      List_Add(pDesignatorList, pDesignatorNew);
     }
 
     else
@@ -4359,6 +4358,66 @@ void Init_Declarator_List(Parser* ctx,
 
 }
 
+void TemplateParameter(Parser* ctx,
+  TTemplateParameter** ppTemplateParameter)
+{
+  *ppTemplateParameter = NULL;
+  /*
+  template-parameter:
+   type-parameter
+   parameter-declaration
+  */
+  Tokens token = Token(ctx);
+  if (token == TK_CLASS)
+  {
+    MatchToken(ctx, TK_CLASS);
+    TTemplateParameter *p = TTemplateParameter_Create();
+    String_Set(&p->Name, Lexeme(ctx));
+    MatchToken(ctx, TK_IDENTIFIER);    
+    *ppTemplateParameter = p;
+  }
+  else
+  {
+    SetError2(ctx, "e", "e");
+  }
+}
+
+void TemplateParameterList(Parser* ctx, TTemplateParameterList* list)
+{
+  /*
+  template-parameter-list:
+  template-parameter
+  template-parameter-list , template-parameter
+  */
+  TTemplateParameter *pTemplateParameter = NULL;
+  
+  TemplateParameter(ctx,
+    &pTemplateParameter);
+
+  List_Add(list, pTemplateParameter);
+
+  Tokens token = Token(ctx);
+  if (token == TK_COMMA)
+  {
+    Match(ctx);
+    TemplateParameterList(ctx, list);
+  }
+}
+
+void TemplateDeclaration(Parser* ctx,  TDeclaration* pFuncVarDeclaration)
+{
+  /*
+  template-declaration:
+  template < template-parameter-list > declaration
+  */
+  
+  //template
+  MatchToken(ctx, TK_TEMPLATE);
+  MatchToken(ctx, TK_LESS_THAN_SIGN);
+  TemplateParameterList(ctx, &pFuncVarDeclaration->TemplateParameters);
+  MatchToken(ctx, TK_GREATER_THAN_SIGN);
+}
+
 bool  Declaration(Parser* ctx,
   TAnyDeclaration** ppDeclaration)
 {
@@ -4383,6 +4442,7 @@ bool  Declaration(Parser* ctx,
   {
     TDeclaration* pFuncVarDeclaration = TDeclaration_Create();
 
+
     if (token == TK_SEMICOLON)
     {
       //declaracao vazia como ;
@@ -4392,8 +4452,21 @@ bool  Declaration(Parser* ctx,
 
     else
     {
-      bHasDeclaration =
-        Declaration_Specifiers(ctx, &pFuncVarDeclaration->Specifiers);
+
+      if (token == TK_TEMPLATE)
+      {
+        //Tem que ter um escopo de tipos aqui
+        //que é passado.
+        //talvez uma map de tipos que seja uma pilha
+        bHasDeclaration = true;
+        TemplateDeclaration(ctx, pFuncVarDeclaration);
+      }
+
+      
+      if (Declaration_Specifiers(ctx, &pFuncVarDeclaration->Specifiers))
+      {
+        bHasDeclaration = true;
+      }
     }
 
 

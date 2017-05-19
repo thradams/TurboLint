@@ -145,6 +145,8 @@ typedef enum
 
     ///
     TK__ASM, //visual c++
+    TK_TEMPLATE,
+    TK_CLASS,
 } Tokens;
 
 //APELIDOS PARA TOKENS
