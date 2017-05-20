@@ -836,12 +836,11 @@ bool TInitializerList_Print(TInitializerList*p, bool b, FILE* fp)
   b = false;
   fprintf(fp, "[");
 
-  for (size_t i = 0; i < p->size; i++)
+  ForEachListItem(TInitializerListItem, pItem, p)
+  
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
       fprintf(fp, ",");
-
-    TInitializerListItem* pItem = p->pItems[i];
     b = TInitializerListItem_Print(pItem, b, fp);
   }
 

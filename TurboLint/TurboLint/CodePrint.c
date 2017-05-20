@@ -459,7 +459,7 @@ static bool TPostfixExpressionCore_CodePrint(TProgram* program, TPostfixExpressi
     b = TExpression_CodePrint(program, p->pExpressionLeft, "l", b, fp);
   }
 
-  if (p->pInitializerList)
+  
   {
     TTypeSpecifier* pTypeSpecifier = NULL;
     if (p->pTypeName)
@@ -474,7 +474,7 @@ static bool TPostfixExpressionCore_CodePrint(TProgram* program, TPostfixExpressi
     }
     //falta imprimeir typename
     //TTypeName_Print*
-    b = TInitializerList_CodePrint(program, pTypeSpecifier, p->pInitializerList, b, fp);
+    b = TInitializerList_CodePrint(program, pTypeSpecifier, &p->InitializerList, b, fp);
   }
 
   switch (p->token)
@@ -876,9 +876,9 @@ static bool TInitializerList_CodePrint(TProgram* program, TTypeSpecifier* pTypeS
 
   b = false;
 
-  if (p->size == 1 && 
-      p->pItems[0]->pInitializer == NULL && 
-      pTypeSpecifier != NULL)
+  if (List_HasOneItem(p) &&
+      List_Back(p)->pInitializer == NULL &&
+	  pTypeSpecifier != NULL)  
   {
     //a partir de {} e um tipo consegue gerar o final
     BuildInitialization(program, pTypeSpecifier, fp);
@@ -886,13 +886,11 @@ static bool TInitializerList_CodePrint(TProgram* program, TTypeSpecifier* pTypeS
   else
   {
     StrBuilder_Append(fp, "{");
-
-    for (size_t i = 0; i < p->size; i++)
+	ForEachListItem(TInitializerListItem, pItem, p)
     {
-      if (i > 0)
+      if (!List_IsFirstItem(p, pItem))
         StrBuilder_Append(fp, ",");
 
-      TInitializerListItem* pItem = p->pItems[i];
       b = TInitializerListItem_CodePrint(program, pTypeSpecifier, pItem, b, fp);
     }
 

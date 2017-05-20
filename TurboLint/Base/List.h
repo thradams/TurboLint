@@ -28,6 +28,12 @@ while ((p)->pHead) {\
 #define List_IsEmpty(pList) \
  ((pList)->pHead == NULL)
 
+#define List_Back(pList) \
+ ((pList)->pTail)
+
+#define List_Front(pList) \
+ ((pList)->pHead)
+
 #define List_HasOneItem(pList) \
  ((pList)->pHead != NULL && (pList)->pHead == (pList)->pTail)
 

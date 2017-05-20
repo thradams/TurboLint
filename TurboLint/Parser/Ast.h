@@ -188,7 +188,12 @@ typedef struct
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
 
 //struct TInitializerList_;
-  
+
+
+
+typedef  struct TInitializerListItem TInitializerListItem;
+typedef List(TInitializerListItem) TInitializerList;
+
 typedef struct TPostfixExpressionCoreTag
 {
   TTypePointer Type;
@@ -201,7 +206,7 @@ typedef struct TPostfixExpressionCoreTag
   
   
   struct TPostfixExpressionCoreTag*  pNext;
-  struct TInitializerList_ *  pInitializerList;
+  TInitializerList InitializerList;
   String Identifier;
   struct TParameterDeclaration* pTypeName; /*typename*/
 } TPostfixExpressionCore;
@@ -519,22 +524,27 @@ typedef List(TDesignator) TDesignatorList;
 
 typedef TTypePointer TInitializer;
 
-typedef struct
+typedef struct TInitializerListItem
 {
   TDesignatorList  DesignatorList;
   TInitializer* pInitializer;
+  struct TInitializerListItem* pNext;
 } TInitializerListItem;
-#define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL}
+
+#define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL, NULL}
 CREATETYPE(TInitializerListItem, TINITIALIZER_LIST_ITEM_INIT)
 
-typedef struct TInitializerList_
-{
-  TInitializerListItem** pItems;
-  size_t size;
-  size_t capacity;
-} TInitializerList;
-#define TINITIALIZER_LIST_INIT {NULL,0,0}
-ARRAYOF(TInitializerList, TInitializerListItem)
+//typedef struct TInitializerList_
+//{
+//  TInitializerListItem** pItems;
+//  size_t size;
+//  size_t capacity;
+//} TInitializerList;
+//#define TINITIALIZER_LIST_INIT {NULL,0,0}
+//ARRAYOF(TInitializerList, TInitializerListItem)
+
+//typedef List(TInitializerListItem) TInitializerList;
+#define TInitializerList_Destroy(p) List_Destroy(TInitializerListItem, p)
 
 typedef struct
 {
@@ -543,7 +553,7 @@ typedef struct
   String MacroExpansion;
 } TInitializerListType;
 
-#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, TINITIALIZER_LIST_INIT, STRING_INIT}
+#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, STRING_INIT}
 CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 

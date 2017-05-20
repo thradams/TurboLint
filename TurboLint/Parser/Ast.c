@@ -167,7 +167,7 @@ void TPrimaryExpressionValue_Destroy(TPrimaryExpressionValue* p)
 
 void TPostfixExpressionCore_Destroy(TPostfixExpressionCore* p)
 {
-  TInitializerList_Delete(p->pInitializerList);
+  TInitializerList_Destroy(&p->InitializerList);
   String_Destroy(&p->Identifier);
   String_Destroy(&p->lexeme);
   TExpression_Delete(p->pExpressionLeft);
@@ -792,7 +792,7 @@ static bool TPostfixExpressionCore_CodePrint2(TPostfixExpressionCore * p,
     EvaluateConstantExpression(p->pExpressionLeft, &left);
   }
 
-  if (p->pInitializerList)
+  //if (p->pInitializerList)
   {
     //falta imprimeir typename
     //TTypeName_Print*

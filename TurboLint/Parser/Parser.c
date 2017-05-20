@@ -919,8 +919,8 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
 
       MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
 
-      pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
-      Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
+      //pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
+      Initializer_List(ctx, &pTPostfixExpressionCore->InitializerList);
       MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
 
       if (Token(ctx) == TK_COMMA)
@@ -1370,8 +1370,8 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
         pTPostfixExpressionCore->pTypeName = TParameterDeclaration_Create();
         TParameterDeclaration_Swap(pTPostfixExpressionCore->pTypeName, &typeName);
 
-        pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
-        Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
+        //pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
+        Initializer_List(ctx, &pTPostfixExpressionCore->InitializerList);
 
         //Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
         
@@ -4209,7 +4209,7 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList)
       break;
 
     TInitializerListItem* pTInitializerListItem = TInitializerListItem_Create();
-    TInitializerList_Push(pInitializerList, pTInitializerListItem);
+    List_Add(pInitializerList, pTInitializerListItem);
     Tokens token = Token(ctx);
 #ifdef LANGUAGE_EXTENSIONS
     if (token == TK_RIGHT_CURLY_BRACKET)
