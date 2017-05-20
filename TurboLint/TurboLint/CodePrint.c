@@ -77,7 +77,7 @@ void BuildStructUnionSpecifierInitialization(TProgram* program,
         StrBuilder_Append(strBuilder, ",");
       }
 
-      FOR_EACH_INITDECLARATOR(pDeclarator, pStructDeclaration->DeclaratorList)
+      ForEachListItem(TInitDeclarator, pDeclarator, &pStructDeclaration->DeclaratorList)
       {
         if (pDeclarator->pInitializer)
         {
@@ -957,12 +957,12 @@ static bool TParameterList_CodePrint(TProgram* program, TParameterList *p, bool 
   b = false;
   StrBuilder_Append(fp, "(");
 
-  for (size_t i = 0; i < p->size; i++)
+  ForEachListItem(TParameterDeclaration , pItem, p)  
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
       StrBuilder_Append(fp, ",");
 
-    TParameterDeclaration * pItem = p->pItems[i];
+    //TParameterDeclaration * pItem = p->pItems[i];
     b = TParameterDeclaration_CodePrint(program, pItem, b, fp);
   }
 
@@ -1127,12 +1127,12 @@ static bool TDirectDeclarator_CodePrint(TProgram* program, TDirectDeclarator* pD
   }
   
 
-  if (pDirectDeclarator->pParametersOpt)
+  //if (pDirectDeclarator->pParametersOpt)
   {
     //( parameter-type-list )
     //fprintf(fp, ",");
     //fprintf(fp, "\"parameter-type-list\":");
-    TParameterList_CodePrint(program, pDirectDeclarator->pParametersOpt, b, fp);
+    TParameterList_CodePrint(program, &pDirectDeclarator->Parameters, b, fp);
   }
 
   if (pDirectDeclarator->pDirectDeclarator)
@@ -1187,13 +1187,12 @@ static bool TStructDeclaratorList_CodePrint(TProgram* program, TStructDeclarator
   b = false;
 
 
-  int i = 0;
-  FOR_EACH_INITDECLARATOR(pItem, *p)
+  
+  ForEachListItem(TInitDeclarator, pItem, p)
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
       StrBuilder_Append(fp, ",");
-    b = TStructDeclarator_CodePrint(program, pItem, b, fp);
-    i++;
+    b = TStructDeclarator_CodePrint(program, pItem, b, fp);    
   }
 
 
@@ -1356,16 +1355,11 @@ bool TInitDeclaratorList_CodePrint(TProgram* program, TTypeSpecifier* pTypeSpeci
 {
   b = false;
   //fprintf(fp, "[");
-  TInitDeclarator* pInitDeclarator = p->pInitDeclaratorHeap;
-  int i = 0;
-  while (pInitDeclarator)
+  ForEachListItem(TInitDeclarator, pInitDeclarator, p)
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pInitDeclarator))
       StrBuilder_Append(fp, ",");
-
-    b = TInitDeclarator_CodePrint(program, pTypeSpecifier, pInitDeclarator, b, fp);
-    pInitDeclarator = pInitDeclarator->pInitDeclaratorNext;
-    i++;
+    b = TInitDeclarator_CodePrint(program, pTypeSpecifier, pInitDeclarator, b, fp);    
   }
 
 //  fprintf(fp, "]");

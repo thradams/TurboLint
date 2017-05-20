@@ -2930,7 +2930,7 @@ void Struct_Declarator_List(Parser* ctx,
   TStructDeclarator* pTDeclarator2 = NULL;// TDeclarator_Create();
 
   Struct_Declarator(ctx, &pTDeclarator2);
-  TStructDeclaratorList_Push(pStructDeclarationList, pTDeclarator2);
+  List_Add(pStructDeclarationList, pTDeclarator2);
 
   for (; ;)
   {
@@ -3341,7 +3341,7 @@ void Parameter_List(Parser* ctx,
   Tokens token = Token(ctx);
 
   TParameterDeclaration*  pParameter = TParameterDeclaration_Create();
-  TParameterList_Push(pParameterList, pParameter);
+  List_Add(pParameterList, pParameter);
   Parameter_Declaration(ctx, pParameter);
 
   //Tem mais?
@@ -3531,8 +3531,8 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       direct-declarator ( identifier-listopt )
       */
       //      pDirectDeclarator->token = token;
-      ASSERT(pDirectDeclarator->pParametersOpt == NULL);
-      pDirectDeclarator->pParametersOpt = TParameterList_Create();
+//      ASSERT(pDirectDeclarator->pParametersOpt == NULL);
+//      pDirectDeclarator->pParametersOpt = TParameterList_Create();
       token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
       //Para indicar que eh uma funcao
@@ -3541,7 +3541,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       if (token != TK_RIGHT_PARENTHESIS)
       {
         //opt
-        Parameter_Type_List(ctx, pDirectDeclarator->pParametersOpt);
+        Parameter_Type_List(ctx, &pDirectDeclarator->Parameters);
       }
       MatchToken(ctx, TK_RIGHT_PARENTHESIS);
       break;
@@ -4346,7 +4346,7 @@ void Init_Declarator_List(Parser* ctx,
 
   TInitDeclarator* pInitDeclarator = NULL;
   Init_Declarator(ctx, &pInitDeclarator);
-  TInitDeclaratorList_Push(pInitDeclaratorList, pInitDeclarator);
+  List_Add(pInitDeclaratorList, pInitDeclarator);
 
   //Tem mais?
   Tokens token = Token(ctx);
@@ -4532,8 +4532,7 @@ void SetSymbolsFromDeclaration(Parser* ctx,
     TDeclaration* pTFuncVarDeclaration = (TDeclaration*)pDeclaration2;
     //if (pTFuncVarDeclaration->Specifiers.StorageSpecifiers.bIsTypedef)
     {
-      FOR_EACH_INITDECLARATOR(pDeclarator, pTFuncVarDeclaration->InitDeclaratorList)
-        //for (size_t i = 0; i < pTFuncVarDeclaration->InitDeclaratorList.size; i++)
+      ForEachListItem(TInitDeclarator, pDeclarator, &pTFuncVarDeclaration->InitDeclaratorList)
       {
         //        TDeclarator* pDeclarator = pTFuncVarDeclaration->Declarators.pItems[i];
         const char* declaratorName = TInitDeclarator_FindName(pDeclarator);

@@ -915,12 +915,11 @@ bool TParameterList_Print(TParameterList *p, bool b, FILE* fp)
   b = false;
   fprintf(fp, "[");
 
-  for (size_t i = 0; i < p->size; i++)
+  ForEachListItem(TParameterDeclaration , pItem, p)
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
       fprintf(fp, ",");
-
-    TParameterDeclaration * pItem = p->pItems[i];
+    
     b = TParameterDeclaration_Print(pItem, b, fp);
   }
 
@@ -1007,12 +1006,12 @@ bool TDirectDeclarator_Print(TDirectDeclarator* pDirectDeclarator,
     b = TExpression_Print(pDirectDeclarator->pExpression, "assignment-expression", b, fp);
   }
 
-  if (pDirectDeclarator->pParametersOpt)
+  if (pDirectDeclarator->token == TK_LEFT_PARENTHESIS)
   {
     //( parameter-type-list )
     fprintf(fp, ",");
     fprintf(fp, "\"parameter-type-list\":");
-    TParameterList_Print(pDirectDeclarator->pParametersOpt, b, fp);
+    TParameterList_Print(&pDirectDeclarator->Parameters, b, fp);
   }
 
   if (pDirectDeclarator->pDirectDeclarator)
@@ -1058,13 +1057,13 @@ bool TStructDeclaratorList_Print(TStructDeclaratorList *p, bool b, FILE* fp)
   b = false;
   fprintf(fp, "[");
 
-  int i = 0;
-  FOR_EACH_INITDECLARATOR(pItem, *p)  
+  
+  ForEachListItem(TInitDeclarator, pItem, p)  
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pItem))
       fprintf(fp, ",");  
     b = TStructDeclarator_Print(pItem, b, fp);
-    i++;
+    
   }
 
   fprintf(fp, "]");
@@ -1075,16 +1074,12 @@ bool TInitDeclaratorList_Print(TInitDeclaratorList *p, bool b, FILE* fp)
 {
   b = false;
   fprintf(fp, "[");
-  TInitDeclarator* pInitDeclarator = p->pInitDeclaratorHeap;
-  int i = 0;
-  while (pInitDeclarator)
+  ForEachListItem(TInitDeclarator, pInitDeclarator, p)
   {
-    if (i > 0)
+    if (!List_IsFirstItem(p, pInitDeclarator))
       fprintf(fp, ",");
 
     b = TInitDeclarator_Print(pInitDeclarator, b, fp);
-    pInitDeclarator = pInitDeclarator->pInitDeclaratorNext;
-    i++;
   }
 
   fprintf(fp, "]");

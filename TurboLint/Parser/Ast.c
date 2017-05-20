@@ -296,29 +296,7 @@ void TInitDeclarator_Destroy(TInitDeclarator* p)
   TInitializer_Delete(p->pInitializer);  
 }
 
-void TInitDeclaratorList_Destroy(TInitDeclaratorList* pList)
-{
-  for (TInitDeclarator * p = pList->pInitDeclaratorHeap; p != NULL; )
-  {
-    TInitDeclarator* pCurrent = p;
-    p = p->pInitDeclaratorNext;
-    TInitDeclarator_Delete(pCurrent);
-  }
-}
 
-void TInitDeclaratorList_Push(TInitDeclaratorList* pList, TInitDeclarator* pItem)
-{
-  if (pList->pInitDeclaratorHeap == NULL)
-  {
-    pList->pInitDeclaratorHeap = pItem;
-  }
-  else
-  {
-    pList->pInitDeclaratorTail->pInitDeclaratorNext = pItem;
-  }
-
-  pList->pInitDeclaratorTail = pItem;
-}
 
 void TDirectDeclarator_Destroy(TDirectDeclarator* p)
 {
@@ -366,29 +344,7 @@ void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p)
   String_Destroy(&p->TypeName);
 }
 
-void TStructDeclaratorList_Destroy(TStructDeclaratorList* pList)
-{
-  for (TInitDeclarator * p = pList->pInitDeclaratorHeap; p != NULL; )
-  {
-    TInitDeclarator* pCurrent = p;
-    p = p->pInitDeclaratorNext;
-    TInitDeclarator_Delete(pCurrent);
-  }
-}
 
-void TStructDeclaratorList_Push(TStructDeclaratorList* pList, TInitDeclarator* pItem)
-{
-  if (pList->pInitDeclaratorHeap == NULL)
-  {
-    pList->pInitDeclaratorHeap = pItem;
-  }
-  else
-  {
-    pList->pInitDeclaratorTail->pInitDeclaratorNext = pItem;
-  }
-
-  pList->pInitDeclaratorTail = pItem;
-}
 
 void TStructDeclaration_Destroy(TStructDeclaration* p)
 {
