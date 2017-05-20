@@ -135,6 +135,9 @@
     <ClInclude Include="Base\Path.h">
       <Filter>Source Files\Base</Filter>
     </ClInclude>
+    <ClInclude Include="Base\List.h">
+      <Filter>Source Files\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="vs2015.txt">
