@@ -1,19 +1,25 @@
 /*external files*/
 
- static void F( int* p)
+ typedef struct Point {
+ int x /* = 1 */;
+ int y /* = 1 */;
+} Point;
+
+ typedef struct Line {
+ Point pt;
+ Point* pt2;
+} Line;
+
+ typedef union s {
+ Point;
+ Line;
+};
+
+ int main()
 {
-}
-
-#define NULL   ((void*)0)
-#define A  1
-
-
- static int main()
-{
- int i = 1+1;
- int* p = NULL;
-F(NULL);
-1+1;
+ Line line = {{1,1},NULL};
+ Line* line = NULL;
+ int* p = NULL, p2 = 0;
 }
 
 

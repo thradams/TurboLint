@@ -1,1 +1,156 @@
-[{"storage-specifers" : {"static":true},"type-specifier":"void","declarators":[{"declarator":{"parameter-list":[{"type-specifier":"int","declarator":{"pointer":[{}],"name":"p"}}]},"name":"F"}],"compound-statement": []},{"storage-specifers" : {"static":true},"type-specifier":"int","declarators":[{"declarator":{"parameter-list":[]},"name":"main"}],"compound-statement": [{"type-specifier":"int","declarators":[{"initializer":{"":{"l-expr":{"lexeme":"1"},"r-expr":{"lexeme":"1"},"binary":"+"}},"name":"i"}]},{"type-specifier":"int","declarators":[{"pointer":[{}],"initializer":{"":{"expr":{"expr":{"lexeme":"0"},"cast":{"type-specifier":"void","declarator":{"pointer":[{}]}}}}},"name":"p"}]},{"expression-statement":{"postfix":{"l":{"lexeme":"F"},"r":{"expr":{"expr":{"lexeme":"0"},"cast":{"type-specifier":"void","declarator":{"pointer":[{}]}}}},"op":"("}}},{"expression-statement":{"l-expr":{"lexeme":"1"},"r-expr":{"lexeme":"1"},"binary":"+"}}]}]
+[
+    {
+        "storage-specifers": { "typedef": true },
+        "struct-specifier": {
+            "name": "Point",
+            "struct-declaration-list": [
+                {
+                    "type-specifier": "int",
+                    "declarators": [
+                        {
+                            "declarator": {
+                                "pointer": [],
+                                "direct-declarator": { "identifier": "x" }
+                            },
+                            "initializer-expression": { "lexeme": "1" }
+                        }
+                    ]
+                },
+                {
+                    "type-specifier": "int",
+                    "declarators": [
+                        {
+                            "declarator": {
+                                "pointer": [],
+                                "direct-declarator": { "identifier": "y" }
+                            },
+                            "initializer-expression": { "lexeme": "1" }
+                        }
+                    ]
+                }
+            ]
+        },
+        "init-declarator-list": [
+            {
+                "declarator": {
+                    "pointer": [],
+                    "direct-declarator": { "identifier": "Point" }
+                }
+            }
+        ]
+    },
+    {
+        "storage-specifers": { "typedef": true },
+        "struct-specifier": {
+            "name": "Line",
+            "struct-declaration-list": [
+                {
+                    "type-specifier": "Point",
+                    "declarators": [
+                        {
+                            "declarator": {
+                                "pointer": [],
+                                "direct-declarator": { "identifier": "pt" }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type-specifier": "Point",
+                    "declarators": [
+                        {
+                            "declarator": {
+                                "pointer": [ {} ],
+                                "direct-declarator": { "identifier": "pt2" }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "init-declarator-list": [
+            {
+                "declarator": {
+                    "pointer": [],
+                    "direct-declarator": { "identifier": "Line" }
+                }
+            }
+        ]
+    },
+    {
+        "storage-specifers": { "typedef": true },
+        "union-specifier": {
+            "name": "s",
+            "struct-declaration-list": [
+                {
+                    "type-specifier": "Point",
+                    "declarators": []
+                },
+                {
+                    "type-specifier": "Line",
+                    "declarators": []
+                }
+            ]
+        },
+        "init-declarator-list": []
+    },
+    {
+        "type-specifier": "int",
+        "init-declarator-list": [
+            {
+                "declarator": {
+                    "pointer": [],
+                    "direct-declarator": {
+                        "identifier": "main",
+                        "parameter-type-list": []
+                    }
+                }
+            }
+        ],
+        "compound-statement": [
+            {
+                "type-specifier": "Line",
+                "init-declarator-list": [
+                    {
+                        "declarator": {
+                            "pointer": [],
+                            "direct-declarator": { "identifier": "line" }
+                        },
+                        "initializer": [ {} ]
+                    }
+                ]
+            },
+            {
+                "type-specifier": "Line",
+                "init-declarator-list": [
+                    {
+                        "declarator": {
+                            "pointer": [ {} ],
+                            "direct-declarator": { "identifier": "line" }
+                        },
+                        "initializer": [ {} ]
+                    }
+                ]
+            },
+            {
+                "type-specifier": "int",
+                "init-declarator-list": [
+                    {
+                        "declarator": {
+                            "pointer": [ {} ],
+                            "direct-declarator": { "identifier": "p" }
+                        },
+                        "initializer": [ {} ]
+                    },
+                    {
+                        "declarator": {
+                            "pointer": [],
+                            "direct-declarator": { "identifier": "p2" }
+                        },
+                        "initializer": [ {} ]
+                    }
+                ]
+            }
+        ]
+    }
+]

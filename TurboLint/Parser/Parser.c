@@ -282,8 +282,8 @@ Result Parser_InitString(Parser* parser,
 
   /////////
   Scanner_InitString(&parser->Scanner, name, text);
-  TDeclarations_Init(&parser->Templates);
-  TDeclarations_Init(&parser->TemplatesInstances);
+  ArrayT_Init(&parser->Templates);
+  ArrayT_Init(&parser->TemplatesInstances);
 
   return RESULT_OK;
 }
@@ -300,8 +300,8 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
   StrBuilder_Init(&parser->ErrorMessage, 100);
   Scanner_Init(&parser->Scanner);
-  TDeclarations_Init(&parser->Templates);
-  TDeclarations_Init(&parser->TemplatesInstances);
+  ArrayT_Init(&parser->Templates);
+  ArrayT_Init(&parser->TemplatesInstances);
 
 
   ////////
@@ -357,8 +357,8 @@ void Parser_Destroy(Parser* parser)
   //Map_Destroy(&parser->TypeDefNames, NULL);
   StrBuilder_Destroy(&parser->ErrorMessage);
   Scanner_Destroy(&parser->Scanner);
-  TDeclarations_Destroy(&parser->Templates);
-  TDeclarations_Destroy(&parser->TemplatesInstances);
+  ArrayT_Destroy(TAnyDeclaration, &parser->Templates);
+  ArrayT_Destroy(TAnyDeclaration, &parser->TemplatesInstances);
 }
 
 static const char* GetName()
@@ -993,7 +993,7 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
             &pDeclaration);
           //expading == 0;
 
-          TDeclarations_Push(&ctx->Templates, pDeclaration);
+          ArrayT_Push(&ctx->Templates, pDeclaration);
           SetSymbolsFromDeclaration(ctx, pDeclaration);
           //TDeclarations_Push(&ctx->TemplatesInstances, pDeclaration);
 
@@ -1006,7 +1006,7 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
           bResult = Declaration(ctx,
             &pDeclaration);
           //expading == 0;
-          TDeclarations_Push(&ctx->TemplatesInstances, pDeclaration);
+          ArrayT_Push(&ctx->TemplatesInstances, pDeclaration);
           SetSymbolsFromDeclaration(ctx, pDeclaration);
 
           StrBuilder_Destroy(&sb);
@@ -2753,7 +2753,7 @@ void Block_Item_List(Parser* ctx, TBlockItemList* pBlockItemList)
 
     TBlockItem* pBlockItem = NULL;
     Block_Item(ctx, &pBlockItem);
-    TBlockItemList_Push(pBlockItemList, pBlockItem);
+    ArrayT_Push(pBlockItemList, pBlockItem);
     Tokens token = Token(ctx);
 
     if (token == TK_RIGHT_CURLY_BRACKET)
@@ -3019,7 +3019,7 @@ void Struct_Declaration_List(Parser* ctx,
 
     TAnyStructDeclaration* pStructDeclaration = NULL;
     Struct_Declaration(ctx, &pStructDeclaration);
-    TStructDeclarationList_Push(pStructDeclarationList, pStructDeclaration);
+    ArrayT_Push(pStructDeclarationList, pStructDeclaration);
   }
 }
 
@@ -4040,7 +4040,7 @@ bool Type_Specifier(Parser* ctx,
           bResult = Declaration(ctx,
             &pDeclaration);
           expading = 0;
-          TDeclarations_Push(&ctx->Templates, pDeclaration);
+          ArrayT_Push(&ctx->Templates, pDeclaration);
           SetSymbolsFromDeclaration(ctx, pDeclaration);
           StrBuilder_Destroy(&sb);
         }
@@ -4564,7 +4564,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
     {
       for (int i = 0; i < ctx->Templates.size; i++)
       {
-        TDeclarations_Push(declarations, ctx->Templates.pItems[i]);
+        ArrayT_Push(declarations, ctx->Templates.pItems[i]);
         declarationIndex++;
       }
       ctx->Templates.size = 0;
@@ -4578,7 +4578,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
       //Cada Declaration poderia ter out uma lista TDeclarations
       //publica que vai ser inserida aqui.
       //
-      TDeclarations_Push(declarations, pDeclarationOut);
+      ArrayT_Push(declarations, pDeclarationOut);
       declarationIndex++;
       SetSymbolsFromDeclaration(ctx, pDeclarationOut);
     }
@@ -4603,7 +4603,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
 
   for (int i = 0; i < ctx->TemplatesInstances.size; i++)
   {
-    TDeclarations_Push(declarations, ctx->TemplatesInstances.pItems[i]);
+    ArrayT_Push(declarations, ctx->TemplatesInstances.pItems[i]);
     declarationIndex++;
     //SetSymbolsFromDeclaration(ctx, ctx->Templates.pItems[i]);
   }
@@ -4618,7 +4618,7 @@ void Parser_Main(Parser* ctx, TDeclarations* declarations)
 
 static void TFileMapToStrArray(TFileMap* map, TFileArray* arr)
 {
-  TFileArray_Reserve(arr, map->Size);
+  ArrayT_Reserve(arr, map->Size);
   arr->size = map->Size;
 
   for (size_t i = 0; i < map->buckets.size; i++)

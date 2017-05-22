@@ -6,7 +6,7 @@
 
 void TCompoundStatement_Destroy(TCompoundStatement *p)
 {
-  TBlockItemList_Destroy(&p->BlockItemList);
+  ArrayT_Destroy(TBlockItem, &p->BlockItemList);
 }
 
 void TLabeledStatement_Destroy(TLabeledStatement *p)
@@ -248,13 +248,13 @@ void TEnumerator_Destroy(TEnumerator* p)
 void TEnumSpecifier_Destroy(TEnumSpecifier* p)
 {
   String_Destroy(&p->Name);
-  TEnumeratorList_Destroy(&p->EnumeratorList);
+  List_Destroy(TEnumerator, &p->EnumeratorList);
 }
 
 void TStructUnionSpecifier_Destroy(TStructUnionSpecifier* p)
 {
   String_Destroy(&p->Name);
-  TStructDeclarationList_Destroy(&p->StructDeclarationList);
+  ArrayT_Destroy(TAnyStructDeclaration, &p->StructDeclarationList);
 }
 
 void TSingleTypeSpecifier_Destroy(TSingleTypeSpecifier* p)
@@ -284,7 +284,7 @@ void TTypeSpecifier_Destroy(TTypeSpecifier* p)
 
 void TDeclarator_Destroy(TDeclarator* p)
 {
-  TPointerList_Destroy(&p->PointerList);
+  List_Destroy(TPointer, &p->PointerList);
   TDirectDeclarator_Delete(p->pDirectDeclarator);
 }
 
@@ -348,7 +348,7 @@ void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p)
 
 void TStructDeclaration_Destroy(TStructDeclaration* p)
 {
-  TStructDeclaratorList_Destroy(&p->DeclaratorList);
+  List_Destroy(TInitDeclarator, &p->DeclaratorList);
   TTypeSpecifier_Delete(p->pSpecifier);
   //TTypeQualifier_Destroy(&p->Qualifier);
 }
@@ -367,6 +367,20 @@ void TAnyStructDeclaration_Destroy(TAnyStructDeclaration* p)
     ASSERT(false);
     break;
   }
+}
+
+bool TPointerList_IsPointer(TPointerList* pPointerlist)
+{
+  bool bIsPointer = false;
+  ForEachListItem(TPointer, pItem, pPointerlist)
+  {
+    if (pItem->bPointer)
+    {
+      bIsPointer = true;
+      break;
+    }
+  }
+  return bIsPointer;
 }
 
 void TPointer_Destroy(TPointer* p)
@@ -461,7 +475,7 @@ void TDeclaration_Destroy(TDeclaration* p)
 {
   TCompoundStatement_Delete(p->pCompoundStatementOpt);
   TDeclarationSpecifiers_Destroy(&p->Specifiers);
-  TInitDeclaratorList_Destroy(&p->InitDeclaratorList);
+  List_Destroy(TInitDeclarator, &p->InitDeclaratorList);
   List_Destroy(TTemplateParameter, &p->TemplateParameters);
 }
 
@@ -565,7 +579,7 @@ void TInitializer_Destroy(TInitializer* p)
 
 void TInitializerListItem_Destroy(TInitializerListItem* p)
 {
-  TDesignatorList_Destroy(&p->DesignatorList);
+  List_Destroy(TDesignator, &p->DesignatorList);
   TInitializer_Delete(p->pInitializer);
 }
 
@@ -714,11 +728,11 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
   return pDeclarationResult;
 }
 
-void TDeclarations_Init(TDeclarations* p)
+/*void TDeclarations_Init(TDeclarations* p)
 {
   TDeclarations temp = TDECLARATIONS_INIT;
   *p = temp;
-}
+}*/
 
 void TProgram_Destroy(TProgram * p)
 {
@@ -726,8 +740,8 @@ void TProgram_Destroy(TProgram * p)
   StrArray_Destroy(&p->MySourceDir);
 
   Map_Destroy(&p->EnumMap, NULL);
-  TDeclarations_Destroy(&p->Declarations);
-  TFileArray_Destroy(&p->Files2);
+  ArrayT_Destroy(TAnyDeclaration, &p->Declarations);
+  ArrayT_Destroy(TFile, &p->Files2);
   DeclarationsMap_Destroy(&p->Symbols);
   MacroMap_Destroy(&p->Defines);
 }

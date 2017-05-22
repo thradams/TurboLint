@@ -74,35 +74,34 @@ void ArrayInt_Init(ArrayInt* p);
 
 void ArrayInt_Destroy(ArrayInt* st);
 
-
-#define ARRAYOF(TYPES, TYPE)\
-inline void TYPES##_Push(TYPES* p, TYPE* pItem)\
+#define ArrayT(T) struct\
 {\
-  Array_Push((Array*)p, pItem);\
-}\
-inline void TYPES##_Destroy(TYPES * p)\
-{\
-  Array_Destroy((Array*)p, TYPE##_DeleteVoid);\
-}\
-inline TYPES* TYPES##_Create()\
-{\
-  TYPES* p = (TYPES*)malloc(sizeof * p);\
-  if (p)\
-  {\
-    Array_Init((Array*)p); \
-  }\
-  return p;\
-}\
-inline Result TYPES##_Reserve(TYPES* p, size_t n)\
-{\
-    return Array_Reserve((Array*)p, n); \
-}\
-inline void TYPES##_Delete(TYPES * p)\
-{\
-  if (p)\
-  {\
-    Array_Destroy((Array*)p, TYPE##_DeleteVoid); \
-    free(p);\
-  }\
+  T** pItems;\
+  size_t size;\
+  size_t capacity;\
 }
+
+#define ARRAYT_INIT {NULL, 0 , 0 }
+#define ArrayT_Push(p, pItem)\
+  Array_Push((Array*)p, (void*)pItem)
+
+#define ArrayT_Init(p)\
+  do {\
+   (p)->pItems = NULL;\
+   (p)->size = 0;\
+   (p)->capacity = 0; \
+  } while(0)
+
+
+#define ArrayT_Reserve(p, n)\
+  Array_Reserve((Array*)p, n)
+
+#define ArrayT_Destroy(T, p)\
+  do{\
+   for (int i = 0; i < (p)->size; i++)\
+   {\
+     T##_Delete((p)->pItems[i]);\
+   }\
+   free((p)->pItems);\
+  }  while (0)
 

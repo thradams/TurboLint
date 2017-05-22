@@ -17,6 +17,7 @@ typedef struct
 	bool bSystemLikeInclude;
 } TFile;
 #define TFILE_INIT {STRING_INIT, STRING_INIT, 0, false, false, false}
+void TFile_Delete(TFile* p);
 
 typedef Map TFileMap;
 
@@ -26,7 +27,9 @@ TFile*  TFileMap_Find(TFileMap* map, const char* key);
 Result TFileMap_DeleteItem(TFileMap *map, const char* key);
 void TFile_DeleteVoid(void* p);
 
-typedef struct
+typedef ArrayT(TFile) TFileArray;
+
+/*typedef struct
 {
 	TFile** pItems;
 	size_t size;
@@ -34,6 +37,7 @@ typedef struct
 } TFileArray;
 #define TFILE_ARRAY_INIT {NULL, 0 , 0}
 ARRAYOF(TFileArray, TFile)
+*/
 
 typedef enum 
 {

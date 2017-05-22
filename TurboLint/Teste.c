@@ -1,20 +1,29 @@
 
+#include <stdio.h>
 
-template <class T, class T2>
-struct List
+typedef struct Point
 {
-  int i;
+  int x = 1;
+  int y = 1;
+} Point;
+
+typedef struct Line
+{
+  Point pt;
+  Point* pt2;
+} Line;
+
+typedef union s
+{
+  Point;
+  Line;
 };
-
-template <class T>
-void Swap(int* p, int* p2)
-{
-  //X x;
-}
 
 int main()
 {  
-
+  Line line = {};
+  Line* line = {};
+  int *p = {}, p2 = {};
 }
 
 

@@ -149,19 +149,7 @@ typedef TTypePointer TAnyDeclaration;
 CASTSAME(TBlockItem, TAnyDeclaration)
 CREATETYPEOR(TAnyDeclaration)
 
-
-typedef struct
-{
-  TBlockItem** pItems;
-  size_t size;
-  size_t capacity;
-} TBlockItemList;
-
-#define TBLOCKITEMLIST_INIT {NULL, 0, 0}
-ARRAYOF(TBlockItemList, TBlockItem)
-
-
-
+typedef ArrayT(TBlockItem) TBlockItemList;
 
 typedef struct
 {
@@ -169,7 +157,7 @@ typedef struct
   TBlockItemList BlockItemList;
 } TCompoundStatement;
 
-#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, TBLOCKITEMLIST_INIT}
+#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT}
 CREATETYPE(TCompoundStatement, TCOMPOUNDSTATEMENT_INIT)
 
 //////////////////
@@ -187,9 +175,6 @@ typedef struct
 
 #define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, STRING_INIT}
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
-
-//struct TInitializerList_;
-
 
 
 typedef  struct TInitializerListItem TInitializerListItem;
@@ -258,11 +243,6 @@ typedef struct
 } TTypeQualifier;
 
 #define TTYPE_QUALIFIER_INIT {false, false, false, false /*extensoes*/, false, false /**/, false, false}
-
-//#define TDECLARATOR_INIT {STRING_INIT, TTYPE_QUALIFIER_INIT, TPOINTERLIST_INIT, NULL, NULL, NULL, NULL, TK_NONE, TPOSITION_INIT}
-
-
-
 
 ////////////////////////////
 
@@ -398,8 +378,9 @@ typedef struct TPointer
 #define TPOINTER_INIT {TTYPE_QUALIFIER_INIT, false, NULL}
 CREATETYPE(TPointer, TPOINTER_INIT)
 
+
 typedef List(TPointer) TPointerList;
-#define TPointerList_Destroy(p) List_Destroy(TPointer, (p))
+bool TPointerList_IsPointer(TPointerList* pPointerlist);
 
 typedef struct
 {
@@ -445,15 +426,6 @@ typedef struct TEnumerator
 CREATETYPE(TEnumerator, TENUMERATOR_INIT)
 
 typedef List(TEnumerator) TEnumeratorList;
-#define TEnumeratorList_Destroy(p) List_Destroy(TEnumerator, p)
-//typedef struct
-//{
-//  TEnumerator** pItems;
-//  size_t size;
-//  size_t capacity;
-//} TEnumeratorList;
-//#define ENUMERATOR_LIST_INIT {NULL, 0, 0}
-//ARRAYOF(TEnumeratorList, TEnumerator)
 
 
 typedef struct
@@ -507,11 +479,9 @@ typedef struct
 
 void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifiers);
 
-//struct ParameterList_T;
 struct TParameterDeclaration;
 typedef TParameterDeclaration TParameterDeclaration;
 typedef List(TParameterDeclaration) TParameterList;
-
 
 typedef struct TDesignator
 {
@@ -523,7 +493,7 @@ typedef struct TDesignator
 #define TDESIGNATOR_INIT { STRING_INIT , NULL}
 CREATETYPE(TDesignator, TDESIGNATOR_INIT)
 typedef List(TDesignator) TDesignatorList;
-#define TDesignatorList_Destroy(p) List_Destroy(TDesignator, p)
+
 
 typedef TTypePointer TInitializer;
 
@@ -537,16 +507,6 @@ typedef struct TInitializerListItem
 #define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL, NULL}
 CREATETYPE(TInitializerListItem, TINITIALIZER_LIST_ITEM_INIT)
 
-//typedef struct TInitializerList_
-//{
-//  TInitializerListItem** pItems;
-//  size_t size;
-//  size_t capacity;
-//} TInitializerList;
-//#define TINITIALIZER_LIST_INIT {NULL,0,0}
-//ARRAYOF(TInitializerList, TInitializerListItem)
-
-//typedef List(TInitializerListItem) TInitializerList;
 #define TInitializerList_Destroy(p) List_Destroy(TInitializerListItem, p)
 
 typedef struct
@@ -560,14 +520,13 @@ typedef struct
 CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 
-
 CREATETYPEOR(TInitializer)
 CAST(TInitializer, TInitializerListType)
 CASTSAME(TInitializer, TExpression)
 
 struct TDirectDeclarator;
 
-typedef struct TDeclarator_S
+typedef struct TDeclarator
 {
   TPointerList PointerList;
   struct TDirectDeclarator* pDirectDeclarator;
@@ -601,8 +560,6 @@ typedef struct TDirectDeclarator
 CREATETYPE(TDirectDeclarator, TDIRECTDECLARATOR_INIT)
 
 
-
-
 typedef struct TInitDeclarator
 {
   TDeclarator* pDeclarator;
@@ -615,35 +572,13 @@ CREATETYPE(TInitDeclarator, TINITDECLARATOR_INIT)
 
 typedef TInitDeclarator TStructDeclarator;
 typedef List(TInitDeclarator) TInitDeclaratorList;
-#define TInitDeclaratorList_Destroy(p) List_Destroy(TInitDeclarator, p)
-
-//typedef struct TInitDeclaratorList//
-//{
-  //TInitDeclarator* pInitDeclaratorHeap;
-  //TInitDeclarator* pInitDeclaratorTail;
-//} TInitDeclaratorList;
-
-//#define TINITDECLARATORLIST_INIT {NULL, NULL}
-
-//CREATETYPE(TInitDeclaratorList, TINITDECLARATORLIST_INIT)
-
-//void TInitDeclaratorList_Push(TInitDeclaratorList* p, TInitDeclarator* pItem);
-
-//#define FOR_EACH_INITDECLARATOR(var, list) \
- //for (TInitDeclarator * var = (list).pInitDeclaratorHeap; \
-      //var != NULL;\
-      //var = var->pInitDeclaratorNext)
-//
-
 
 const char* TDeclarator_FindName(TDeclarator* p);
 const char* TInitDeclarator_FindName(TInitDeclarator* p);
 
 
 typedef TInitDeclaratorList TStructDeclaratorList;
-#define TStructDeclaratorList_Destroy(p) List_Destroy(TInitDeclarator, p)
-//#define TSTRUCT_DECLARATOR_LIST_INIT TINITDECLARATORLIST_INIT
-//void TStructDeclaratorList_Push(TStructDeclaratorList* p, TInitDeclarator* pItem);
+
 
 typedef struct
 {
@@ -662,17 +597,7 @@ CREATETYPEOR(TAnyStructDeclaration)
 CAST(TAnyStructDeclaration, TStructDeclaration)
 CAST(TAnyStructDeclaration, TStaticAssertDeclaration)
 
-typedef struct
-{
-  TAnyStructDeclaration** pItems;
-  size_t size;
-  size_t capacity;
-} TStructDeclarationList;
-#define TSTRUCT_DECLARATION_LIST_INIT {NULL,0,0}
-
-ARRAYOF(TStructDeclarationList, TAnyStructDeclaration)
-//typedef List(TAnyStructDeclaration) TStructDeclarationList
-//#define TStructDeclarationList_Destroy(p) List_Destroy(TAnyStructDeclaration, p)
+typedef ArrayT(TAnyStructDeclaration) TStructDeclarationList;
 
 typedef struct
 {
@@ -682,7 +607,7 @@ typedef struct
   bool bIsStruct;
 
 } TStructUnionSpecifier;
-#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, TSTRUCT_DECLARATION_LIST_INIT, STRING_INIT , true }
+#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true }
 
 CREATETYPE(TStructUnionSpecifier, TSTRUCT_UNION_SPECIFIER_INIT)
 
@@ -755,27 +680,9 @@ void TParameterDeclaration_Swap(TParameterDeclaration* a, TParameterDeclaration*
 
 CREATETYPE(TParameterDeclaration, TPARAMETER_DECLARATION_INIT)
 
+typedef ArrayT(TAnyDeclaration) TDeclarations;
 
-//typedef struct ParameterList_T
-//{
-//  TParameterDeclaration** pItems;
-  //size_t size;
-  //size_t capacity;
-//} TParameterList;
-//#define TPARAMETER_LIST_INIT {NULL, 0 , 0}
-//ARRAYOF(TParameterList, TParameterDeclaration)
-//typedef List(TParameterDeclaration) TParameterList;
-#define TParameterList_Destroy(p) List_Destroy(TParameterList, p)
 
-typedef struct
-{
-  TAnyDeclaration** pItems;
-  size_t size;
-  size_t capacity;
-} TDeclarations;
-#define TDECLARATIONS_INIT {NULL, 0 , 0}
-ARRAYOF(TDeclarations, TAnyDeclaration)
-void TDeclarations_Init(TDeclarations* p);
 /////////
 typedef MultiMap DeclarationsMap;
 //Mapa de String - > TAnyDeclaration*
@@ -808,7 +715,7 @@ typedef struct
 
 } TProgram;
 
-#define TPROGRAM_INIT {TDECLARATIONS_INIT, STRARRAY_INIT, STRARRAY_INIT, DECLARATIONSMAP_INIT, MACROMAP_INIT, MAP_INIT}
+#define TPROGRAM_INIT {ARRAYT_INIT, STRARRAY_INIT, STRARRAY_INIT, ARRAYT_INIT, MACROMAP_INIT, MAP_INIT}
 void TProgram_Destroy(TProgram* p);
 TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName);
 TDeclaration* TProgram_FindDeclaration(TProgram* p, const char* name);
