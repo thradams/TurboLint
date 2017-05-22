@@ -25,9 +25,10 @@ bool IsSuffix(const char* s, const char* suffix)
 ////////////////////////////////////////
 bool IsTemplateFunction(const char* lexeme)
 {
+  return false;
   //_Create
   //_Delete
-  
+  /*
   bool bResult = false;
   if (IsSuffix(lexeme, "_Create"))
   {
@@ -42,11 +43,13 @@ bool IsTemplateFunction(const char* lexeme)
     bResult = true;
   }
   return bResult;
+  */
 }
 
 bool IsTemplateType(const char* lexeme)
 {
-  bool bResult = false;
+  return false;
+  /*bool bResult = false;
   if (IsSuffix(lexeme, "Array"))
   {
     bResult = true;
@@ -55,7 +58,7 @@ bool IsTemplateType(const char* lexeme)
   {
     bResult = true;
   }
-  return bResult;
+  return bResult;*/
 }
 
 bool InstantiateTemplateType(const char *lexeme, StrBuilder* strBuilder)
@@ -2999,7 +3002,6 @@ void Struct_Declaration(Parser* ctx,
 }
 
 void Struct_Declaration_List(Parser* ctx,
-
   TStructDeclarationList* pStructDeclarationList)
 {
   /*
@@ -3007,20 +3009,21 @@ void Struct_Declaration_List(Parser* ctx,
   struct-declaration
   struct-declaration-list struct-declaration
   */
-  for (; ;)
+  if (ErrorOrEof(ctx))
   {
-    if (ErrorOrEof(ctx))
-      break;
-
-    Tokens token = Token(ctx);
-
-    if (token == TK_RIGHT_CURLY_BRACKET)
-      break;
-
-    TAnyStructDeclaration* pStructDeclaration = NULL;
-    Struct_Declaration(ctx, &pStructDeclaration);
-    ArrayT_Push(pStructDeclarationList, pStructDeclaration);
+    return;
   }
+
+  TAnyStructDeclaration* pStructDeclaration = NULL;
+  Struct_Declaration(ctx, &pStructDeclaration);
+  ArrayT_Push(pStructDeclarationList, pStructDeclaration);
+
+  Tokens token = Token(ctx);
+  if (token != TK_RIGHT_CURLY_BRACKET)
+  {
+    //Tem mais?
+    Struct_Declaration_List(ctx, pStructDeclarationList);
+  }  
 }
 
 void Struct_Or_Union_Specifier(Parser* ctx,

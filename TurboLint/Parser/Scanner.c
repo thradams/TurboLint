@@ -903,32 +903,26 @@ bool GetNewMacroCallString(Scanner* pScanner,
   //fazer uma lista com os parametros
   if (nArgsExpected > 0)
   {
+    //Olha adiante para ver se tem (
     ScannerItem* pLookAhead = Scanner_GetLookAhead(pScanner);
     
-    
-
     Tokens token = pLookAhead->token;// Scanner_Token(pScanner);
 
     if (token == TK_LEFT_PARENTHESIS)
     {
+      //Este é o nome da macro MACRO(
+      lexeme = Scanner_Lexeme(pScanner);
       PPToken *ppTokenName = PPToken_Create(lexeme,
-        TokenToPPToken(GetToken(pScanner)));
+        PPTokenType_Identifier);
       TokenArray_Push(ppTokenArray, ppTokenName);
+      
+      //Match do nome da macro
+      Scanner_Next(pScanner);
 
-
-      //se a macro tem parametro pode ter espaco depois
-      //X (A)
-      //entao pular espacos
-      //SkipSpaces(pScanner);
-
-      //Nao pode fazer o match pq se nao eh macro
-      // max
-      BasicScanner_Next(Scanner_Top(pScanner));
-      //Tem que deixar os espaços  no basic scanner antigo
-      //para que a expansao da macro seja antes
-      //#define S static
-      //S int f();
-
+      //lexeme = Scanner_Lexeme(pScanner);
+      //Match do nome do (
+//      Scanner_Next(pScanner);
+      //lexeme = Scanner_Lexeme(pScanner);
 
       PPToken *ppToken = PPToken_Create(Scanner_Lexeme(pScanner), TokenToPPToken(GetToken(pScanner)));
       TokenArray_Push(ppTokenArray, ppToken);
@@ -996,9 +990,10 @@ bool GetNewMacroCallString(Scanner* pScanner,
         }
       }
     }
-
     else
     {
+      //MACRO (
+      //teria que colocar MACRO de volta
       //oops
     }
   }
@@ -1008,6 +1003,7 @@ bool GetNewMacroCallString(Scanner* pScanner,
     PPToken *ppTokenName = PPToken_Create(lexeme,
       TokenToPPToken(GetToken(pScanner)));
     TokenArray_Push(ppTokenArray, ppTokenName);
+    BasicScanner_Next(Scanner_Top(pScanner));
   }
 
   bool bIsMacro = true;
