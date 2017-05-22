@@ -293,7 +293,7 @@ void TInitDeclarator_Destroy(TInitDeclarator* p)
   //nao deletar aqui
   //TInitDeclarator_Delete(p->pInitDeclaratorNext);
   TDeclarator_Delete(p->pDeclarator);
-  TInitializer_Delete(p->pInitializer);  
+  TInitializer_Delete(p->pInitializer);
 }
 
 
@@ -323,7 +323,7 @@ const char* TDeclarator_FindName(TDeclarator*   p)
       if (name != NULL)
       {
         return name;
-      }      
+      }
     }
     pDirectDeclarator =
       pDirectDeclarator->pDirectDeclarator;
@@ -394,28 +394,30 @@ void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifie
   TTypeSpecifier_Delete(pDeclarationSpecifiers->pTypeSpecifierOpt);
 }
 
-/*TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
+TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
 {
   if (p == NULL)
   {
     return NULL;
   }
-
   TDeclarator*  pResult = NULL;
-  for (int i = 0; i < p->Declarators.size; i++)
+
+  ForEachListItem(TInitDeclarator, pInitDeclarator, &p->InitDeclaratorList)
   {
-    if (p->Declarators.pItems[i]->Name != NULL)
+    if (pInitDeclarator->pDeclarator &&
+      pInitDeclarator->pDeclarator->pDirectDeclarator &&
+      pInitDeclarator->pDeclarator->pDirectDeclarator->Identifier)
     {
-      if (strcmp(p->Declarators.pItems[i]->Name, name) == 0)
+      if (strcmp(pInitDeclarator->pDeclarator->pDirectDeclarator->Identifier, name) == 0)
       {
-        pResult = p->Declarators.pItems[i];
+        pResult = pInitDeclarator->pDeclarator;
         break;
       }
     }
   }
   return pResult;
 }
-*/
+
 /*
 bool TDeclaration_Is_FunctionDeclaration(TDeclaration*  p)
 {

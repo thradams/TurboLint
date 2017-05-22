@@ -50,13 +50,29 @@ void BuildSingleTypeSpecifierInitialization(TProgram* program,
     TDeclaration * p = TProgram_GetFinalTypeDeclaration(program, pSingleTypeSpecifier->TypedefName);
     if (p)
     {
-      BuildInitialization(program, p->Specifiers.pTypeSpecifierOpt,         
-        bIsPointer, strBuilder);
+      //Tem que ver se o typedef nao era ponteiro tb
+      TDeclarator* pDeclarator = TDeclaration_FindDeclarator(p, pSingleTypeSpecifier->TypedefName);
+      if (pDeclarator)
+      {
+        BuildInitialization(program, p->Specifiers.pTypeSpecifierOpt,
+          bIsPointer || TPointerList_IsPointer(&pDeclarator->PointerList),
+          strBuilder);
+      }
+      else
+      {
+        ASSERT(false);
+      }
+      
     }
   }
   else
   {
-    StrBuilder_Append(strBuilder, "0");
+    if (pSingleTypeSpecifier->bIsBool)
+      StrBuilder_Append(strBuilder, "false");
+    else if (pSingleTypeSpecifier->bIsDouble)
+      StrBuilder_Append(strBuilder, "0.0");    
+    else
+      StrBuilder_Append(strBuilder, "0");
   }
 }
 
