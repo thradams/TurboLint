@@ -634,8 +634,6 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     TPrimaryExpressionValue *  pPrimaryExpressionValue
       = TPrimaryExpressionValue_Create();
 
-
-
     pPrimaryExpressionValue->token = token;
 
     StrBuilder adjacentStrings = STRBUILDER_INIT;
@@ -663,7 +661,6 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
   {
     TPrimaryExpressionValue *   pPrimaryExpressionValue
       = TPrimaryExpressionValue_Create();
-
 
     pPrimaryExpressionValue->token = token;
     String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
@@ -1378,7 +1375,6 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
 
         //Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
         
-
 
         if (Token(ctx) == TK_COMMA)
         {
@@ -3473,7 +3469,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     //Para indicar que eh uma ( declarator )
-    pDirectDeclarator->token = TK_RIGHT_PARENTHESIS;
+    pDirectDeclarator->Type = TDirectDeclaratorTypeDeclarator;
     // ) para nao confundir com funcao (
   }
   break;
@@ -3484,7 +3480,8 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     pDirectDeclarator = TDirectDeclarator_Create();
 
     //Para indicar que eh uma identificador
-    pDirectDeclarator->token = TK_IDENTIFIER;
+    
+    pDirectDeclarator->Type = TDirectDeclaratorTypeIdentifier;
 
     const char* lexeme = Lexeme(ctx);
     String_Set(&pDirectDeclarator->Identifier, lexeme);
@@ -3512,7 +3509,8 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);
 
     //Para indicar que eh uma identificador
-    pDirectDeclarator->token = TK_IDENTIFIER;
+    
+    pDirectDeclarator->Type = TDirectDeclaratorTypeIdentifier;
 
     //Quando tiver abstract declarator vai ser 
     //bug cair aqui
@@ -3539,7 +3537,8 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
       //Para indicar que eh uma funcao
-      pDirectDeclarator->token = TK_LEFT_PARENTHESIS;
+      
+      pDirectDeclarator->Type = TDirectDeclaratorTypeFunction;
 
       if (token != TK_RIGHT_PARENTHESIS)
       {
@@ -3561,7 +3560,8 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       //pDirectDeclarator->pParametersOpt = TParameterList_Create();
 
       //Para indicar que eh um array
-      pDirectDeclarator->token = TK_LEFT_SQUARE_BRACKET;
+      
+      pDirectDeclarator->Type = TDirectDeclaratorTypeArray;
 
       token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
       if (token == TK_STATIC)
@@ -4445,6 +4445,7 @@ bool  Declaration(Parser* ctx,
   {
     TDeclaration* pFuncVarDeclaration = TDeclaration_Create();
 
+    List_Swap(TNodeClue, &ctx->Scanner.NodeClueList, &pFuncVarDeclaration->BeginNodeClueList);
 
     if (token == TK_SEMICOLON)
     {
@@ -4508,8 +4509,8 @@ bool  Declaration(Parser* ctx,
         }
       }
 
-      StrBuilder_Swap(&pFuncVarDeclaration->PreprocessorAndCommentsString,
-        &ctx->Scanner.PreprocessorAndCommentsString);
+     // StrBuilder_Swap(&pFuncVarDeclaration->PreprocessorAndCommentsString,
+       // &ctx->Scanner.PreprocessorAndCommentsString);
 
 
     }
@@ -4576,7 +4577,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
       //TDeclarations_Init(&ctx->Templates);
 
       //printf("%s", ctx->Scanner.PreprocessorAndCommentsString);
-      StrBuilder_Clear(&ctx->Scanner.PreprocessorAndCommentsString);
+     // StrBuilder_Clear(&ctx->Scanner.PreprocessorAndCommentsString);
 
       //Cada Declaration poderia ter out uma lista TDeclarations
       //publica que vai ser inserida aqui.
@@ -4662,7 +4663,7 @@ bool GetAST(const char*  filename,
   Parser_InitFile(&parser, fullConfigFilePath);
   Parser_Main(&parser, &pProgram->Declarations);
 
-  StrBuilder_Clear(&parser.Scanner.PreprocessorAndCommentsString);
+//  StrBuilder_Clear(&parser.Scanner.PreprocessorAndCommentsString);
 
   parser.Scanner.bAmalgamationMode = bAmalgamationMode;
   if (!parser.Scanner.bAmalgamationMode)

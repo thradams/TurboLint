@@ -1006,7 +1006,7 @@ bool TDirectDeclarator_Print(TDirectDeclarator* pDirectDeclarator,
     b = TExpression_Print(pDirectDeclarator->pExpression, "assignment-expression", b, fp);
   }
 
-  if (pDirectDeclarator->token == TK_LEFT_PARENTHESIS)
+  if (pDirectDeclarator->Type == TDirectDeclaratorTypeFunction)
   {
     //( parameter-type-list )
     fprintf(fp, ",");

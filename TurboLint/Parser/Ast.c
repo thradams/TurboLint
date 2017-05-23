@@ -479,6 +479,7 @@ void TDeclaration_Destroy(TDeclaration* p)
   TDeclarationSpecifiers_Destroy(&p->Specifiers);
   List_Destroy(TInitDeclarator, &p->InitDeclaratorList);
   List_Destroy(TTemplateParameter, &p->TemplateParameters);
+  List_Destroy(TNodeClue, &p->BeginNodeClueList);
 }
 
 void TParameterDeclaration_Swap(TParameterDeclaration* a, TParameterDeclaration* b)

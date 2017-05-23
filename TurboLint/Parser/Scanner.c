@@ -17,6 +17,7 @@ TNodeClue* TNodeClue_Create()
 
 void TNodeClue_Destroy(TNodeClue* p)
 {
+  StrBuilder_Destroy(&p->Text);
 }
 
 void TNodeClue_Delete(TNodeClue* p)
@@ -26,36 +27,6 @@ void TNodeClue_Delete(TNodeClue* p)
     TNodeClue_Destroy(p);
     free(p);
   }
-}
-
-void TNodeClueList_Init(TNodeClueList* p)
-{
-  TNodeClueList temp = TNODECLUELIST_INIT;
-  *p = temp;
-}
-
-void TNodeClueList_Destroy(TNodeClueList* pList)
-{
-  for (TNodeClue * p = pList->pHead; p != NULL; )
-  {
-    TNodeClue* pCurrent = p;
-    p = p->pNext;
-    TNodeClue_Delete(pCurrent);
-  }
-}
-
-void TNodeClueList_Push(TNodeClueList* pList, TNodeClue* pItem)
-{
-  if (pList->pHead == NULL)
-  {
-    pList->pHead = pItem;
-  }
-  else
-  {
-    pList->pTail->pNext = pItem;
-  }
-
-  pList->pTail= pItem;
 }
 
 PPTokenType TokenToPPToken(Tokens token)
@@ -282,9 +253,9 @@ static Result Scanner_InitCore(Scanner* pScanner)
   Map_Init(&pScanner->FilesIncluded, 100);
   MacroMap_Init(&pScanner->Defines2);
   StrBuilder_Init(&pScanner->DebugString, 100);
-  StrBuilder_Init(&pScanner->PreprocessorAndCommentsString, 100);
+  //StrBuilder_Init(&pScanner->PreprocessorAndCommentsString, 100);
   StrBuilder_Init(&pScanner->ErrorString, 100);
-  TNodeClueList_Init(&pScanner->NodeClueList);
+  List_Init(&pScanner->NodeClueList);
 
   //StrBuilder_Init(&pScanner->DebugString, 100);
   //StrBuilder_Init(&pScanner->ErrorString, 100);
@@ -612,8 +583,8 @@ void Scanner_Destroy(Scanner* pScanner)
 
   MacroMap_Destroy(&pScanner->Defines2);
   StrBuilder_Destroy(&pScanner->DebugString);
-  StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
-  TNodeClueList_Destroy(&pScanner->NodeClueList);
+  //StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
+  List_Destroy(TNodeClue, &pScanner->NodeClueList);
   StrBuilder_Destroy(&pScanner->ErrorString);
   ArrayInt_Destroy(&pScanner->StackIfDef);
   BasicScannerStack_Destroy(&pScanner->stack);
@@ -752,7 +723,7 @@ void SkipSpaces(Scanner* pScanner)
     Scanner_Top(pScanner)->currentItem.token == TK_EOF)
   {
     //se nao usou nao vai ficar para o proximo
-    StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+    //StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
     
     BasicScannerStack_Pop(&pScanner->stack);    
     
@@ -1105,14 +1076,19 @@ void ParsePreDefine(Scanner* pScanner)
 {
   //objetivo eh montar a macro e colocar no mapa
   Macro* pNewMacro = Macro_Create();
+
+  TNodeClue* pDefineClue = TNodeClue_Create();
+  pDefineClue->Type = NodeClueTypeDefine;
+  List_Add(&pScanner->NodeClueList, pDefineClue);
+
   //const char* lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
   //define MATCHED
   //Scanner_Match(pScanner);
   //nome da macro
   const char* lexeme = Scanner_Top(pScanner)->currentItem.lexeme.c_str;
 
-  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "#define ");
-  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, lexeme);
+  StrBuilder_Append(&pDefineClue->Text, "#define ");
+  StrBuilder_Append(&pDefineClue->Text, lexeme);
 
   String_Set(&pNewMacro->Name, lexeme);
 
@@ -1162,34 +1138,28 @@ void ParsePreDefine(Scanner* pScanner)
 
   if (pNewMacro->FormalArguments.Size > 0)
   {
-    StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "(");
+    StrBuilder_Append(&pDefineClue->Text, "(");
     
     for (int i = 0; i < pNewMacro->FormalArguments.Size; i++)
     {
       if (i > 0)
       {
-        StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, ", ");
+        StrBuilder_Append(&pDefineClue->Text, ", ");
       }
       
-      StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, 
+      StrBuilder_Append(&pDefineClue->Text,
         pNewMacro->FormalArguments.pItems[i]->Lexeme);
     }
-    StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, ")");    
+    StrBuilder_Append(&pDefineClue->Text, ")");
   }
 
-  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, " ");
+  StrBuilder_Append(&pDefineClue->Text, " ");
   GetPPTokens(pScanner, &pNewMacro->TokenSequence);
   
   for (int i = 0; i < pNewMacro->TokenSequence.Size; i++)
   {  
-    StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, pNewMacro->TokenSequence.pItems[i]->Lexeme);
+    StrBuilder_Append(&pDefineClue->Text, pNewMacro->TokenSequence.pItems[i]->Lexeme);
   }
-
-  
-  StrBuilder_Append(&pScanner->PreprocessorAndCommentsString, "\n");
-
-  //TNodeClue* TNodeClue_Create()
-  //TNodeClueList_Push(&pScanner->NodeClueList, );
 
   MacroMap_SetAt(&pScanner->Defines2, pNewMacro->Name, pNewMacro);
 
@@ -1690,7 +1660,7 @@ void Scanner_SkipCore(Scanner* pScanner)
       
 
       //se nao usou nao vai ficar para o proximo
-      StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+      //StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
 
       if (pScanner->stack->pPrevious == NULL)
       {
@@ -1739,6 +1709,13 @@ void Scanner_Skip(Scanner* pScanner)
       token == TK_COMMENT ||
       token == TK_LINE_COMMENT)
     {
+      TNodeClue* pDefineClue = TNodeClue_Create();
+      pDefineClue->Type = NodeClueTypeComment;
+      
+      StrBuilder_Append(&pDefineClue->Text, Scanner_Lexeme(pScanner));
+
+      List_Add(&pScanner->NodeClueList, pDefineClue);
+
       if (token == TK_BREAKLINE)
       {
         StrBuilder_Clear(&pScanner->DebugString);
@@ -1762,7 +1739,7 @@ void Scanner_Skip(Scanner* pScanner)
     else if (token == TK_EOF)
     {
       //se nao usou nao vai ficar para o proximo
-      StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+      //StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
       
       
       BasicScannerStack_PopIfNotLast(&pScanner->stack);

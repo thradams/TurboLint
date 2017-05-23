@@ -24,7 +24,34 @@ static bool TParameterDeclaration_CodePrint(TProgram* program, TParameterDeclara
 static bool TInitializerListItem_CodePrint(TProgram* program, TTypeSpecifier* pTypeSpecifier, bool bIsPointer, TInitializerListItem* p, bool b, StrBuilder* fp);
 
 
+static void TNodeClueList_CodePrint(TNodeClueList* list,
+  StrBuilder* fp)
+{
+  ForEachListItem(TNodeClue, pNodeClue, list)
+  {
+    switch (pNodeClue->Type)
+    {
+    case NodeClueTypeDefine:
+    case NodeClueTypeUndef:
+      StrBuilder_Append(fp, pNodeClue->Text.c_str);
+      StrBuilder_Append(fp, "\n");
+      break;
 
+    case NodeClueTypeComment:
+    case NodeClueTypeLineComment:
+    case NodeClueTypeSpaces:
+    case NodeClueTypeMacroCall:
+      StrBuilder_Append(fp, pNodeClue->Text.c_str);      
+      break;
+
+    case NodeClueTypeNone:      
+    default:
+      ASSERT(false);
+      break;
+    }
+
+  }
+}
 
 //static bool TInitializer_CodePrint(TInitializer*  p, bool b, StrBuilder* fp);
 
@@ -503,13 +530,14 @@ static bool TPostfixExpressionCore_CodePrint(TProgram* program, TPostfixExpressi
 
       pTypeSpecifier = p->pTypeName->Specifiers.pTypeSpecifierOpt;
       bIsPointer = TPointerList_IsPointer(&p->pTypeName->Declarator.PointerList);
-      
+    
+      //falta imprimeir typename
+      //TTypeName_Print*
+      b = TInitializerList_CodePrint(program, pTypeSpecifier,
+        bIsPointer,
+        &p->InitializerList, b, fp);
     }
-    //falta imprimeir typename
-    //TTypeName_Print*
-    b = TInitializerList_CodePrint(program, pTypeSpecifier,
-      bIsPointer,
-      &p->InitializerList, b, fp);
+    
   }
 
   switch (p->token)
@@ -1155,7 +1183,7 @@ static bool TDirectDeclarator_CodePrint(TProgram* program, TDirectDeclarator* pD
     StrBuilder_Append(fp, ")");
   }
 
-  if (pDirectDeclarator->token == TK_LEFT_SQUARE_BRACKET)
+  if (pDirectDeclarator->Type == TDirectDeclaratorTypeArray)
   {
     /*
     direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
@@ -1172,7 +1200,7 @@ static bool TDirectDeclarator_CodePrint(TProgram* program, TDirectDeclarator* pD
   }
   
 
-  if (pDirectDeclarator->token == TK_LEFT_PARENTHESIS)
+  if (pDirectDeclarator->Type == TDirectDeclaratorTypeFunction)
   {
     //( parameter-type-list )
     //fprintf(fp, ",");
@@ -1417,11 +1445,16 @@ bool TInitDeclaratorList_CodePrint(TProgram* program,
   return true;
 }
 
-static bool TDeclaration_CodePrint(TProgram* program, TDeclaration* p,
+
+
+static bool TDeclaration_CodePrint(TProgram* program,
+  TDeclaration* p,
   bool b,
   StrBuilder* fp)
 {
  
+  TNodeClueList_CodePrint(&p->BeginNodeClueList, fp);
+
   //para amalgamation eh util transformar a funcao em static
 #ifdef amalgamation 
   if (p->Declarators.size > 0 &&

@@ -545,6 +545,16 @@ CREATETYPE(TDeclarator, TDECLARATOR_INIT)
 //CREATETYPE(TDeclarator, TDECLARATOR_INIT)
 
 
+typedef enum TDirectDeclaratorType
+{
+  TDirectDeclaratorTypeNone,
+  TDirectDeclaratorTypeIdentifier,
+  TDirectDeclaratorTypeDeclarator,
+  TDirectDeclaratorTypeFunction,
+  TDirectDeclaratorTypeArray,
+
+}TDirectDeclaratorType;
+
 typedef struct TDirectDeclarator
 {
   String Identifier; //identifier
@@ -553,10 +563,10 @@ typedef struct TDirectDeclarator
   TPosition Position;
   TParameterList  Parameters;
   TExpression*   pExpression;
-  Tokens token; //para diferenciar pois null nao basta []
+  TDirectDeclaratorType Type; //para diferenciar pois null nao basta []
 } TDirectDeclarator;
 
-#define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TK_NONE}
+#define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TDirectDeclaratorTypeNone}
 CREATETYPE(TDirectDeclarator, TDIRECTDECLARATOR_INIT)
 
 
@@ -643,10 +653,13 @@ typedef struct
   int Line;
 
   StrBuilder PreprocessorAndCommentsString;
-
+  TNodeClueList BeginNodeClueList;
 } TDeclaration;
-#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, STRBUILDER_INIT}
+#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, STRBUILDER_INIT, LIST_INIT}
 CREATETYPE(TDeclaration, TFUNCVARDECLARATION_INIT)
+
+void TDeclaration_Destroy(TDeclaration* p);
+
 bool TDeclaration_Is_StructOrUnionDeclaration(TDeclaration* p);
 bool TDeclaration_Is_FunctionDeclaration(TDeclaration* p);
 bool TDeclaration_Is_FunctionDefinition(TDeclaration* p);

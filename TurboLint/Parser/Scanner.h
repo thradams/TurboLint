@@ -4,6 +4,7 @@
 #include "..\Base\Array.h"
 #include "BasicScanner.h"
 #include "..\Base\Map.h"
+#include "..\Base\List.h"
 #include "Macro.h"
 
 
@@ -29,40 +30,28 @@ void TFile_DeleteVoid(void* p);
 
 typedef ArrayT(TFile) TFileArray;
 
-/*typedef struct
-{
-	TFile** pItems;
-	size_t size;
-	size_t capacity;
-} TFileArray;
-#define TFILE_ARRAY_INIT {NULL, 0 , 0}
-ARRAYOF(TFileArray, TFile)
-*/
 
 typedef enum 
 {
   NodeClueTypeNone,
   NodeClueTypeDefine,
-  NodeClueTypeUndef
+  NodeClueTypeUndef,
+  NodeClueTypeComment,
+  NodeClueTypeLineComment,
+  NodeClueTypeSpaces,
+  NodeClueTypeMacroCall,
 } NodeClueType;
 
 typedef struct TNodeClue
 {
   NodeClueType Type;  
-  String Text;
+  StrBuilder Text; //todo - usar string ja pronta
   struct TNodeClue* pNext;
 } TNodeClue;
-#define TNODECLUE_INIT { NodeClueTypeNone, STRING_INIT, NULL }
+#define TNODECLUE_INIT { NodeClueTypeNone, STRBUILDER_INIT, NULL }
+void TNodeClue_Delete(TNodeClue* p);
 
-typedef struct TNodeClueList
-{
-  TNodeClue* pHead;
-  TNodeClue* pTail;
-} TNodeClueList;
-#define TNODECLUELIST_INIT {NULL, NULL}
-
-void TNodeClueList_Init(TNodeClueList* p);
-void TNodeClueList_Push(TNodeClueList* p, TNodeClue* );
+typedef List(TNodeClue) TNodeClueList;
 
 typedef struct
 {
@@ -112,7 +101,7 @@ typedef struct
 
 
     //string para debug
-    StrBuilder PreprocessorAndCommentsString;
+    //StrBuilder PreprocessorAndCommentsString;
     TNodeClueList NodeClueList;
     bool bAmalgamationMode;
 

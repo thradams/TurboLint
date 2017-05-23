@@ -14,6 +14,8 @@ typedef struct
   int FileIndex;
 } Macro;
 
+
+
 #define MACRO_INIT { STRING_INIT, false , TOKENARRAY_INIT, TOKENARRAY_INIT, -1}
 Macro* Macro_Create();
 

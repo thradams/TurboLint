@@ -8,6 +8,8 @@ struct {\
 }
 #define LIST_INIT { NULL, NULL }
 
+#define List_Init(p)\
+   do{ (p)->pHead = 0; (p)->pTail = 0;  }while (0)
 
 #define List_Destroy(T, p)\
 while ((p)->pHead) {\
@@ -21,6 +23,16 @@ while ((p)->pHead) {\
 
 #define List_IsFirstItem(pList, pItem) ((pList)->pHead == (pItem))
 #define List_IsLastItem(pList, pItem) ((pList)->pTail == (pItem))
+
+#define List_Swap(T, pA, pB) \
+ do { \
+   T* _temp = (pA)->pHead;\
+   (pA)->pHead = (pB)->pHead;\
+   (pB)->pHead = _temp;\
+   _temp = (pA)->pTail; \
+   (pA)->pTail = (pB)->pTail;\
+   (pB)->pTail = _temp;\
+ } while(0)
 
 #define List_HasItems(pList) \
  ((pList)->pHead != NULL)
