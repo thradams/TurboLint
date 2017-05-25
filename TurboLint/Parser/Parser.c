@@ -613,6 +613,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
   ( expression )
   generic-selection
   */
+  *ppPrimaryExpression = NULL; //out
 
   Tokens token = Token(ctx);
 

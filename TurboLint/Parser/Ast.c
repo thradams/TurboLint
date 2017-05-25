@@ -849,52 +849,83 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
       {
       case TK_ASTERISK:
         result = (left * right);
+        b = true;
         break;
       case TK_PLUS_SIGN:
         result = (left + right);
+        b = true;
         break;
       case TK_HYPHEN_MINUS:
         result = (left - right);
+        b = true;
         break;
       case TK_ANDAND:
         result = (left && right);
+        b = true;
         break;
       case TK_OROR:
         result = (left || right);
+        b = true;
         break;
       case TK_NOTEQUAL:
         result = (left != right);
+        b = true;
         break;
       case TK_EQUALEQUAL:
         result = (left == right);
+        b = true;
         break;
       case TK_GREATEREQUAL:
         result = (left >= right);
+        b = true;
         break;
       case TK_LESSEQUAL:
         result = (left <= right);
+        b = true;
         break;
       case TK_GREATER_THAN_SIGN:
         result = (left > right);
+        b = true;
         break;
       case TK_LESS_THAN_SIGN:
         result = (left < right);
+        b = true;
         break;
       case TK_AMPERSAND:
         result = (left & right);
+        b = true;
         break;
       case TK_GREATERGREATER:
         result = (left >> right);
+        b = true;
         break;
       case TK_LESSLESS:
         result = (left << right);
+        b = true;
         break;
       case TK_VERTICAL_LINE:
         result = (left | right);
+        b = true;
         break;
+
+      case TK_SOLIDUS:
+        if (right != 0)
+        {
+          result = (left / right);
+          b = true;
+        }
+        else
+        {
+          b = false;
+          //SetError
+        }
+        break;
+        
+
       default:
         //TODO ADD THE OPERADOR?
         ASSERT(false);
+        b = false;
       }
 
       //if (pBinaryExpression->)
@@ -928,14 +959,17 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
         {
         case TK_IDENTIFIER:
           result = 0; //para macro
+          b = true;
           break;
 
         case TK_DECIMAL_INTEGER:
           result = atoi(pPrimaryExpressionValue->lexeme);
+          b = true;
           break;
 
         case TK_HEX_INTEGER:
           result = strtol(pPrimaryExpressionValue->lexeme, NULL, 16);
+          b = true;
           break;
 
         case TK_CHAR_LITERAL:
@@ -943,6 +977,7 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
           {
             //vem com 'A'
             result = pPrimaryExpressionValue->lexeme[1];
+            b = true;
           }
           else
           {
@@ -950,6 +985,7 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
           }
           break;
         default:
+          b = false;
           ASSERT(0);
           break;
         }
@@ -998,6 +1034,11 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
         {
         case TK_EXCLAMATION_MARK:
           result = !localResult;
+          b = true;
+          break;
+        case TK_HYPHEN_MINUS:
+          result = -localResult;
+          b = true;
           break;
         default:
           ASSERT(false);
@@ -1018,8 +1059,7 @@ bool EvaluateConstantExpression(TExpression *  p, int *pResult)
       //b = TTypeSpecifier_CodePrint2(pCastExpressionType->TypeName.pTypeSpecifier, b, fp);
       //b = TDeclarator_CodePrint(&pCastExpressionType->TypeName.declarator, b, fp);
 
-
-      EvaluateConstantExpression(pCastExpressionType->pExpression, &result);
+      b = EvaluateConstantExpression(pCastExpressionType->pExpression, &result);
       ASSERT(false);
 
     }

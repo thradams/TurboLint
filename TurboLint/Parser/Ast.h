@@ -513,10 +513,9 @@ typedef struct
 {
   TTypePointer Type;
   TInitializerList InitializerList;
-  String MacroExpansion;
 } TInitializerListType;
 
-#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, STRING_INIT}
+#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT}
 CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 

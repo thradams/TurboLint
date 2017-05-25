@@ -10,12 +10,12 @@
 
 typedef struct
 {
-    String FullPath;
-	String IncludePath;
-    int FileIndex;
-    bool PragmaOnce;    
-    bool bDirectInclude;
-	bool bSystemLikeInclude;
+  String FullPath;
+  String IncludePath;
+  int FileIndex;
+  bool PragmaOnce;
+  bool bDirectInclude;
+  bool bSystemLikeInclude;
 } TFile;
 #define TFILE_INIT {STRING_INIT, STRING_INIT, 0, false, false, false}
 void TFile_Delete(TFile* p);
@@ -31,7 +31,7 @@ void TFile_DeleteVoid(void* p);
 typedef ArrayT(TFile) TFileArray;
 
 
-typedef enum 
+typedef enum
 {
   NodeClueTypeNone,
   NodeClueTypeDefine,
@@ -44,7 +44,7 @@ typedef enum
 
 typedef struct TNodeClue
 {
-  NodeClueType Type;  
+  NodeClueType Type;
   StrBuilder Text; //todo - usar string ja pronta
   struct TNodeClue* pNext;
 } TNodeClue;
@@ -55,55 +55,55 @@ typedef List(TNodeClue) TNodeClueList;
 
 typedef struct
 {
-    //Stack de basicscanner
-    BasicScannerStack stack;
+  //Stack de basicscanner
+  BasicScannerStack stack;
 
-    //Mapa dos defines
-    MacroMap  Defines2;
+  //Mapa dos defines
+  MacroMap  Defines2;
 
-    //Stack usado para #if #else etc
-    ArrayInt StackIfDef;
+  //Stack usado para #if #else etc
+  ArrayInt StackIfDef;
 
-    //lista de arquivos marcados com pragma once
-    TFileMap FilesIncluded;
+  //lista de arquivos marcados com pragma once
+  TFileMap FilesIncluded;
 
-    //Lista de diretorios de include
-    StrArray IncludeDir;
+  //Lista de diretorios de include
+  StrArray IncludeDir;
 
-    //Lista de diretorios considerados codigo do usuario
-    StrArray MySourceDir;
+  //Lista de diretorios considerados codigo do usuario
+  StrArray MySourceDir;
 
-    //string para debug
-    StrBuilder DebugString;
-
-
-    //String que mantem o erro
-    StrBuilder ErrorString;
-
-    //True indica error
-    bool bError;
-
-    //Imprime includes no console
-    bool bPrintIncludes;
-
-    //Quando true o scanner retorna tambem espacos
-    bool bIncludeSpaces;
-
-    ///////////////////////////////////////////////////
-    //Indica que foi feita uma leitura especulativa
-    bool bHasLookAhead;
-
-    //Valor lido na leitura especulativa
-    ScannerItem LookAhead;
-    //BasicScanner* pLookAheadPreviousScanner;
-
-    ///////////////////////////////////////////////////
+  //string para debug
+  StrBuilder DebugString;
 
 
-    //string para debug
-    //StrBuilder PreprocessorAndCommentsString;
-    TNodeClueList NodeClueList;
-    bool bAmalgamationMode;
+  //String que mantem o erro
+  StrBuilder ErrorString;
+
+  //True indica error
+  bool bError;
+
+  //Imprime includes no console
+  bool bPrintIncludes;
+
+  //Quando true o scanner retorna tambem espacos
+  bool bIncludeSpaces;
+
+  ///////////////////////////////////////////////////
+  //Indica que foi feita uma leitura especulativa
+  bool bHasLookAhead;
+
+  //Valor lido na leitura especulativa
+  ScannerItem LookAhead;
+  //BasicScanner* pLookAheadPreviousScanner;
+
+  ///////////////////////////////////////////////////
+
+
+  //string para debug
+  //StrBuilder PreprocessorAndCommentsString;
+  TNodeClueList NodeClueList;
+  bool bAmalgamationMode;
 
 } Scanner;
 
@@ -111,8 +111,8 @@ void Scanner_SetError(Scanner* pScanner, const char* message);
 
 const char* Scanner_GetStreamName(Scanner* pScanner);
 Result Scanner_InitString(Scanner* pScanner,
-                          const char* name,
-                          const char* text);
+  const char* name,
+  const char* text);
 
 Result PushExpandedMacro(Scanner * pScanner, const char * defineName, const char * callString, const char * defineContent);
 
@@ -124,14 +124,14 @@ Result Scanner_Init(Scanner* pScanner);
 
 typedef enum
 {
-    FileIncludeTypeQuoted,
-    FileIncludeTypeIncludes,
-    FileIncludeTypeFullPath,
+  FileIncludeTypeQuoted,
+  FileIncludeTypeIncludes,
+  FileIncludeTypeFullPath,
 } FileIncludeType;
 
 void Scanner_IncludeFile(Scanner* pScanner,
-                         const char* fileName,
-                         FileIncludeType fileIncludeType);
+  const char* fileName,
+  FileIncludeType fileIncludeType);
 
 const char * Scanner_GetApparentStreamName(Scanner * pScanner);
 
@@ -156,7 +156,7 @@ void PrintPreprocessedToFile(const char* fileIn,
   const char* configFileName);
 
 void Scanner_GetScannerItemCopy(Scanner* pScanner,
-                                ScannerItem* scannerItem);
+  ScannerItem* scannerItem);
 
 
 

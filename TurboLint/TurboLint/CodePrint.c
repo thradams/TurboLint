@@ -969,16 +969,11 @@ static bool TInitializerList_CodePrint(TProgram* program,
 
 static bool TInitializerListType_CodePrint(TProgram* program, TTypeSpecifier* pTypeSpecifier, bool bIsPointer, TInitializerListType*p, bool b, StrBuilder* fp)
 {
-  if (p->MacroExpansion != NULL)
-  {
-    StrBuilder_Append(fp, p->MacroExpansion);
-  }
-  else
-  {
+ 
     b = TInitializerList_CodePrint(program, pTypeSpecifier,
       bIsPointer,
       &p->InitializerList, b, fp);
-  }
+  
 
   return true;
 }

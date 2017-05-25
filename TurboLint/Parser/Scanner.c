@@ -815,7 +815,11 @@ int PreprocessorExpression(Parser* parser)
   //calcula o valor
   //TODO pegar error
   int r;
-  EvaluateConstantExpression(pExpression, &r);
+  if (!EvaluateConstantExpression(pExpression, &r))
+  {
+    Scanner_SetError(&parser->Scanner, "error evaluating expression");
+  }
+
   TExpression_Delete(pExpression);
   return r;
 }
@@ -848,6 +852,11 @@ int EvalExpression(const char* s, Scanner* pScanner)
   if (parser.bError)
   {
     Scanner_SetError(pScanner, parser.ErrorMessage.c_str);
+  }
+
+  if (parser.Scanner.bError)
+  {
+    Scanner_SetError(pScanner, parser.Scanner.ErrorString.c_str);
   }
 
   Parser_Destroy(&parser);
@@ -994,6 +1003,14 @@ bool GetNewMacroCallString(Scanner* pScanner,
 
     else
     {
+      if (nArgsExpected > nArgsFound)
+      {
+        Scanner_SetError(pScanner, "Illegal macro call. Too few arguments error");
+      }
+      else
+      {
+        Scanner_SetError(pScanner, "Illegal macro call. Too many arguments error.");
+      }
       ASSERT(false);
       //JObj_PrintDebug(pMacro);
       Scanner_PrintDebug(pScanner);
@@ -1594,7 +1611,17 @@ void Scanner_SkipCore(Scanner* pScanner)
 
       Macro* pMacro2 = Scanner_FindPreprocessorItem2(pScanner, lexeme);
 
-      if (pMacro2 != NULL)
+      //Nao pode ter nenhuma macro sendo expandida
+      //senao pode ficar recursiva
+      //tudo o que tinha p fazer foi feito ja
+      /*
+      TESTE
+      #define foo (4 + foo)
+      foo
+      */
+      
+      if (pMacro2 != NULL && 
+          !pBasicScanner->bMacroExpanded)
       {
         StrBuilder strBuilder = STRBUILDER_INIT;
         TokenArray ppTokenArray = TOKENARRAY_INIT;
@@ -1875,8 +1902,10 @@ ScannerItem* Scanner_GetLookAhead(Scanner* pScanner)
     
     /////////////////////////////////////////
     //Mover scanner p proximo
-    BasicScanner_Next(Scanner_Top(pScanner));
-    Scanner_Skip(pScanner);
+    //BasicScanner_Next(Scanner_Top(pScanner));
+    //Scanner_Skip(pScanner);
+
+    Scanner_Next(pScanner);
     //////////////////////////////////////////
 
     //So no fim para que o mover seja normal
