@@ -8,7 +8,7 @@
 
 [Under the Hood: warp, a fast C and C++ preprocessor](https://code.facebook.com/posts/476987592402291/under-the-hood-warp-a-fast-c-and-c-preprocessor/)
 
-[http://mcpp.sourceforge.net/](mcpp -- a portable C preprocessor)
+[http://mcpp.sourceforge.net/](mcpp - a portable C preprocessor)
 
 [https://docs.freebsd.org/info/cpp/cpp.pdf](The C Preprocessor, Richard M. Stallman)
 
