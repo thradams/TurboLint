@@ -132,10 +132,11 @@ typedef struct
   TTypePointer Type;
   
   TExpression* pConstantExpression;
-} TStaticAssertDeclaration;
-#define TSTATIC_ASSERT_DECLARATION_INIT { {TStaticAssertDeclaration_ID} , NULL}
-CREATETYPE(TStaticAssertDeclaration, TSTATIC_ASSERT_DECLARATION_INIT)
+  TNodeClueList NodeClueList;
 
+} TStaticAssertDeclaration;
+#define TSTATIC_ASSERT_DECLARATION_INIT { {TStaticAssertDeclaration_ID} , NULL, TNODECLUELIST_INIT}
+CREATETYPE(TStaticAssertDeclaration, TSTATIC_ASSERT_DECLARATION_INIT)
 
 
 
@@ -155,9 +156,10 @@ typedef struct
 {
   TTypePointer Type;
   TBlockItemList BlockItemList;
+  TNodeClueList NodeClueList;
 } TCompoundStatement;
 
-#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT}
+#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TNODECLUELIST_INIT}
 CREATETYPE(TCompoundStatement, TCOMPOUNDSTATEMENT_INIT)
 
 //////////////////
@@ -169,11 +171,11 @@ typedef struct
   TTypePointer Type;
   Tokens token;
   String lexeme;
-  TExpression*  pExpressionOpt;
-  String MacroExpansion;
+  TExpression*  pExpressionOpt;  
+  TNodeClueList NodeClueList;
 } TPrimaryExpressionValue;
 
-#define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, STRING_INIT}
+#define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
 
 
@@ -195,8 +197,9 @@ typedef struct TPostfixExpressionCoreTag
   TInitializerList InitializerList;
   String Identifier;
   struct TParameterDeclaration* pTypeName; /*typename*/
+  TNodeClueList NodeClueList;
 } TPostfixExpressionCore;
-#define TPOSTFIX_EXPRESSION_CORE { {TPostfixExpressionCore_ID}, TK_NONE, STRING_INIT, NULL, NULL, NULL, NULL, STRING_INIT}
+#define TPOSTFIX_EXPRESSION_CORE { {TPostfixExpressionCore_ID}, TK_NONE, STRING_INIT, NULL, NULL, NULL, LIST_INIT, STRING_INIT, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TPostfixExpressionCore, TPOSTFIX_EXPRESSION_CORE)
 
 
@@ -207,8 +210,10 @@ typedef struct
   TExpression*  pExpressionLeft;
   TExpression*  pExpressionRight;
   TPosition Position;
+  TNodeClueList NodeClueList;
+
 } TBinaryExpression;
-#define TBINARYEXPRESSION_INIT { {TBinaryExpression_ID}, TK_NONE, NULL, NULL, TPOSITION_INIT}
+#define TBINARYEXPRESSION_INIT { {TBinaryExpression_ID}, TK_NONE, NULL, NULL, TPOSITION_INIT, TNODECLUELIST_INIT}
 CREATETYPE(TBinaryExpression, TBINARYEXPRESSION_INIT)
 
 typedef struct
@@ -218,8 +223,9 @@ typedef struct
   TExpression*  pExpressionLeft;
   TExpression*   pExpressionMiddle;
   TExpression*   pExpressionRight;
+  TNodeClueList NodeClueList;
 } TTernaryExpression;
-#define TTERNARYEXPRESSION_INIT { {TTernaryExpression_ID}, TK_NONE, NULL, NULL, NULL}
+#define TTERNARYEXPRESSION_INIT { {TTernaryExpression_ID}, TK_NONE, NULL, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TTernaryExpression, TTERNARYEXPRESSION_INIT)
 
 
@@ -239,10 +245,10 @@ typedef struct
 	bool bIsDestructor;
 	bool bIsMemDestructor;
 	//
-
+  TNodeClueList NodeClueList;
 } TTypeQualifier;
 
-#define TTYPE_QUALIFIER_INIT {false, false, false, false /*extensoes*/, false, false /**/, false, false}
+#define TTYPE_QUALIFIER_INIT {false, false, false, false /*extensoes*/, false, false /**/, false, false, TNODECLUELIST_INIT}
 
 ////////////////////////////
 
@@ -250,8 +256,9 @@ typedef struct
 {
   TTypePointer Type;  
   TExpression *   pExpression;  
+  TNodeClueList NodeClueList;
 } TExpressionStatement;
-#define TEXPRESSION_STATEMENT_INIT { {TExpressionStatement_ID}, NULL}
+#define TEXPRESSION_STATEMENT_INIT { {TExpressionStatement_ID}, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TExpressionStatement, TEXPRESSION_STATEMENT_INIT)
 
 typedef struct
@@ -259,19 +266,20 @@ typedef struct
   TTypePointer Type;
   Tokens token;
   TExpression *  pExpression;
+  TNodeClueList NodeClueList;
 } TJumpStatement;
 
-#define TJUMP_STATEMENT_INIT {{TJumpStatement_ID}, TK_NONE, NULL }
+#define TJUMP_STATEMENT_INIT {{TJumpStatement_ID}, TK_NONE, NULL, TNODECLUELIST_INIT }
 CREATETYPE(TJumpStatement, TJUMP_STATEMENT_INIT)
 
 
 typedef struct
 {
   TTypePointer Type;
-
+  TNodeClueList NodeClueList;
 } TAsmStatement;
 
-#define TASM_STATEMENT_INIT {{TAsmStatement_ID} }
+#define TASM_STATEMENT_INIT {{TAsmStatement_ID} , TNODECLUELIST_INIT}
 CREATETYPE(TAsmStatement, TASM_STATEMENT_INIT)
 
 
@@ -283,9 +291,10 @@ typedef struct
   TExpression* pExpression2;
   TExpression*  pExpression3;
   TStatement*  pStatement;
+  TNodeClueList NodeClueList;
 } TForStatement;
 
-#define TFORSTATEMENT_INIT {{TForStatement_ID}, NULL, NULL, NULL, NULL, NULL}
+#define TFORSTATEMENT_INIT {{TForStatement_ID}, NULL, NULL, NULL, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TForStatement, TFORSTATEMENT_INIT)
 
 typedef struct
@@ -293,18 +302,20 @@ typedef struct
   TTypePointer Type;
   TExpression*  pExpression;
   TStatement*  pStatement;
+  TNodeClueList NodeClueList;
 } TWhileStatement;
 
-#define TWHILESTATEMENT_INIT { {TWhileStatement_ID}, NULL, NULL}
+#define TWHILESTATEMENT_INIT { {TWhileStatement_ID}, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TWhileStatement, TWHILESTATEMENT_INIT)
 
 typedef struct
 {
   TTypePointer Type;
   TExpression*   pExpression;
+  TNodeClueList NodeClueList;
 } TReturnStatement;
 
-#define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL}
+#define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TReturnStatement, TRETURN_STATEMENT_INIT)
 
 
@@ -313,8 +324,9 @@ typedef struct
   TTypePointer Type;
   TExpression *   pExpression;
   TStatement*   pStatement;
+  TNodeClueList NodeClueList;
 } TDoStatement;
-#define TDOSTATEMENT_INIT {{TDoStatement_ID}, NULL, NULL}
+#define TDOSTATEMENT_INIT {{TDoStatement_ID}, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TDoStatement, TDOSTATEMENT_INIT)
 
 typedef struct
@@ -325,9 +337,10 @@ typedef struct
   TExpression *   pExpression;
   String Identifier;
   Tokens token;
+  TNodeClueList NodeClueList;
 } TLabeledStatement;
 
-#define TLABEDSTATEMENT_INIT {{TLabeledStatement_ID},  NULL, NULL, STRING_INIT, TK_NONE}
+#define TLABEDSTATEMENT_INIT {{TLabeledStatement_ID},  NULL, NULL, STRING_INIT, TK_NONE, TNODECLUELIST_INIT}
 CREATETYPE(TLabeledStatement, TLABEDSTATEMENT_INIT)
 
 
@@ -336,9 +349,10 @@ typedef struct
   TTypePointer Type;
   TExpression *   pConditionExpression;
   TStatement*   pExpression;
+  TNodeClueList NodeClueList;
 } TSwitchStatement;
 
-#define TSWITCH_STATEMENT { {TSwitchStatement_ID}, NULL, NULL}
+#define TSWITCH_STATEMENT { {TSwitchStatement_ID}, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TSwitchStatement, TSWITCH_STATEMENT)
 
 
@@ -348,8 +362,9 @@ typedef struct
   TExpression*    pConditionExpression;
   TStatement*   pStatement;
   TStatement*   pElseStatement;
+  TNodeClueList NodeClueList;
 } TIfStatement;
-#define TIFSTATEMENT_INIT { {TIfStatement_ID}, NULL, NULL, NULL}
+#define TIFSTATEMENT_INIT { {TIfStatement_ID}, NULL, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TIfStatement, TIFSTATEMENT_INIT)
 
 
@@ -374,8 +389,9 @@ typedef struct TPointer
   TTypeQualifier Qualifier;
   bool bPointer;
   struct TPointer* pNext;
+  TNodeClueList NodeClueList;
 } TPointer;
-#define TPOINTER_INIT {TTYPE_QUALIFIER_INIT, false, NULL}
+#define TPOINTER_INIT {TTYPE_QUALIFIER_INIT, false, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TPointer, TPOINTER_INIT)
 
 
@@ -386,10 +402,11 @@ typedef struct
 {
   bool bIsInline;
   bool bIsNoReturn;
+  TNodeClueList NodeClueList;
 } TFunctionSpecifier;
 
 
-#define TFUNCTION_SPECIFIER_INIT {false, false}
+#define TFUNCTION_SPECIFIER_INIT {false, false, TNODECLUELIST_INIT}
 
 typedef struct
 {
@@ -399,8 +416,9 @@ typedef struct
   bool bIsThread_local;
   bool bIsAuto;
   bool bIsRegister;
+  TNodeClueList NodeClueList;
 } TStorageSpecifier;
-#define TSTORAGE_SPECIFIER_INIT {false, false, false, false, false, false}
+#define TSTORAGE_SPECIFIER_INIT {false, false, false, false, false, false, TNODECLUELIST_INIT}
 
 
 typedef struct
@@ -420,9 +438,10 @@ typedef struct TEnumerator
   String Name;  
   TExpression*   pExpression;
   struct TEnumerator *pNext;
+  TNodeClueList NodeClueList;
 } TEnumerator;
 
-#define TENUMERATOR_INIT { STRING_INIT , NULL}
+#define TENUMERATOR_INIT { STRING_INIT , NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TEnumerator, TENUMERATOR_INIT)
 
 typedef List(TEnumerator) TEnumeratorList;
@@ -433,9 +452,10 @@ typedef struct
   TTypePointer Type;
   String Name;
   TEnumeratorList EnumeratorList;
+  TNodeClueList NodeClueList;
 } TEnumSpecifier;
 
-#define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, LIST_INIT}
+#define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, LIST_INIT, LIST_INIT}
 CREATETYPE(TEnumSpecifier, ENUM_SPECIFIER_INIT)
 
 typedef struct
@@ -457,10 +477,10 @@ typedef struct
   bool bIsTypeDef;
   String TypedefName;
 
-  
+  TNodeClueList NodeClueList;
 } TSingleTypeSpecifier;
 
-#define TBUILDINTYPE_SPECIFIER_INIT { {TSingleTypeSpecifier_ID}, false, false, false, false, 0, false, false , false, false, false, false, false, STRING_INIT}
+#define TBUILDINTYPE_SPECIFIER_INIT { {TSingleTypeSpecifier_ID}, false, false, false, false, 0, false, false , false, false, false, false, false, STRING_INIT, LIST_INIT}
 CREATETYPE(TSingleTypeSpecifier, TBUILDINTYPE_SPECIFIER_INIT)
 
 typedef TTypePointer TTypeSpecifier;
@@ -472,9 +492,9 @@ typedef struct
   TTypeQualifier TypeQualifiers;
   TFunctionSpecifier FunctionSpecifiers;
   TAlignmentSpecifier AlignmentSpecifier;
-
+  TNodeClueList NodeClueList;
 } TDeclarationSpecifiers;
-#define TDECLARATION_SPECIFIERS_INIT { TSTORAGE_SPECIFIER_INIT, NULL, TTYPE_QUALIFIER_INIT, TFUNCTION_SPECIFIER_INIT, TALIGNMENT_SPECIFIER}
+#define TDECLARATION_SPECIFIERS_INIT { TSTORAGE_SPECIFIER_INIT, NULL, TTYPE_QUALIFIER_INIT, TFUNCTION_SPECIFIER_INIT, TALIGNMENT_SPECIFIER, TNODECLUELIST_INIT}
 
 
 void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifiers);
@@ -488,9 +508,10 @@ typedef struct TDesignator
   String Name;
   TExpression *  pExpression;
   struct TDesignator *pNext;
+  TNodeClueList NodeClueList;
 } TDesignator;
 
-#define TDESIGNATOR_INIT { STRING_INIT , NULL}
+#define TDESIGNATOR_INIT { STRING_INIT , NULL, NULL,TNODECLUELIST_INIT}
 CREATETYPE(TDesignator, TDESIGNATOR_INIT)
 typedef List(TDesignator) TDesignatorList;
 
@@ -502,9 +523,10 @@ typedef struct TInitializerListItem
   TDesignatorList  DesignatorList;
   TInitializer* pInitializer;
   struct TInitializerListItem* pNext;
+  TNodeClueList NodeClueList;
 } TInitializerListItem;
 
-#define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL, NULL}
+#define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TInitializerListItem, TINITIALIZER_LIST_ITEM_INIT)
 
 #define TInitializerList_Destroy(p) List_Destroy(TInitializerListItem, p)
@@ -513,9 +535,10 @@ typedef struct
 {
   TTypePointer Type;
   TInitializerList InitializerList;
+  TNodeClueList NodeClueList;
 } TInitializerListType;
 
-#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT}
+#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, TNODECLUELIST_INIT}
 CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 
@@ -529,9 +552,10 @@ typedef struct TDeclarator
 {
   TPointerList PointerList;
   struct TDirectDeclarator* pDirectDeclarator;
+  TNodeClueList NodeClueList;
 } TDeclarator;
 
-#define TDECLARATOR_INIT {LIST_INIT, NULL}
+#define TDECLARATOR_INIT {LIST_INIT, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TDeclarator, TDECLARATOR_INIT)
 
 //typedef struct TAbstractDeclarator
@@ -563,9 +587,10 @@ typedef struct TDirectDeclarator
   TParameterList  Parameters;
   TExpression*   pExpression;
   TDirectDeclaratorType Type; //para diferenciar pois null nao basta []
+  TNodeClueList NodeClueList;
 } TDirectDeclarator;
 
-#define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TDirectDeclaratorTypeNone}
+#define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TDirectDeclaratorTypeNone, TNODECLUELIST_INIT}
 CREATETYPE(TDirectDeclarator, TDIRECTDECLARATOR_INIT)
 
 
@@ -574,9 +599,10 @@ typedef struct TInitDeclarator
   TDeclarator* pDeclarator;
   TInitializer* pInitializer;
   struct TInitDeclarator * pNext;
+  TNodeClueList NodeClueList;
 } TInitDeclarator;
 
-#define TINITDECLARATOR_INIT {NULL, NULL, NULL}
+#define TINITDECLARATOR_INIT {NULL, NULL, NULL, TNODECLUELIST_INIT}
 CREATETYPE(TInitDeclarator, TINITDECLARATOR_INIT)
 
 typedef TInitDeclarator TStructDeclarator;
@@ -595,9 +621,9 @@ typedef struct
   TTypeSpecifier*   pSpecifier;
   TTypeQualifier Qualifier;
   TStructDeclaratorList DeclaratorList;
-
+  TNodeClueList NodeClueList;
 } TStructDeclaration;
-#define TSTRUCT_DECLARATION_BASE_INIT {{TStructDeclaration_ID}, NULL, TTYPE_QUALIFIER_INIT, LIST_INIT}
+#define TSTRUCT_DECLARATION_BASE_INIT {{TStructDeclaration_ID}, NULL, TTYPE_QUALIFIER_INIT, LIST_INIT, TNODECLUELIST_INIT}
 
 CREATETYPE(TStructDeclaration, TSTRUCT_DECLARATION_BASE_INIT)
 
@@ -614,9 +640,9 @@ typedef struct
   TStructDeclarationList StructDeclarationList;
   String Name;
   bool bIsStruct;
-
+  TNodeClueList NodeClueList;
 } TStructUnionSpecifier;
-#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true }
+#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true , LIST_INIT}
 
 CREATETYPE(TStructUnionSpecifier, TSTRUCT_UNION_SPECIFIER_INIT)
 
@@ -651,10 +677,11 @@ typedef struct
   int FileIndex;
   int Line;
 
-  StrBuilder PreprocessorAndCommentsString;
-  TNodeClueList BeginNodeClueList;
+  TNodeClueList NodeClueList;
+  
+  
 } TDeclaration;
-#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, STRBUILDER_INIT, LIST_INIT}
+#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, TNODECLUELIST_INIT}
 CREATETYPE(TDeclaration, TFUNCVARDECLARATION_INIT)
 
 void TDeclaration_Destroy(TDeclaration* p);
@@ -685,8 +712,10 @@ typedef struct TParameterDeclaration
   //Anotacoes in out opt geradas automaticamente?
   //para os parametros?
   //para o retorno opt?
+  TNodeClueList NodeClueList;
+
 } TParameterDeclaration;
-#define TPARAMETER_DECLARATION_INIT { TDECLARATION_SPECIFIERS_INIT, TDECLARATOR_INIT}
+#define TPARAMETER_DECLARATION_INIT { TDECLARATION_SPECIFIERS_INIT, TDECLARATOR_INIT, NULL, TNODECLUELIST_INIT}
 void TParameterDeclaration_Destroy(TParameterDeclaration* p);
 void TParameterDeclaration_Swap(TParameterDeclaration* a, TParameterDeclaration* b);
 
@@ -762,8 +791,9 @@ typedef struct
 	TTypePointer Type;
 	TExpression*   pExpression;
 	TTypeName TypeName;
+  TNodeClueList NodeClueList;
 } TCastExpressionType;
-#define TCAST_EXPRESSION_INIT { {TCastExpressionType_ID}, NULL , TTYPENAME_INIT}
+#define TCAST_EXPRESSION_INIT { {TCastExpressionType_ID}, NULL , TTYPENAME_INIT, TNODECLUELIST_INIT}
 CREATETYPE(TCastExpressionType, TCAST_EXPRESSION_INIT)
 
 
@@ -775,9 +805,10 @@ typedef struct
 	Tokens token;
 	TExpression*   pExpressionLeft;
 	TTypeName TypeName;
+  TNodeClueList NodeClueList;
 } TUnaryExpressionOperator;
 
-#define TUNARY_EXPRESSION_OPERATOR_INIT { {TUnaryExpressionOperator_ID}, TK_NONE,  NULL, TTYPENAME_INIT}
+#define TUNARY_EXPRESSION_OPERATOR_INIT { {TUnaryExpressionOperator_ID}, TK_NONE,  NULL, TTYPENAME_INIT, TNODECLUELIST_INIT}
 CREATETYPE(TUnaryExpressionOperator, TUNARY_EXPRESSION_OPERATOR_INIT)
 
 

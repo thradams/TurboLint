@@ -29,6 +29,37 @@ void TNodeClue_Delete(TNodeClue* p)
   }
 }
 
+void TNodeClueList_MoveToEnd(TNodeClueList * pDest, TNodeClueList * pSource)
+{
+  if (pSource->pHead != NULL)
+  {
+    int pos = 0;
+    if (pDest->pHead == NULL)
+    {
+      pDest->pHead = pSource->pHead;
+      pDest->pTail= pSource->pTail;
+    }
+    else
+    {
+      pos = pDest->pTail->Position + 1;
+      ForEachListItem(TNodeClue, pItem, pSource)
+      {
+        pItem->Position = pos;
+      }
+      pDest->pTail->pNext = pSource->pHead;
+      pDest->pTail = pSource->pTail;
+    }
+    pSource->pHead = NULL;
+    pSource->pTail = NULL;    
+  }  
+}
+void TNodeClueList_SetPosition(TNodeClueList * p, int pos)
+{
+  ForEachListItem(TNodeClue, pItem, p)
+  {
+    pItem->Position = pos;
+  }
+}
 PPTokenType TokenToPPToken(Tokens token)
 {
   PPTokenType result = PPTokenType_Other;
@@ -304,6 +335,12 @@ Result PushExpandedMacro(Scanner* pScanner,
   const char* callString,
   const char* defineContent)
 {
+  
+  TNodeClue* pClue = TNodeClue_Create();
+  pClue->Type = NodeClueTypeMacroCall;
+  StrBuilder_Append(&pClue->Text, callString);
+  List_Add(&pScanner->NodeClueList, pClue);
+
   BasicScanner* pNewScanner;
   Result result = BasicScanner_Create(&pNewScanner,
     callString, /*defineName*/
@@ -724,7 +761,12 @@ void SkipSpaces(Scanner* pScanner)
   {
     //se nao usou nao vai ficar para o proximo
     //StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
-    
+    if (Scanner_Top(pScanner)->bMacroExpanded)
+    {
+      TNodeClue* pDefineClue = TNodeClue_Create();
+      pDefineClue->Type = NodeClueTypeMacroEndExpansion;
+      List_Add(&pScanner->NodeClueList, pDefineClue);
+    }
     BasicScannerStack_Pop(&pScanner->stack);    
     
   }
@@ -1683,6 +1725,13 @@ void Scanner_SkipCore(Scanner* pScanner)
     else if (token == TK_EOF)
     {
   
+      if (Scanner_Top(pScanner) != NULL &&
+          Scanner_Top(pScanner)->bMacroExpanded)
+      {
+        TNodeClue* pDefineClue = TNodeClue_Create();
+        pDefineClue->Type = NodeClueTypeMacroEndExpansion;
+        List_Add(&pScanner->NodeClueList, pDefineClue);
+      }
       BasicScannerStack_PopIfNotLast(&pScanner->stack);
       
 
@@ -1738,10 +1787,25 @@ void Scanner_Skip(Scanner* pScanner)
     {
       TNodeClue* pDefineClue = TNodeClue_Create();
       pDefineClue->Type = NodeClueTypeComment;
-      
       StrBuilder_Append(&pDefineClue->Text, Scanner_Lexeme(pScanner));
-
       List_Add(&pScanner->NodeClueList, pDefineClue);
+
+      switch (token)
+      {
+      case TK_SPACES:
+        pDefineClue->Type = NodeClueTypeSpaces;
+        break;
+      case TK_BREAKLINE: 
+        pDefineClue->Type = NodeClueTypeBreakLine;
+        break;
+      case TK_COMMENT: 
+        pDefineClue->Type = NodeClueTypeComment;
+        break;
+      case TK_LINE_COMMENT: 
+        pDefineClue->Type = NodeClueTypeLineComment;
+        break;
+      }
+     
 
       if (token == TK_BREAKLINE)
       {
@@ -1767,8 +1831,16 @@ void Scanner_Skip(Scanner* pScanner)
     {
       //se nao usou nao vai ficar para o proximo
       //StrBuilder_Clear(&pScanner->PreprocessorAndCommentsString);
+      List_Clear(TNodeClue, &pScanner->NodeClueList);
       
-      
+      if (Scanner_Top(pScanner) != NULL &&
+        Scanner_Top(pScanner)->bMacroExpanded)
+      {
+        TNodeClue* pDefineClue = TNodeClue_Create();
+        pDefineClue->Type = NodeClueTypeMacroEndExpansion;
+        List_Add(&pScanner->NodeClueList, pDefineClue);
+      }
+
       BasicScannerStack_PopIfNotLast(&pScanner->stack);
       
 

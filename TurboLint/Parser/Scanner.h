@@ -39,19 +39,32 @@ typedef enum
   NodeClueTypeComment,
   NodeClueTypeLineComment,
   NodeClueTypeSpaces,
+  NodeClueTypeBreakLine,
   NodeClueTypeMacroCall,
+  NodeClueTypeMacroEndExpansion,
 } NodeClueType;
 
 typedef struct TNodeClue
 {
   NodeClueType Type;
   StrBuilder Text; //todo - usar string ja pronta
+  
+  //Para nao ter várias lista o position ajuda 
+  //a ter uma lista so com positions difentes
+  //ex position = 0 struct position = 1 name
+  //a lista eh para antes e depois da struct
+  //pelo position se diz se imprime antes ou depois
+  int Position;
   struct TNodeClue* pNext;
 } TNodeClue;
-#define TNODECLUE_INIT { NodeClueTypeNone, STRBUILDER_INIT, NULL }
+#define TNODECLUE_INIT { NodeClueTypeNone, STRBUILDER_INIT, 0, NULL }
 void TNodeClue_Delete(TNodeClue* p);
 
 typedef List(TNodeClue) TNodeClueList;
+#define TNODECLUELIST_INIT LIST_INIT
+#define TNodeClueList_Destroy(p) List_Destroy(TNodeClue, (p))
+void TNodeClueList_SetPosition(TNodeClueList * p, int pos);
+void TNodeClueList_MoveToEnd(TNodeClueList * pDest, TNodeClueList * pSource);
 
 typedef struct
 {

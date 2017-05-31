@@ -18,6 +18,19 @@ while ((p)->pHead) {\
     T##_Delete(pCurrent); \
 }
 
+#define List_Clear(T, p)\
+do {\
+while ((p)->pHead) {\
+    T* pCurrent = (p)->pHead; \
+    (p)->pHead = (p)->pHead->pNext; \
+    T##_Delete(pCurrent); \
+}\
+(p)->pHead = NULL;\
+(p)->pTail = NULL;\
+}\
+while(0)
+
+
 #define ForEachListItem(T, var, list)\
   for (T * var = (list)->pHead ; var != NULL; var =  var->pNext)
 
