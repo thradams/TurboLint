@@ -1,140 +1,53 @@
 # C language extensions
 
-
-# Include 
-
-1) Similar of original
-2) Original with expanded includes
-3) Amalgamation
-
-
-## Operator new
-
-Syntaxe:
-
-```cpp
-Type *p = new (Type) {0};
-```
-
-The code above is equivalent of:
+## initializers
 
 ```c
-//Equivalent code in C
-Type* Type_OperatorNew()
+struct Point
 {
-  Type* p = malloc (sizeof (Type));
-  if (p)
-  {
-    *p = (Type){0};
-   }
-  return p;
- } 
- 
- Type *p = Type_OperatorNew();
+   int x = 0;
+};
+
+Point pt = {};
 ```
 
-Let´s say I want my custon allocator for Type
+## new expression
 
-```cpp
-
-Type* new TypeAllocator()
-{
-  return malloc(sizeof Type);
-}
-```
-This especial function will be called if present: (default is malloc)
 
 ```c
-//Equivalent code in C
-Type* Type_OperatorNew()
-{
-  Type* p = TypeAllocator();
-  if (p)
-  {
-    *p = (Type){0};
-   }
-  return p;
- } 
- 
- Type *p = Type_OperatorNew();
-```
 
-## Operator destroy
-
-Syntaxe:
-
-```cpp
-Type p;
-destroy p;
-```
-Destroy will call an special function defined with "destroy". 
-If no function is defined there is no effect.
-
-
-```cpp
-void destroy Type_OperatorDestroy(Type* p)
-{
-  //...
- }   
- 
- Type p;
- Type_OperatorDestroy(&p);
+Point* p = new (Point){};
+Point* p = new (Point){.x=2};
 
 ```
 
-## Operator delete
+## delete
+```c
 
-Syntaxe:
-
-```cpp
-Type *p = ...
+Point* p = new (Point){};
 delete p;
 ```
 
-The code above is equivalent of:
 
-```cpp
-
-Type *p = ...
-
-destroy p; free(p);
-```
-Let´s say you have used your custon allocator for new:
-Now you can define the deallocator
-
-```cpp
-void delete Type_Deallocator(Type* p)
-{
-  free(p);
-} 
-```
- 
- 
-Obs:
-I tried to use the same keyword (whaterer it is) to define the operator and 
-the especial function modifiers. But i am not sure the best position to put for "especial" functions.
-
-
-## Auto destroy
-
-This will call ```void destroy Type_OperatorDestroy(Type* p)```  at end of scope;
+## destroy
 
 ```c
-int main(0
+struct Line
 {
-  auto Type obj;
+  Point^ p;
 }
+
+Line line;
+
+destroy line;
 ```
 
-
-This will call ```void destroy Type_OperatorDestroyOther(Type** p)```  at end of scope is existent or 
-if not it will call delete p;
+## custon destroy
 
 ```c
-int main(0
+void operator destroy(Type * p)
 {
-  auto Type * p;
 }
-```
 
+```
 
