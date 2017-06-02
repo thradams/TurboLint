@@ -21,8 +21,32 @@ else\
 }
 
 
+#define MATCH(scanner, TK) \
+ TEST(Scanner_Token((scanner)) == TK&& \
+      Scanner_IsActiveGroup((scanner)));\
+ Scanner_NextVersion2((scanner));
+
+#define MATCH_INACTIVE(scanner, TK) \
+ TEST(Scanner_Token((scanner)) == TK && \
+      !Scanner_IsActiveGroup((scanner)));\
+ Scanner_NextVersion2((scanner));
+
+#define  MATCH_INACTIVE2(scanner, TK, lexeme)\
+TEST(Scanner_Token((scanner)) == TK &&\
+     strcmp(Scanner_Lexeme(scanner), lexeme) == 0 &&\
+     !Scanner_IsActiveGroup((scanner)));\
+Scanner_NextVersion2((scanner));
+
+#define  MATCH2(scanner, TK, lexeme)\
+TEST(Scanner_Token((scanner)) == TK &&\
+     strcmp(Scanner_Lexeme(scanner), lexeme) == 0 &&\
+     Scanner_IsActiveGroup((scanner)));\
+Scanner_NextVersion2((scanner));
+
 void Test()
 {
+  printf("RUNNING TESTS ...\n");
+
   SStream stream;
   SStream_Init(&stream, "name", "123");
   TEST(stream.currentChar == '1');
@@ -31,7 +55,7 @@ void Test()
   TEST(stream.currentChar == '2');
   TEST(SStream_LookAhead(&stream) == '3');
   SStream_Next(&stream);
-  
+
   TEST(stream.currentChar == '3');
   TEST(SStream_LookAhead(&stream) == '\0');
 
@@ -40,13 +64,13 @@ void Test()
   TEST(SStream_LookAhead(&stream) == '\0');
 
   SStream_Next(&stream);
-  
+
   TEST(stream.currentChar == '\0');
   TEST(SStream_LookAhead(&stream) == '\0');
- 
+
 
   BasicScanner scanner;
-  BasicScanner_Init(&scanner, "name", "123\r\n");    
+  BasicScanner_Init(&scanner, "name", "123\r\n");
   TEST(scanner.currentItem.token == TK_BOF);
   BasicScanner_Next(&scanner);
   TEST(scanner.currentItem.token == TK_DECIMAL_INTEGER);
@@ -54,10 +78,10 @@ void Test()
   TEST(scanner.currentItem.token == TK_BREAKLINE);
   BasicScanner_Next(&scanner);
   TEST(scanner.currentItem.token == TK_EOF);
-  BasicScanner_Next(&scanner); 
+  BasicScanner_Next(&scanner);
   TEST(scanner.currentItem.token == TK_EOF);
 
-  
+
   BasicScanner_Destroy(&scanner);
   BasicScanner_Init(&scanner, "name", "#pragma once\r\n");
   TEST(scanner.currentItem.token == TK_BOF);
@@ -97,10 +121,10 @@ void Test()
   Scanner_Init(&scanner2);
   TEST(Scanner_Token(&scanner2) == TK_EOF);
 
-  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted);  
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted);
   TEST(Scanner_Token(&scanner2) == TK_BOF);
   Scanner_NextVersion2(&scanner2);
-  
+
   //Este break line veio de um #define A
   TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
 
@@ -169,12 +193,12 @@ void Test()
   //
   TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
   Scanner_NextVersion2(&scanner2);
-  
+
   //"1 2"
   TEST(Scanner_Token(&scanner2) == TK_STRING_LITERAL);
   TEST(strcmp(Scanner_Lexeme(&scanner2), "\"1 2\"") == 0);
   Scanner_NextVersion2(&scanner2);
-  
+
   TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
 
   Scanner_Destroy(&scanner2);
@@ -182,72 +206,62 @@ void Test()
 
   Scanner_Init(&scanner2);
   Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test4.h", FileIncludeTypeQuoted);
-  TEST(Scanner_Token(&scanner2) == TK_BOF);
-  Scanner_NextVersion2(&scanner2);
 
-  //Define
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
-  Scanner_NextVersion2(&scanner2);
-  
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
-  Scanner_NextVersion2(&scanner2);
+  MATCH(&scanner2, TK_BOF)
 
-  TEST(Scanner_Token(&scanner2) == TK_LEFT_PARENTHESIS);
-  Scanner_NextVersion2(&scanner2);
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_LEFT_PARENTHESIS)
+    MATCH(&scanner2, TK_DECIMAL_INTEGER)
+    MATCH(&scanner2, TK_SPACES)
+    MATCH(&scanner2, TK_PLUS_SIGN)
+    MATCH(&scanner2, TK_SPACES)
+    MATCH2(&scanner2, TK_IDENTIFIER, "foo")
+    MATCH(&scanner2, TK_RIGHT_PARENTHESIS)
+    MATCH(&scanner2, TK_BREAKLINE)
 
-  TEST(Scanner_Token(&scanner2) == TK_DECIMAL_INTEGER);
-  Scanner_NextVersion2(&scanner2);
-
-  TEST(Scanner_Token(&scanner2) == TK_SPACES);
-  Scanner_NextVersion2(&scanner2);
-
-  TEST(Scanner_Token(&scanner2) == TK_PLUS_SIGN);
-  Scanner_NextVersion2(&scanner2);
-
-  TEST(Scanner_Token(&scanner2) == TK_SPACES);
-  Scanner_NextVersion2(&scanner2);
-
-  TEST(Scanner_Token(&scanner2) == TK_IDENTIFIER);
-  TEST(strcmp(Scanner_Lexeme(&scanner2), "foo") == 0);
-  Scanner_NextVersion2(&scanner2);
-
-  TEST(Scanner_Token(&scanner2) == TK_RIGHT_PARENTHESIS);
-  Scanner_NextVersion2(&scanner2);
-
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
-  Scanner_NextVersion2(&scanner2);
-
-  Scanner_Destroy(&scanner2);
+    Scanner_Destroy(&scanner2);
   //////////
 
   Scanner_Init(&scanner2);
   Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test5.h", FileIncludeTypeQuoted);
-  TEST(Scanner_Token(&scanner2) == TK_BOF);
-    
-  //#define hash_hash # ## #
-  Scanner_NextVersion2(&scanner2);
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
-  
-  //#define mkstr(a) # a
-  Scanner_NextVersion2(&scanner2);
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
 
-  //#define in_between(a) mkstr(a)
-  Scanner_NextVersion2(&scanner2);
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  MATCH(&scanner2, TK_BOF)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH2(&scanner2, TK_STRING_LITERAL, "\"x ## y\"")
 
-  //#define join(c, d) in_between(c hash_hash d)
-  Scanner_NextVersion2(&scanner2);
-  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
-
-  //#define join(c, d) in_between(c hash_hash d)
-  Scanner_NextVersion2(&scanner2);
-  TEST(Scanner_Token(&scanner2) == TK_STRING_LITERAL);
-  TEST(strcmp(Scanner_Lexeme(&scanner2), "\"x ## y\"") == 0);
-  Scanner_NextVersion2(&scanner2);
-
-
-  Scanner_Destroy(&scanner2);
+    Scanner_Destroy(&scanner2);
   ///////////////////////////
 
+  Scanner_Init(&scanner2);
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test6.h", FileIncludeTypeQuoted);
+  MATCH(&scanner2, TK_BOF)
+  MATCH2(&scanner2, TK_IDENTIFIER, "BEGIN")
+  MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_BREAKLINE)
+  MATCH2(&scanner2, TK_IDENTIFIER, "A")
+  MATCH(&scanner2, TK_SPACES)    
+  MATCH2(&scanner2, TK_IDENTIFIER, "B")
+  MATCH(&scanner2, TK_BREAKLINE)
+    
+    MATCH_INACTIVE(&scanner2, TK_BREAKLINE) //#else
+    MATCH_INACTIVE(&scanner2, TK_IDENTIFIER, "B")
+    MATCH_INACTIVE(&scanner2, TK_SPACES)
+    MATCH_INACTIVE(&scanner2, TK_IDENTIFIER, "D")
+    MATCH_INACTIVE(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_BREAKLINE) //#endif
+
+    MATCH2(&scanner2, TK_IDENTIFIER, "END")
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_EOF)
+    Scanner_Destroy(&scanner2);
+  ///////////////////////////
+
+  if (error_count == 0)
+  {
+    printf("ALL TESTS OK\n");
+  }
 }

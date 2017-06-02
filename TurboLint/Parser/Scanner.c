@@ -1410,6 +1410,12 @@ int EvalPre(Scanner* pScanner)
   return iRes;
 }
 
+bool Scanner_IsActiveGroup(Scanner* pScanner)
+{
+  State state = StateTop(pScanner);
+  return IsIncludeState(state);
+}
+
 void Scanner_SkipCore(Scanner* pScanner)
 {
 
@@ -2053,154 +2059,148 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
       if (preToken == PRETK_INCLUDE)
       {
-        if (!IsIncludeState(state))
+        if (IsIncludeState(state))
         {
           Scanner_Match(pScanner);
-          continue;
-        }
 
-        Scanner_Match(pScanner);
-
-        if (GetToken(pScanner) == TK_STRING_LITERAL)
-        {
-          String fileName;
-          String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
-          Scanner_Match(pScanner);
-          fileName[strlen(fileName) - 1] = 0;
-          IgnorePreProcessor(pScanner);
-          //pode ou nao incluir depende do pragma once
-          Scanner_IncludeFile(pScanner, fileName, FileIncludeTypeQuoted);
-          String_Destroy(&fileName);
-          //break;
-        }
-
-        else if (GetToken(pScanner) == TK_LESS_THAN_SIGN)
-        {
-          Scanner_Match(pScanner);
-          StrBuilder path = STRBUILDER_INIT;
-
-          //StrBuilder_Init(&path, 200);
-          for (;;)
+          if (GetToken(pScanner) == TK_STRING_LITERAL)
           {
-            if (GetToken(pScanner) == TK_GREATER_THAN_SIGN)
-            {
-              Scanner_Match(pScanner);
-              break;
-            }
-
-            if (GetToken(pScanner) == TK_BREAKLINE)
-            {
-              //oopps
-              break;
-            }
-
-            StrBuilder_Append(&path, Scanner_Lexeme(pScanner));
+            String fileName;
+            String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
             Scanner_Match(pScanner);
+            fileName[strlen(fileName) - 1] = 0;
+            IgnorePreProcessor(pScanner);
+            //pode ou nao incluir depende do pragma once
+            Scanner_IncludeFile(pScanner, fileName, FileIncludeTypeQuoted);
+            String_Destroy(&fileName);
+            //break;
           }
 
-          //pode ou nao incluir depende do pragma once
-          Scanner_IncludeFile(pScanner, path.c_str, FileIncludeTypeIncludes);
-          StrBuilder_Destroy(&path);
-        }
+          else if (GetToken(pScanner) == TK_LESS_THAN_SIGN)
+          {
+            Scanner_Match(pScanner);
+            StrBuilder path = STRBUILDER_INIT;
 
-        else
-        {
+            //StrBuilder_Init(&path, 200);
+            for (;;)
+            {
+              if (GetToken(pScanner) == TK_GREATER_THAN_SIGN)
+              {
+                Scanner_Match(pScanner);
+                break;
+              }
+
+              if (GetToken(pScanner) == TK_BREAKLINE)
+              {
+                //oopps
+                break;
+              }
+
+              StrBuilder_Append(&path, Scanner_Lexeme(pScanner));
+              Scanner_Match(pScanner);
+            }
+
+            //pode ou nao incluir depende do pragma once
+            Scanner_IncludeFile(pScanner, path.c_str, FileIncludeTypeIncludes);
+            StrBuilder_Destroy(&path);
+          }
           IgnorePreProcessor(pScanner);
-        }
-
-        //
-        //break;
+        }        
       }
-
       else if (preToken == PRETK_PRAGMA)
       {
-        if (!IsIncludeState(state))
+        if (IsIncludeState(state))
         {
+          Scanner_Match(pScanner);
+
+          if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "once"))
+          {
+            const char* fullPath = Scanner_Top(pScanner)->stream.NameOrFullPath;
+            TFile* pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
+
+            if (pFile == NULL)
+            {
+              pFile = TFile_Create();
+              pFile->PragmaOnce = true;
+              TFileMap_Set(&pScanner->FilesIncluded, fullPath, pFile);
+            }
+
+            else
+            {
+              pFile->PragmaOnce = true;
+            }
+          }
+
+          else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "dir"))
+          {
+            Scanner_Match(pScanner);
+            String fileName;
+            String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
+            Scanner_Match(pScanner);
+            fileName[strlen(fileName) - 1] = 0;
+            StrArray_Push(&pScanner->IncludeDir, fileName);
+            String_Destroy(&fileName);
+          }
+
+          else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "mydir"))
+          {
+            pScanner->bAmalgamationMode = true;
+            Scanner_Match(pScanner);
+            String fileName;
+            String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
+            Scanner_Match(pScanner);
+            fileName[strlen(fileName) - 1] = 0;
+            StrArray_Push(&pScanner->MySourceDir, fileName);
+            String_Destroy(&fileName);
+          }
+
+          else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "ignore"))
+          {
+            Scanner_Match(pScanner);
+            String fileName;
+            String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
+            Scanner_Match(pScanner);
+            fileName[strlen(fileName) - 1] = 0;
+            TFile* pFile = TFile_Create();
+            TFileMap_Set(&pScanner->FilesIncluded, fileName, pFile);
+          }
+
+          else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "push_macro"))
+          {
+            Scanner_Match(pScanner);
+            Scanner_Match(pScanner); //(
+            Scanner_Match(pScanner);  //""
+            Scanner_Match(pScanner); //)
+                                     //salva a macro em uma pilha
+          }
+
+          else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "pop_macro"))
+          {
+            Scanner_Match(pScanner);
+            Scanner_Match(pScanner); //(
+            Scanner_Match(pScanner);  //""
+            Scanner_Match(pScanner); //)
+                                     //#pragma push_macro("Y")
+                                     //#pragma pop_macro("X")
+          }
           IgnorePreProcessor(pScanner);
-          continue;
         }
-
-        Scanner_Match(pScanner);
-
-        if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "once"))
-        {
-          const char* fullPath = Scanner_Top(pScanner)->stream.NameOrFullPath;
-          TFile* pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
-
-          if (pFile == NULL)
-          {
-            pFile = TFile_Create();
-            pFile->PragmaOnce = true;
-            TFileMap_Set(&pScanner->FilesIncluded, fullPath, pFile);
-          }
-
-          else
-          {
-            pFile->PragmaOnce = true;
-          }
-        }
-
-        else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "dir"))
-        {
-          Scanner_Match(pScanner);
-          String fileName;
-          String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
-          Scanner_Match(pScanner);
-          fileName[strlen(fileName) - 1] = 0;
-          StrArray_Push(&pScanner->IncludeDir, fileName);
-          String_Destroy(&fileName);
-        }
-
-        else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "mydir"))
-        {
-          pScanner->bAmalgamationMode = true;
-          Scanner_Match(pScanner);
-          String fileName;
-          String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
-          Scanner_Match(pScanner);
-          fileName[strlen(fileName) - 1] = 0;
-          StrArray_Push(&pScanner->MySourceDir, fileName);
-          String_Destroy(&fileName);
-        }
-
-        else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "ignore"))
-        {
-          Scanner_Match(pScanner);
-          String fileName;
-          String_Init(&fileName, Scanner_Lexeme(pScanner) + 1);
-          Scanner_Match(pScanner);
-          fileName[strlen(fileName) - 1] = 0;
-          TFile* pFile = TFile_Create();
-          TFileMap_Set(&pScanner->FilesIncluded, fileName, pFile);
-        }
-
-        else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "push_macro"))
-        {
-          Scanner_Match(pScanner);
-          Scanner_Match(pScanner); //(
-          Scanner_Match(pScanner);  //""
-          Scanner_Match(pScanner); //)
-                                   //salva a macro em uma pilha
-        }
-
-        else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "pop_macro"))
-        {
-          Scanner_Match(pScanner);
-          Scanner_Match(pScanner); //(
-          Scanner_Match(pScanner);  //""
-          Scanner_Match(pScanner); //)
-                                   //#pragma push_macro("Y")
-                                   //#pragma pop_macro("X")
-        }
-
-        IgnorePreProcessor(pScanner);
       }
 
       else if (preToken == PRETK_IF ||
         preToken == PRETK_IFDEF ||
         preToken == PRETK_IFNDEF)
       {
-        Scanner_Match(pScanner);
+        
+        //Match if
+        BasicScanner_Next(pTopScanner);
+
+        //Pula espaços
+        while (pTopScanner->currentItem.token == TK_SPACES ||
+          pTopScanner->currentItem.token == TK_COMMENT)
+        {
+          BasicScanner_Next(pTopScanner);
+        }
 
         switch (state)
         {
@@ -2256,7 +2256,8 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
       else if (preToken == PRETK_ELIF)
       {
-        Scanner_Match(pScanner);
+        //Match elif
+        BasicScanner_Next(pTopScanner);
 
         switch (state)
         {
@@ -2304,13 +2305,18 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
       else if (preToken == PRETK_ENDIF)
       {
+        //Match elif
+        BasicScanner_Next(pTopScanner);
+
         IgnorePreProcessor(pScanner);
         StatePop(pScanner);
       }
 
       else if (preToken == PRETK_ELSE)
       {
-        IgnorePreProcessor(pScanner);
+        
+        //Match else
+        BasicScanner_Next(pTopScanner);
 
         switch (state)
         {
@@ -2346,45 +2352,52 @@ void Scanner_NextVersion2(Scanner* pScanner)
           ASSERT(false);
           break;
         }
+
+        IgnorePreProcessor(pScanner);
       }
 
       else if (preToken == PRETK_ERROR)
       {
-        if (!IsIncludeState(state))
+        if (IsIncludeState(state))
         {
-          IgnorePreProcessor(pScanner);
-          continue;
-        }
+          //Match error
+          BasicScanner_Next(pTopScanner);
 
-        Scanner_Match(pScanner);
-        StrBuilder str = STRBUILDER_INIT;
-        //StrBuilder_Init(&str, 100);
-        StrBuilder_Append(&str, ": #error : ");
-        GetDefineString(pScanner, &str);
-        Scanner_SetError(pScanner, str.c_str);
-        StrBuilder_Destroy(&str);
-        IgnorePreProcessor(pScanner);
+          
+          StrBuilder str = STRBUILDER_INIT;
+          //StrBuilder_Init(&str, 100);
+          StrBuilder_Append(&str, ": #error : ");
+          GetDefineString(pScanner, &str);
+          Scanner_SetError(pScanner, str.c_str);
+          StrBuilder_Destroy(&str);
+          IgnorePreProcessor(pScanner);
+        }
       }
 
       else if (preToken == PRETK_LINE)
       {
-        IgnorePreProcessor(pScanner);
+        if (IsIncludeState(state))
+        {
+          //Match line
+          BasicScanner_Next(pTopScanner);
+
+          IgnorePreProcessor(pScanner);
+        }
       }
 
       else if (preToken == PRETK_UNDEF)
       {
-        if (!IsIncludeState(state))
+        if (IsIncludeState(state))
         {
+          //Match undef
+          BasicScanner_Next(pTopScanner);
+          
+          lexeme = BasicScanner_Lexeme(Scanner_Top(pScanner));
+
+          MacroMap_RemoveKey(&pScanner->Defines2, lexeme);
+
           IgnorePreProcessor(pScanner);
-          continue;
         }
-
-        Scanner_Match(pScanner);
-        lexeme = BasicScanner_Lexeme(Scanner_Top(pScanner));
-
-        MacroMap_RemoveKey(&pScanner->Defines2, lexeme);
-
-        IgnorePreProcessor(pScanner);
       }
 
       else if (preToken == PRETK_DEFINE)
@@ -2403,40 +2416,19 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
           //se ja existe deletar
           ParsePreDefine(pScanner);
-          break;
+          IgnorePreProcessor(pScanner);
         }
-
-
       }
 
-      else
-      {
-        IgnorePreProcessor(pScanner);
-      }
-
-      //todos acabam com final de linha exceto o include
-      if (preToken == PRETK_INCLUDE)
-      {
-        //continua
-      }
-      else
-      {
-        //ASSERT(Scanner_Top(pScanner)->currentItem.token == TK_BREAKLINE);
-        if (pScanner->bIncludeSpaces)
-        {
-          //é para retornar a quebra de linha, entao sair
-          break;
-        }
-
-        BasicScanner_Next(Scanner_Top(pScanner));
-      }
+      //acabou a linha #
+      break;
     }
 
     else if (token == TK_IDENTIFIER)
     {
       if (IsIncludeState(state))
       {
-        
+
         const char* lexeme = BasicScanner_Lexeme(pTopScanner);
 
         Macro* pMacro2 = Scanner_FindPreprocessorItem2(pScanner, lexeme);
@@ -2495,25 +2487,15 @@ void Scanner_NextVersion2(Scanner* pScanner)
           TokenArray_Destroy(&ppTokenArray);
           StrBuilder_Destroy(&strBuilder);
           StrBuilder_Destroy(&callString);
-
-          if (!bIsMacro)
-          {
-            break;
-          }
-        }
-        else
-        {
-
-          //eh um identificador..sair
-          break;
-
-        }
-        break;
+         }
       }
+      
+      break;
     }
     else if (token == TK_EOF)
     {
 
+      //provalmente vai sair daqui
       if (Scanner_Top(pScanner) != NULL &&
         Scanner_Top(pScanner)->bMacroExpanded)
       {
@@ -2536,18 +2518,9 @@ void Scanner_NextVersion2(Scanner* pScanner)
       }
 
     }
-
     else
     {
-      //if (!IsIncludeState(state))
-      //{
-        //BasicScanner_Next(Scanner_Top(pScanner));
-      //}
-
-      //else
-      //{
       break;
-      //}
     }
   }//for
 }

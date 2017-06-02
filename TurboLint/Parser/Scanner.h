@@ -133,6 +133,8 @@ const char* Scanner_TokenString(Scanner* pScanner);
 Tokens Scanner_Token(Scanner* pScanner);
 const char* Scanner_Lexeme(Scanner* pScanner);
 
+bool Scanner_IsActiveGroup(Scanner* pScanner);
+
 Result Scanner_Init(Scanner* pScanner);
 
 typedef enum
