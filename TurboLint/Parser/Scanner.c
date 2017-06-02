@@ -240,10 +240,18 @@ void Scanner_SetError(Scanner* pScanner, const char* message)
   if (!pScanner->bError)
   {
     pScanner->bError = true;
-    StrBuilder_Set(&pScanner->ErrorString,
-      Scanner_Top(pScanner)->stream.NameOrFullPath);
+    
+    if (Scanner_Top(pScanner) != NULL)
+    {
+      StrBuilder_Set(&pScanner->ErrorString,
+        Scanner_Top(pScanner)->stream.NameOrFullPath);
+    }
+
     StrBuilder_Append(&pScanner->ErrorString, "(");
-    StrBuilder_AppendInt(&pScanner->ErrorString, Scanner_Top(pScanner)->stream.currentLine);
+    if (Scanner_Top(pScanner))
+    {
+      StrBuilder_AppendInt(&pScanner->ErrorString, Scanner_Top(pScanner)->stream.currentLine);
+    }
     StrBuilder_Append(&pScanner->ErrorString, ")");
     StrBuilder_Append(&pScanner->ErrorString, message);
   }

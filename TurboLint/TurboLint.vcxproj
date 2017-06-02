@@ -167,6 +167,7 @@
     <ClCompile Include="TurboLint\AstMatch.c" />
     <ClCompile Include="TurboLint\CodePrint.c" />
     <ClCompile Include="TurboLint\TCLint2.c" />
+    <ClCompile Include="UnitTest.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base\Array.h" />
@@ -190,6 +191,7 @@
     <ClInclude Include="TurboLint\AstMatch.h" />
     <ClInclude Include="TurboLint\CodePrint.h" />
     <ClInclude Include="TurboLint\TCLint2.h" />
+    <ClInclude Include="UnitTest.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="vs2015.txt" />

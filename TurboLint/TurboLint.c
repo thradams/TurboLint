@@ -8,6 +8,7 @@
 #include ".\TurboLint\CodePrint.h"
 #include ".\TurboLint\TCLint2.h"
 #include "..\TurboLint\Base\Path.h"
+#include "UnitTest.h"
 
 void RunLint(const char* configFileName,
 	const char* inputFileName,
@@ -73,6 +74,9 @@ int main(int argc, char* argv[])
 		printf("TurboLint.exe configFile.txt file.c");
 		return 1;
 	}
+
+  Test();
+
 	const char* configFileName = argv[1];
 	const char* inputFileName = argv[2];
 

@@ -14,6 +14,9 @@ const char* TokenToString(Tokens tk)
     {
         case TK_NONE:
             return "None";
+            
+        case TK_BOF:
+          return "Bof";
         case TK_EOF:
             return "Eof";
         case TK_LINE_COMMENT:
@@ -286,6 +289,7 @@ Result BasicScanner_Init(BasicScanner* pBasicScanner,
     pBasicScanner->bMacroExpanded = false;
     SStream_Init(&pBasicScanner->stream, name, text);
     ScannerItem_Init(&pBasicScanner->currentItem);
+    pBasicScanner->currentItem.token = TK_BOF;
     return RESULT_OK;
 }
 
@@ -299,6 +303,7 @@ Result BasicScanner_InitFile(BasicScanner* pBasicScanner, const char* fileName)
         pBasicScanner->bLineStart = true;
         pBasicScanner->bMacroExpanded = false;
         ScannerItem_Init(&pBasicScanner->currentItem);
+        pBasicScanner->currentItem.token = TK_BOF;
     }
     return result;
 }
@@ -857,17 +862,7 @@ void BasicScanner_Next(BasicScanner* scanner)
     ASSERT(false);
 }
 
-void BasicScanner_NextNoSpaces(BasicScanner* scanner)
-{
-    for(;;)
-    {
-        BasicScanner_Next(scanner);
-        if(scanner->currentItem.token == TK_SPACES)
-            continue;
-        else
-            break;
-    }
-}
+
 Tokens BasicScanner_Token(BasicScanner* scanner)
 {
     return scanner->currentItem.token;

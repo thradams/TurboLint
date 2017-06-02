@@ -63,7 +63,7 @@ void TNodeClue_Delete(TNodeClue* p);
 typedef List(TNodeClue) TNodeClueList;
 #define TNODECLUELIST_INIT LIST_INIT
 #define TNodeClueList_Destroy(p) List_Destroy(TNodeClue, (p))
-void TNodeClueList_SetPosition(TNodeClueList * p, int pos);
+//void TNodeClueList_SetPosition(TNodeClueList * p, int pos);
 void TNodeClueList_MoveToEnd(TNodeClueList * pDest, TNodeClueList * pSource);
 
 typedef struct
@@ -146,7 +146,6 @@ void Scanner_IncludeFile(Scanner* pScanner,
   const char* fileName,
   FileIncludeType fileIncludeType);
 
-const char * Scanner_GetApparentStreamName(Scanner * pScanner);
 
 void Scanner_Destroy(Scanner* pScanner);
 int Scanner_GetCurrentLine(Scanner * pScanner);
@@ -172,7 +171,5 @@ void Scanner_GetScannerItemCopy(Scanner* pScanner,
   ScannerItem* scannerItem);
 
 
-
-bool Scanner_GetApparentMacroOnTop(Scanner * pScanner);
 
 ScannerItem* Scanner_GetLookAhead(Scanner* pScanner);

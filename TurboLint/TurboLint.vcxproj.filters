@@ -73,6 +73,9 @@
     <ClCompile Include="Base\Path.c">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base\Array.h">
@@ -137,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="Base\List.h">
       <Filter>Source Files\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitTest.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

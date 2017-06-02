@@ -8,6 +8,7 @@
 typedef enum
 {
     TK_NONE,
+    TK_BOF,
     TK_EOF,
     TK_ENDMARK,
     TK_LINE_COMMENT,
@@ -191,7 +192,6 @@ Result      BasicScanner_Create(BasicScanner** pp, const char* name, const char*
 const char* BasicScanner_Lexeme(BasicScanner* scanner);
 bool        BasicScanner_IsLexeme(BasicScanner* scanner, const char* psz);
 void        BasicScanner_Next(BasicScanner* scanner);
-void        BasicScanner_NextNoSpaces(BasicScanner* scanner);
 Result      BasicScanner_InitFile(BasicScanner* pScanner, const char* fileName);
 Result      BasicScanner_CreateFile(const char* fileName, BasicScanner** pp);
 void        BasicScanner_Delete(BasicScanner* pScanner);
