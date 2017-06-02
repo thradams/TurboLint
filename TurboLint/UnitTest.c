@@ -220,5 +220,34 @@ void Test()
   Scanner_Destroy(&scanner2);
   //////////
 
+  Scanner_Init(&scanner2);
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test5.h", FileIncludeTypeQuoted);
+  TEST(Scanner_Token(&scanner2) == TK_BOF);
+    
+  //#define hash_hash # ## #
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  
+  //#define mkstr(a) # a
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  //#define in_between(a) mkstr(a)
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  //#define join(c, d) in_between(c hash_hash d)
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  //#define join(c, d) in_between(c hash_hash d)
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_STRING_LITERAL);
+  TEST(strcmp(Scanner_Lexeme(&scanner2), "\"x ## y\"") == 0);
+  Scanner_NextVersion2(&scanner2);
+
+
+  Scanner_Destroy(&scanner2);
+  ///////////////////////////
 
 }
