@@ -64,7 +64,7 @@ bool PPToken_IsIdentifier(PPToken* pHead)
 
 bool PPToken_IsSpace(PPToken* pHead)
 {
-	if (pHead->Lexeme[0] == ' ' )
+	if (pHead->Token == PPTokenType_Spaces)
 	{
 		return true;
 	}

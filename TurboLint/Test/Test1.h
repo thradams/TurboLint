@@ -1,2 +1,2 @@
-#define A 1
+#define A    /*a*/            1    /*a*/
 A

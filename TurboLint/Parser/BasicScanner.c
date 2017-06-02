@@ -824,26 +824,43 @@ void BasicScanner_Next(BasicScanner* scanner)
     if(ch == L'\\' &&
             (ch1 == L'\n' || ch1 == L'\r'))
     {
-        ch = BasicScanner_Match(scanner);
+      //1) Whenever backslash appears at the end of 
+      //a line(immediately followed by the newline character), both 
+      //backslash and newline are deleted,
+      //combining two physical source lines into one logical 
+      //source line.This is a single - pass operation; 
+      //a line ending in two backslashes followed by an empty 
+      //line does not combine three lines into one.
+      //If a universal character name(\uXXX) is formed in this 
+      //phase, the behavior is undefined.
+
+      SStream_Next(&scanner->stream);
+      ch = scanner->stream.currentChar;
         if(ch == L'\r')
         {
-            ch = BasicScanner_Match(scanner);
+          SStream_Next(&scanner->stream);
+          ch = scanner->stream.currentChar;
             if(ch == L'\n')
             {
-                ch = BasicScanner_Match(scanner);
+              SStream_Next(&scanner->stream);
+              ch = scanner->stream.currentChar;
             }
         }
         else if(ch == L'\n')
         {
-            ch = BasicScanner_Match(scanner);
+          SStream_Next(&scanner->stream);
+          ch = scanner->stream.currentChar;
         }
-        //acho que o padrao manda sumir...
-        //vou colocar espaco por enquanto
+        ////acho que o padrao manda sumir...
+        ///vou colocar espaco por enquanto
         //vai ser ignorado
-        scanner->currentItem.token = TK_SPACES;
-        StrBuilder_Clear(&scanner->currentItem.lexeme);
-        StrBuilder_AppendChar(&scanner->currentItem.lexeme, L' ');
+        //scanner->currentItem.token = TK_SPACES;
+        //StrBuilder_Clear(&scanner->currentItem.lexeme);
+        //StrBuilder_AppendChar(&scanner->currentItem.lexeme, L' ');
+        
         scanner->bLineStart = false;
+        BasicScanner_Next(scanner);
+        
         return;
     }
     if(ch == 2)  //peguei um

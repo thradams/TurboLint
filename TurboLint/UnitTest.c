@@ -95,12 +95,130 @@ void Test()
 
   Scanner scanner2;
   Scanner_Init(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_EOF);
+
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted);  
+  TEST(Scanner_Token(&scanner2) == TK_BOF);
+  Scanner_NextVersion2(&scanner2);
   
-  Scanner_IncludeFile(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted);
-  Scanner_Next(&scanner2);
-  TEST(Scanner_Token(&scanner2) == TK_IDENTIFIER);
-  
+  //Este break line veio de um #define A
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  //Este 1 vem da expansão de A
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_DECIMAL_INTEGER);
+
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_EOF);
+
 
   Scanner_Destroy(&scanner2);
+  //////////////////////////////////////////////////////////////
+
+  Scanner_Init(&scanner2);
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test2.h", FileIncludeTypeQuoted);
+
+  TEST(Scanner_Token(&scanner2) == TK_BOF);
+  Scanner_NextVersion2(&scanner2);
+
+  //Este break line veio de um #define A
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  //Este 1 vem da expansão de A
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_DECIMAL_INTEGER);
+
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  Scanner_NextVersion2(&scanner2);
+  TEST(Scanner_Token(&scanner2) == TK_EOF);
+  Scanner_Destroy(&scanner2);
+  //////////////////////////////////////////////////////////////
+  Scanner_Init(&scanner2);
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test3.h", FileIncludeTypeQuoted);
+
+  TEST(Scanner_Token(&scanner2) == TK_BOF);
+  Scanner_NextVersion2(&scanner2);
+
+
+  //#define A  1   2 
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+
+  //1
+  TEST(Scanner_Token(&scanner2) == TK_DECIMAL_INTEGER);
+  TEST(strcmp(Scanner_Lexeme(&scanner2), "1") == 0);
+  Scanner_NextVersion2(&scanner2);
+  //
+  TEST(Scanner_Token(&scanner2) == TK_SPACES);
+  Scanner_NextVersion2(&scanner2);
+  //2
+  TEST(Scanner_Token(&scanner2) == TK_DECIMAL_INTEGER);
+  TEST(strcmp(Scanner_Lexeme(&scanner2), "2") == 0);
+  Scanner_NextVersion2(&scanner2);
+  //
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+  //
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+  //
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+  
+  //"1 2"
+  TEST(Scanner_Token(&scanner2) == TK_STRING_LITERAL);
+  TEST(strcmp(Scanner_Lexeme(&scanner2), "\"1 2\"") == 0);
+  Scanner_NextVersion2(&scanner2);
+  
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+
+  Scanner_Destroy(&scanner2);
+  ///////////
+
+  Scanner_Init(&scanner2);
+  Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test4.h", FileIncludeTypeQuoted);
+  TEST(Scanner_Token(&scanner2) == TK_BOF);
+  Scanner_NextVersion2(&scanner2);
+
+  //Define
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+  
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_LEFT_PARENTHESIS);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_DECIMAL_INTEGER);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_SPACES);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_PLUS_SIGN);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_SPACES);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_IDENTIFIER);
+  TEST(strcmp(Scanner_Lexeme(&scanner2), "foo") == 0);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_RIGHT_PARENTHESIS);
+  Scanner_NextVersion2(&scanner2);
+
+  TEST(Scanner_Token(&scanner2) == TK_BREAKLINE);
+  Scanner_NextVersion2(&scanner2);
+
+  Scanner_Destroy(&scanner2);
+  //////////
+
 
 }

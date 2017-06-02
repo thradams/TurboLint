@@ -146,6 +146,9 @@ void Scanner_IncludeFile(Scanner* pScanner,
   const char* fileName,
   FileIncludeType fileIncludeType);
 
+void Scanner_IncludeFile_Version2(Scanner* pScanner,
+  const char* includeFileName,
+  FileIncludeType fileIncludeType);
 
 void Scanner_Destroy(Scanner* pScanner);
 int Scanner_GetCurrentLine(Scanner * pScanner);
@@ -157,6 +160,7 @@ const char * Scanner_Lexeme(Scanner * pScanner);
 int Scanner_Line(Scanner* scanner);
 int Scanner_Col(Scanner* scanner);
 void Scanner_Next(Scanner* pScanner);
+void Scanner_NextVersion2(Scanner* pScanner);
 void Scanner_Skip(Scanner* pScanner);
 
 int EvalExpression(const char* s, Scanner* pScanner);
