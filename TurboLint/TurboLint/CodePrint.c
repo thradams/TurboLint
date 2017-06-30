@@ -44,6 +44,11 @@ static void TNodeClueList_CodePrint(TScannerItemList* list,
     {
     case TK_PRE_DEFINE:
     case TK_PRE_UNDEF:
+    case TK_PRE_PRAGMA:
+    case TK_PRE_IF:
+    case TK_PRE_ENDIF:
+    case TK_PRE_ELSE:
+    case TK_PRE_INCLUDE:
       Output_Append(fp, pNodeClue->lexeme.c_str);
       Output_Append(fp, "\n");
       break;
@@ -79,7 +84,7 @@ static void TNodeClueList_CodePrint(TScannerItemList* list,
 
     //case NodeClueTypeNone:      
     default:
-      ASSERT(false);
+        Output_Append(fp, pNodeClue->lexeme.c_str);
       break;
     }
 
@@ -324,7 +329,10 @@ static bool TDoStatement_CodePrint(TProgram* program, TDoStatement * p, bool b, 
 static bool TExpressionStatement_CodePrint(TProgram* program, TExpressionStatement * p, bool b, StrBuilder* fp)
 {
   TExpression_CodePrint(program, p->pExpression, "", b, fp);
+  
+  TNodeClueList_CodePrint(&p->NodeClueList, fp, 0);
   Output_Append(fp, ";");
+
   return true;
 }
 

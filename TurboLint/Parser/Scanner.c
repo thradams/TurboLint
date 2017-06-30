@@ -1833,7 +1833,7 @@ void Scanner_NextCorev2(Scanner* pScanner)
 
 void Scanner_NextVersion2(Scanner* pScanner)
 {
-    Scanner_NextCorev2(pScanner);
+    Scanner_NextCorev2(pScanner);    
 }
 
 //const char* Scanner_TokenString(Scanner* pScanner)
