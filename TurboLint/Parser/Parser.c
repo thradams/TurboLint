@@ -6,6 +6,26 @@
 #include "..\Base\Path.h"
 //Define to include modications
 #define LANGUAGE_EXTENSIONS 
+Tokens Parser_Match(Parser* parser);
+
+static bool IsPreprocessorTokenPhase(Tokens token)
+{
+    return 
+        token == TK_SPACES ||
+        token == TK_COMMENT ||
+        token == TK_BREAKLINE ||
+        token == TK_PRE_DEFINE ||
+        token == TK_PRE_INCLUDE ||
+        token == TK_PRE_UNDEF ||
+        token == TK_PRE_ERROR ||
+        token == TK_PRE_PRAGMA ||
+        token == TK_PRE_LINE||
+        token == TK_PRE_ELIF||
+        token == TK_PRE_ELSE ||
+        token == TK_PRE_IF||
+        token == TK_MACRO_CALL ||
+        token == TK_MACRO_EOF;
+}
 
 bool IsSuffix(const char* s, const char* suffix)
 {
@@ -274,6 +294,7 @@ Result Parser_InitString(Parser* parser,
   const char* name,
   const char* text)
 {
+  List_Init(&parser->NodeClueList);
   MultiMap_Init(&parser->Symbols, SYMBOL_BUCKETS_SIZE);
   Map_Init(&parser->EnumMap, SYMBOL_BUCKETS_SIZE);
 
@@ -293,7 +314,7 @@ Result Parser_InitString(Parser* parser,
 
 Result Parser_InitFile(Parser* parser, const char* fileName)
 {
-
+  List_Init(&parser->NodeClueList);
   DeclarationsMap_Init(&parser->Symbols, SYMBOL_BUCKETS_SIZE);
   Map_Init(&parser->EnumMap, SYMBOL_BUCKETS_SIZE);
 
@@ -309,7 +330,10 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
   ////////
   Scanner_IncludeFile(&parser->Scanner, fileName, FileIncludeTypeFullPath);
-  Scanner_Match(&parser->Scanner);
+  
+  //Scanner_Match(&parser->Scanner);
+  //sair do BOF
+  Parser_Match(parser);
 
   return RESULT_OK;
 }
@@ -317,7 +341,7 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 void Parser_PushFile(Parser* parser, const char* fileName)
 {
   Scanner_IncludeFile(&parser->Scanner, fileName, FileIncludeTypeFullPath);
-  Scanner_Match(&parser->Scanner);
+  Parser_Match(parser);
 }
 
 
@@ -354,6 +378,7 @@ void DeclarationsMap_Destroy(DeclarationsMap* p)
 
 void Parser_Destroy(Parser* parser)
 {
+  List_Destroy(ScannerItem, &parser->NodeClueList);
   DeclarationsMap_Destroy(&parser->Symbols);
   Map_Destroy(&parser->EnumMap, NULL); //OWNER IS AST
 
@@ -383,15 +408,15 @@ static bool HasErrors(Parser* pParser)
 }
 
 
-static void Next(Parser* parser)
-{
-  if (HasErrors(parser))
-  {
-    return;
-  }
+//static void Next(Parser* parser)
+//{
+  //if (HasErrors(parser))
+  //{
+    //return;
+  //}
 
-  Scanner_Match(&parser->Scanner);
-}
+  //Scanner_Match(&parser->Scanner);
+//}
 
 
 void SetError2(Parser* parser, const char* message, const char* message2)
@@ -476,7 +501,7 @@ const char* LookAheadLexeme(Parser* parser)
 }
 
 
-Tokens Token(Parser* parser)
+Tokens Parser_CurrentToken(Parser* parser)
 {
   if (HasErrors(parser))
   {
@@ -484,34 +509,49 @@ Tokens Token(Parser* parser)
   }
 
   Tokens token = Scanner_CurrentToken(&parser->Scanner);
-  if (token == TK_SPACES)
+  
+  if (IsPreprocessorTokenPhase(token))
   {
-    SetUnexpectedError(parser, "!", "");
+    SetUnexpectedError(parser, "!IsPreprocessorTokenPhase", "");
   }
   return token;
 }
 
 
-Tokens Match(Parser* parser)
+Tokens Parser_Match(Parser* parser)
 {
   Tokens token = TK_EOF;
   if (!HasErrors(parser))
   {
-    Next(parser);
-    token = Token(parser);
+    //mover
+    List_Clear(ScannerItem, &parser->NodeClueList);
+
+    Scanner_Match(&parser->Scanner);
+
+    token = Scanner_CurrentToken(&parser->Scanner);
+    while (IsPreprocessorTokenPhase(token))
+    {
+        ScannerItem* pNew = ScannerItem_Create();
+        StrBuilder_Set(&pNew->lexeme, Scanner_CurrentLexeme(&parser->Scanner));
+        pNew->token = Scanner_CurrentToken(&parser->Scanner);
+        List_Add(&parser->NodeClueList, pNew);
+        
+        Scanner_Match(&parser->Scanner);
+        token = Scanner_CurrentToken(&parser->Scanner);
+    }
   }
 
   return token;
 }
 
-Tokens MatchToken(Parser* parser, Tokens tk)
+Tokens Parser_MatchToken(Parser* parser, Tokens tk)
 {
   if (HasErrors(parser))
   {
     return TK_EOF;
   }
 
-  Tokens currentToken = Token(parser);
+  Tokens currentToken = Parser_CurrentToken(parser);
 
   if (tk != currentToken)
   {
@@ -519,8 +559,8 @@ Tokens MatchToken(Parser* parser, Tokens tk)
     return TK_EOF;
   }
 
-  Next(parser);
-  return Token(parser);
+  Parser_Match(parser);
+  return Parser_CurrentToken(parser);
 }
 
 const char* GetCompletationMessage(Parser* parser)
@@ -557,7 +597,7 @@ const char* Lexeme(Parser* parser)
 bool ErrorOrEof(Parser* parser)
 {
   return HasErrors(parser) ||
-    Token(parser) == TK_EOF;
+    Parser_CurrentToken(parser) == TK_EOF;
 }
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -615,7 +655,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
   */
   *ppPrimaryExpression = NULL; //out
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   //PreprocessorTokenIndex(ctx);
   //-2 nem eh macro
@@ -646,7 +686,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
       StrBuilder_AppendN(&adjacentStrings, lexeme + 1, len - 2);
       
       ////TNodeClueList_MoveToEnd(&pPrimaryExpressionValue->NodeClueList, &ctx->Scanner.NodeClueList);
-      token = Match(ctx);
+      token = Parser_Match(ctx);
     }
     StrBuilder_Append(&adjacentStrings, "\"");
     String_Set(&pPrimaryExpressionValue->lexeme, adjacentStrings.c_str);
@@ -669,7 +709,7 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
     String_Set(&pPrimaryExpressionValue->lexeme, Lexeme(ctx));
 
 //    //TNodeClueList_MoveToEnd(&pPrimaryExpressionValue->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
     *ppPrimaryExpression = (TExpression*)pPrimaryExpressionValue;
   }
   break;
@@ -680,13 +720,13 @@ void PrimaryExpression(Parser* ctx, TExpression** ppPrimaryExpression)
       = TPrimaryExpressionValue_Create();
 
 //    //TNodeClueList_MoveToEnd(&pPrimaryExpressionValue->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpression;
     Expression0(ctx, &pExpression);
 
 //    //TNodeClueList_MoveToEnd(&pPrimaryExpressionValue->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
 
     pPrimaryExpressionValue->token = token;
@@ -780,7 +820,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 
   */
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -794,7 +834,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     
     //  postfix-expression ( argument-expression-listopt )
 //    //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    token = Match(ctx);
+    token = Parser_Match(ctx);
 
     if (token != TK_RIGHT_PARENTHESIS)
     {
@@ -802,7 +842,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     }
 
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
   }
   break;
 
@@ -812,12 +852,12 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     // postfix-expression [ expression ]
     
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
+    Parser_MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
 
     Expression0(ctx, &pPostfixExpressionCore->pExpressionRight);
 
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
+    Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
   }
   break;
 
@@ -827,12 +867,12 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     pPostfixExpressionCore->token = token;
     
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
 
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_IDENTIFIER);
+    Parser_MatchToken(ctx, TK_IDENTIFIER);
   }
   break;
 
@@ -842,12 +882,12 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     pPostfixExpressionCore->token = token;
     
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
 
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_IDENTIFIER);
+    Parser_MatchToken(ctx, TK_IDENTIFIER);
   }
   break;
 
@@ -857,7 +897,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     //postfix-expression ++
     
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
   }
   break;
@@ -868,7 +908,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     pPostfixExpressionCore->token = token;
     
     //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
   }
   break;
@@ -879,7 +919,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
   }
 
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -925,7 +965,7 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
 
   */
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   if (token == TK_LEFT_PARENTHESIS)
@@ -941,28 +981,28 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
         TPostfixExpressionCore_Create();
 
       //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_LEFT_PARENTHESIS);
+      Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
       TTypeName typeName = TTYPENAME_INIT;
       TypeName(ctx, &typeName);
       TParameterDeclaration_Destroy(&typeName);
 
       //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+      Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
       //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
+      Parser_MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
 
       //pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
       Initializer_List(ctx, &pTPostfixExpressionCore->InitializerList);
 
       //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+      Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
 
-      if (Token(ctx) == TK_COMMA)
+      if (Parser_CurrentToken(ctx) == TK_COMMA)
       {
         //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);        
-        Match(ctx);
+        Parser_Match(ctx);
       }
 
       *ppExpression = (TExpression*)pTPostfixExpressionCore;
@@ -985,7 +1025,7 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
     *ppExpression = pPrimaryExpression;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1084,12 +1124,12 @@ void ArgumentExpressionList(Parser* ctx, TExpression** ppExpression)
   AssignmentExpression(ctx, &pAssignmentExpression);
   *ppExpression = pAssignmentExpression;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_COMMA)
   {
     ////TNodeClueList_MoveToEnd(&pAssignmentExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pAssignmentExpressionRight;
     AssignmentExpression(ctx, &pAssignmentExpressionRight);
@@ -1107,11 +1147,11 @@ void ArgumentExpressionList(Parser* ctx, TExpression** ppExpression)
     *ppExpression = (TExpression*)pExpr;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   if (token == TK_COMMA)
   {
-    Match(ctx);
+    Parser_Match(ctx);
     TBinaryExpression *  pExpr =
       TBinaryExpression_Create();
 
@@ -1221,7 +1261,7 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
   & * + - ~ !
   */
 
-  Tokens token0 = Token(ctx);
+  Tokens token0 = Parser_CurrentToken(ctx);
   Tokens tokenAhead = LookAheadToken(ctx);
   const char* lookAheadlexeme = LookAheadLexeme(ctx);
 
@@ -1251,7 +1291,7 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
   {
     ////TNodeClueList_MoveToEnd(&pUnaryExpressionOperator->NodeClueList, &ctx->Scanner.NodeClueList);
 
-    Match(ctx);
+    Parser_Match(ctx);
     TExpression *pUnaryExpression;
     UnaryExpression(ctx, &pUnaryExpression);
 
@@ -1277,7 +1317,7 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
 #endif
     //
   {
-    Match(ctx);
+    Parser_Match(ctx);
     TExpression* pCastExpression;
     CastExpression(ctx, &pCastExpression);
 
@@ -1296,9 +1336,9 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
   case TK_SIZEOF:
     
     ////TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_SIZEOF);
+    Parser_MatchToken(ctx, TK_SIZEOF);
 
-    if (Token(ctx) == TK_LEFT_PARENTHESIS)
+    if (Parser_CurrentToken(ctx) == TK_LEFT_PARENTHESIS)
     {
       const char* lookAheadlexeme = LookAheadLexeme(ctx);
       Tokens lookAheadToken = LookAheadToken(ctx);
@@ -1311,11 +1351,11 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
 
 
         //sizeof deste tipo
-        MatchToken(ctx, TK_LEFT_PARENTHESIS);
+        Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
         TypeName(ctx, &pUnaryExpressionOperator->TypeName);
 
-        MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+        Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
 
 
@@ -1379,7 +1419,7 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
   ( type-name ) cast-expression
   */
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_LEFT_PARENTHESIS)
   {
@@ -1388,11 +1428,11 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
 
     if (IsTypeName(ctx, lookAheadToken, lookAheadlexeme))
     {
-      MatchToken(ctx, TK_LEFT_PARENTHESIS);
+      Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
       TTypeName typeName = TTYPENAME_INIT;
       TypeName(ctx, &typeName);
 
-      token = MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+      token = Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
       if (token == TK_LEFT_CURLY_BRACKET)
       {
@@ -1406,7 +1446,7 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
         ( type-name ) { initializer-list , }
         */
 
-        MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
+        Parser_MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
 
         TPostfixExpressionCore*  pTPostfixExpressionCore =
           TPostfixExpressionCore_Create();
@@ -1419,11 +1459,11 @@ void CastExpression(Parser* ctx, TExpression** ppExpression)
         //Initializer_List(ctx, pTPostfixExpressionCore->pInitializerList);
         
 
-        if (Token(ctx) == TK_COMMA)
+        if (Parser_CurrentToken(ctx) == TK_COMMA)
         {
-          Match(ctx);
+          Parser_Match(ctx);
         }
-        MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+        Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
         *ppExpression = (TExpression*)pTPostfixExpressionCore;
         //PostfixExpressionCore(ctx, pTPostfixExpressionCore);
       }
@@ -1476,7 +1516,7 @@ void MultiplicativeExpression(Parser* ctx, TExpression** ppExpression)
   CastExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1492,7 +1532,7 @@ void MultiplicativeExpression(Parser* ctx, TExpression** ppExpression)
     pBinaryExpression->pExpressionLeft = *ppExpression;
 
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     CastExpression(ctx, &pExpressionRight);
@@ -1502,7 +1542,7 @@ void MultiplicativeExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1518,7 +1558,7 @@ void MultiplicativeExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     MultiplicativeExpression(ctx, &pExpressionRight);
@@ -1543,7 +1583,7 @@ void AdditiveExpression(Parser* ctx, TExpression** ppExpression)
   MultiplicativeExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1558,7 +1598,7 @@ void AdditiveExpression(Parser* ctx, TExpression** ppExpression)
     pBinaryExpression->pExpressionLeft = *ppExpression;
 
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     MultiplicativeExpression(ctx, &pExpressionRight);
@@ -1568,7 +1608,7 @@ void AdditiveExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1581,7 +1621,7 @@ void AdditiveExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     AdditiveExpression(ctx, &pExpressionRight);
@@ -1607,7 +1647,7 @@ void ShiftExpression(Parser* ctx, TExpression** ppExpression)
   AdditiveExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1621,7 +1661,7 @@ void ShiftExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     AdditiveExpression(ctx, &pExpressionRight);
@@ -1631,7 +1671,7 @@ void ShiftExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1644,7 +1684,7 @@ void ShiftExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     ShiftExpression(ctx, &pExpressionRight);
@@ -1670,7 +1710,7 @@ void RelationalExpression(Parser* ctx, TExpression** ppExpression)
   ShiftExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1686,7 +1726,7 @@ void RelationalExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     ShiftExpression(ctx, &pExpressionRight);
@@ -1696,7 +1736,7 @@ void RelationalExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1711,7 +1751,7 @@ void RelationalExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     RelationalExpression(ctx, &pExpressionRight);
@@ -1735,7 +1775,7 @@ void EqualityExpression(Parser* ctx, TExpression** ppExpression)
   RelationalExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1749,7 +1789,7 @@ void EqualityExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     RelationalExpression(ctx, &pExpressionRight);
@@ -1759,7 +1799,7 @@ void EqualityExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1772,7 +1812,7 @@ void EqualityExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     EqualityExpression(ctx, &pExpressionRight);
@@ -1794,7 +1834,7 @@ void AndExpression(Parser* ctx, TExpression **ppExpression)
   EqualityExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1807,7 +1847,7 @@ void AndExpression(Parser* ctx, TExpression **ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     EqualityExpression(ctx, &pExpressionRight);
@@ -1817,7 +1857,7 @@ void AndExpression(Parser* ctx, TExpression **ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1829,7 +1869,7 @@ void AndExpression(Parser* ctx, TExpression **ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     AndExpression(ctx, &pExpressionRight);
@@ -1852,7 +1892,7 @@ void ExclusiveOrExpression(Parser* ctx, TExpression** ppExpression)
   AndExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1865,7 +1905,7 @@ void ExclusiveOrExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     AndExpression(ctx, &pExpressionRight);
@@ -1875,7 +1915,7 @@ void ExclusiveOrExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1887,7 +1927,7 @@ void ExclusiveOrExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
 
     TExpression* pExpressionRight;
@@ -1913,7 +1953,7 @@ void InclusiveOrExpression(Parser* ctx, TExpression**ppExpression)
   ExclusiveOrExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1926,7 +1966,7 @@ void InclusiveOrExpression(Parser* ctx, TExpression**ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     ExclusiveOrExpression(ctx, &pExpressionRight);
@@ -1936,7 +1976,7 @@ void InclusiveOrExpression(Parser* ctx, TExpression**ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -1948,7 +1988,7 @@ void InclusiveOrExpression(Parser* ctx, TExpression**ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     InclusiveOrExpression(ctx, &pExpressionRight);
@@ -1972,7 +2012,7 @@ void LogicalAndExpression(Parser* ctx, TExpression** ppExpression)
   InclusiveOrExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -1985,7 +2025,7 @@ void LogicalAndExpression(Parser* ctx, TExpression** ppExpression)
     GetPosition(ctx, &pBinaryExpression->Position);
     
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
 
     TExpression* pExpressionRight;
@@ -1996,7 +2036,7 @@ void LogicalAndExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2010,7 +2050,7 @@ void LogicalAndExpression(Parser* ctx, TExpression** ppExpression)
     pBinaryExpression->pExpressionLeft = *ppExpression;
 
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     LogicalAndExpression(ctx, &pExpressionRight);
@@ -2033,7 +2073,7 @@ void LogicalOrExpression(Parser* ctx, TExpression** ppExpression)
   LogicalAndExpression(ctx, &pExpressionLeft);
   *ppExpression = pExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
 
   switch (token)
@@ -2046,7 +2086,7 @@ void LogicalOrExpression(Parser* ctx, TExpression** ppExpression)
     pBinaryExpression->pExpressionLeft = *ppExpression;
 
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     LogicalAndExpression(ctx, &pExpressionRight);
@@ -2056,7 +2096,7 @@ void LogicalOrExpression(Parser* ctx, TExpression** ppExpression)
   break;
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2068,7 +2108,7 @@ void LogicalOrExpression(Parser* ctx, TExpression** ppExpression)
     pBinaryExpression->pExpressionLeft = *ppExpression;
 
     //TNodeClueList_MoveToEnd(&pBinaryExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pExpressionRight;
     LogicalOrExpression(ctx, &pExpressionRight);
@@ -2090,14 +2130,14 @@ void ConditionalExpression(Parser* ctx, TExpression**ppExpression)
   LogicalOrExpression(ctx, &pLogicalOrExpressionLeft);
   *ppExpression = pLogicalOrExpressionLeft;
 
-  if (Token(ctx) == TK_QUESTION_MARK)
+  if (Parser_CurrentToken(ctx) == TK_QUESTION_MARK)
   {
     ////TNodeClueList_MoveToEnd(&pLogicalOrExpressionLeft->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     TExpression* pTExpression;
     Expression0(ctx, &pTExpression);
-    MatchToken(ctx, TK_COLON);
+    Parser_MatchToken(ctx, TK_COLON);
 
     TExpression* pConditionalExpressionRight;
     ConditionalExpression(ctx, &pConditionalExpressionRight);
@@ -2133,7 +2173,7 @@ void AssignmentExpression(Parser* ctx, TExpression** ppExpression)
   ConditionalExpression(ctx, &pConditionalExpressionLeft);
   *ppExpression = pConditionalExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2150,7 +2190,7 @@ void AssignmentExpression(Parser* ctx, TExpression** ppExpression)
   case TK_CARETEQUAL:
   case TK_OREQUAL:
   {
-    Match(ctx);
+    Parser_Match(ctx);
     //Significa que o anterior deve ser do tipo  unary-expression
     //embora tenhamos feito o parser de conditional-expression
     //se nao for é erro.
@@ -2186,12 +2226,12 @@ void Expression0(Parser* ctx, TExpression** ppExpression)
   AssignmentExpression(ctx, &pAssignmentExpressionLeft);
   *ppExpression = pAssignmentExpressionLeft;
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_COMMA)
   {
     TExpression* pAssignmentExpressionRight;
-    Match(ctx);
+    Parser_Match(ctx);
     Expression0(ctx, &pAssignmentExpressionRight);
 
     TBinaryExpression* pBinaryExpression =
@@ -2250,7 +2290,7 @@ void Expression_Statement(Parser* ctx, TStatement** ppStatement)
   */
   TExpressionStatement* pExpression = TExpressionStatement_Create();
   *ppStatement = (TStatement*)pExpression;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token != TK_SEMICOLON)
   {
@@ -2258,7 +2298,7 @@ void Expression_Statement(Parser* ctx, TStatement** ppStatement)
   }
 
   //TNodeClueList_MoveToEnd(&pExpression->NodeClueList, &ctx->Scanner.NodeClueList);
-  MatchToken(ctx, TK_SEMICOLON);
+  Parser_MatchToken(ctx, TK_SEMICOLON);
 }
 
 void Selection_Statement(Parser* ctx, TStatement** ppStatement)
@@ -2269,7 +2309,7 @@ void Selection_Statement(Parser* ctx, TStatement** ppStatement)
   if ( expression ) statement else statement
   switch ( expression ) statement
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2279,27 +2319,27 @@ void Selection_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pIfStatement;
 
     //TNodeClueList_MoveToEnd(&pIfStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     //TNodeClueList_MoveToEnd(&pIfStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
     //      TExpression0 * pExpression =
     //      NewObject(pStatement, "expression");
     Expression0(ctx, &pIfStatement->pConditionExpression);
 
 //    //TNodeClueList_MoveToEnd(&pIfStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     //TStatement0 * pTrueStatement =
     //NewObject(pStatement, "statement-true");
     Statement(ctx, &pIfStatement->pStatement);
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     if (token == TK_ELSE)
     {
       //TNodeClueList_MoveToEnd(&pIfStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
       // TStatement0 * pElseStatement =
       //  NewObject(pStatement, "statement-else");
       Statement(ctx, &pIfStatement->pElseStatement);
@@ -2313,17 +2353,17 @@ void Selection_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pSelectionStatement;
     
     //TNodeClueList_MoveToEnd(&pSelectionStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     //TNodeClueList_MoveToEnd(&pSelectionStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
     //TExpression0 * pExpression =
     //NewObject(pStatement, "expression");
     Expression0(ctx, &pSelectionStatement->pConditionExpression);
 
     //TNodeClueList_MoveToEnd(&pSelectionStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     //TStatement0 * pStatement0 =
     // NewObject(pStatement, "statement");
@@ -2347,7 +2387,7 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
   return expressionopt ;
   */
   //jump-statement
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2358,10 +2398,10 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pJumpStatement;
     
     //TNodeClueList_MoveToEnd(&pJumpStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     //TNodeClueList_MoveToEnd(&pJumpStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_IDENTIFIER);
+    Parser_MatchToken(ctx, TK_IDENTIFIER);
   }
   break;
 
@@ -2372,10 +2412,10 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pJumpStatement;
 
     //TNodeClueList_MoveToEnd(&pJumpStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     //TNodeClueList_MoveToEnd(&pJumpStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_SEMICOLON);
+    Parser_MatchToken(ctx, TK_SEMICOLON);
   }
   break;
 
@@ -2386,10 +2426,10 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pJumpStatement;
     
     //TNodeClueList_MoveToEnd(&pJumpStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
 //    //TNodeClueList_MoveToEnd(&pJumpStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_SEMICOLON);
+    Parser_MatchToken(ctx, TK_SEMICOLON);
   }
   break;
 
@@ -2400,7 +2440,7 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pReturnStatement;
     
     //TNodeClueList_MoveToEnd(&pReturnStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    token = Match(ctx);
+    token = Parser_Match(ctx);
 
     if (token != TK_SEMICOLON)
     {
@@ -2408,7 +2448,7 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
     }
 
     //TNodeClueList_MoveToEnd(&pReturnStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_SEMICOLON);
+    Parser_MatchToken(ctx, TK_SEMICOLON);
   }
   break;
 
@@ -2427,7 +2467,7 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
   for ( expressionopt ; expressionopt ; expressionopt ) statement
   for ( declaration expressionopt ; expressionopt ) statement
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2437,15 +2477,15 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pWhileStatement;
     
     //TNodeClueList_MoveToEnd(&pWhileStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
 //    //TNodeClueList_MoveToEnd(&pWhileStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
     Expression0(ctx, &pWhileStatement->pExpression);
 
 //    //TNodeClueList_MoveToEnd(&pWhileStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     Statement(ctx, &pWhileStatement->pStatement);
   }
@@ -2457,23 +2497,23 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pDoStatement;
     
 //    //TNodeClueList_MoveToEnd(&pDoStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     Statement(ctx, &pDoStatement->pStatement);
     
 //    //TNodeClueList_MoveToEnd(&pDoStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_WHILE);
+    Parser_MatchToken(ctx, TK_WHILE);
 
 //    //TNodeClueList_MoveToEnd(&pDoStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
     Expression0(ctx, &pDoStatement->pExpression);
     
 //    //TNodeClueList_MoveToEnd(&pDoStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     ////TNodeClueList_MoveToEnd(&pDoStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_SEMICOLON);
+    Parser_MatchToken(ctx, TK_SEMICOLON);
   }
   break;
 
@@ -2483,10 +2523,10 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
     *ppStatement = (TStatement*)pIterationStatement;
     
     ////TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     ////TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    token = Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
     //primeira expressao do for
     if (token != TK_SEMICOLON)
@@ -2499,7 +2539,7 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
 
       if (bHasDeclaration)
       {
-        token = Token(ctx);
+        token = Parser_CurrentToken(ctx);
 
         if (token != TK_SEMICOLON)
         {
@@ -2507,19 +2547,19 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
           Expression0(ctx, &pIterationStatement->pExpression2);
           
           ////TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-          MatchToken(ctx, TK_SEMICOLON);
+          Parser_MatchToken(ctx, TK_SEMICOLON);
         }
         else
         {
           //segunda expressao vazia
           ////TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-          MatchToken(ctx, TK_SEMICOLON);
+          Parser_MatchToken(ctx, TK_SEMICOLON);
         }
       }
 
       else
       {
-        token = Token(ctx);
+        token = Parser_CurrentToken(ctx);
 
         if (token != TK_SEMICOLON)
         {
@@ -2527,10 +2567,10 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
           Expression0(ctx, &pIterationStatement->pExpression1);
           
           ////TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-          MatchToken(ctx, TK_SEMICOLON);
+          Parser_MatchToken(ctx, TK_SEMICOLON);
         }
 
-        token = Token(ctx);
+        token = Parser_CurrentToken(ctx);
 
         if (token != TK_SEMICOLON)
         {
@@ -2538,14 +2578,14 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
           Expression0(ctx, &pIterationStatement->pExpression2);
           
           //TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-          MatchToken(ctx, TK_SEMICOLON);
+          Parser_MatchToken(ctx, TK_SEMICOLON);
         }
 
         else
         {
           //segunda expressao vazia
           //TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-          MatchToken(ctx, TK_SEMICOLON);
+          Parser_MatchToken(ctx, TK_SEMICOLON);
         }
 
       }
@@ -2555,9 +2595,9 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
     {
       //primeira expressao do for vazia
       //TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_SEMICOLON);
+      Parser_MatchToken(ctx, TK_SEMICOLON);
 
-      token = Token(ctx);
+      token = Parser_CurrentToken(ctx);
 
       if (token != TK_SEMICOLON)
       {
@@ -2565,18 +2605,18 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
         Expression0(ctx, &pIterationStatement->pExpression2);
         
         //TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-        MatchToken(ctx, TK_SEMICOLON);
+        Parser_MatchToken(ctx, TK_SEMICOLON);
       }
 
       else
       {
         //segunda expressao do for vazia tb
         //TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-        MatchToken(ctx, TK_SEMICOLON);
+        Parser_MatchToken(ctx, TK_SEMICOLON);
       }
     }
 
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     //terceira expressao do for
     if (token != TK_RIGHT_PARENTHESIS)
@@ -2585,7 +2625,7 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
     }
 
     //TNodeClueList_MoveToEnd(&pIterationStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     Statement(ctx, &pIterationStatement->pStatement);
   }
@@ -2608,7 +2648,7 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
   */
   TLabeledStatement* pLabeledStatement = TLabeledStatement_Create();
   *ppStatement = (TStatement*)pLabeledStatement;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
   pLabeledStatement->token = token;
 
   if (token == TK_IDENTIFIER)
@@ -2617,10 +2657,10 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
     String_Set(&pLabeledStatement->Identifier, Lexeme(ctx));
 
     //TNodeClueList_MoveToEnd(&pLabeledStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     //TNodeClueList_MoveToEnd(&pLabeledStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_COLON);
+    Parser_MatchToken(ctx, TK_COLON);
 
     Statement(ctx, &pLabeledStatement->pStatementOpt);
   }
@@ -2628,12 +2668,12 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
   else if (token == TK_CASE)
   {
     //TNodeClueList_MoveToEnd(&pLabeledStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     ConstantExpression(ctx, &pLabeledStatement->pExpression);
 
     //TNodeClueList_MoveToEnd(&pLabeledStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_COLON);
+    Parser_MatchToken(ctx, TK_COLON);
 
     Statement(ctx, &pLabeledStatement->pStatementOpt);
   }
@@ -2641,10 +2681,10 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
   else if (token == TK_DEFAULT)
   {
     //TNodeClueList_MoveToEnd(&pLabeledStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
     
     //TNodeClueList_MoveToEnd(&pLabeledStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_COLON);
+    Parser_MatchToken(ctx, TK_COLON);
 
     Statement(ctx, &pLabeledStatement->pStatementOpt);
   }
@@ -2658,12 +2698,12 @@ void Asm_Statement(Parser* ctx, TStatement** ppStatement)
   */
   TAsmStatement * pAsmStatement = TAsmStatement_Create();
   *ppStatement = (TStatement*)pAsmStatement;
-  MatchToken(ctx, TK__ASM);
-  Tokens token = Token(ctx);
+  Parser_MatchToken(ctx, TK__ASM);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_LEFT_CURLY_BRACKET)
   {
-    Match(ctx);
+    Parser_Match(ctx);
 
     for (; ;)
     {
@@ -2672,15 +2712,15 @@ void Asm_Statement(Parser* ctx, TStatement** ppStatement)
         break;
       }
 
-      token = Token(ctx);
+      token = Parser_CurrentToken(ctx);
 
       if (token == TK_RIGHT_CURLY_BRACKET)
       {
-        Match(ctx);
+        Parser_Match(ctx);
         break;
       }
 
-      Match(ctx);
+      Parser_Match(ctx);
     }
   }
 
@@ -2689,7 +2729,7 @@ void Asm_Statement(Parser* ctx, TStatement** ppStatement)
     //sem ;
     //    __asm int 0x2c
     //chato
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     for (; ;)
     {
@@ -2698,7 +2738,7 @@ void Asm_Statement(Parser* ctx, TStatement** ppStatement)
         break;
       }
 
-      token = Token(ctx);
+      token = Parser_CurrentToken(ctx);
 
       if (token == TK_RIGHT_CURLY_BRACKET)
       {
@@ -2714,16 +2754,16 @@ void Asm_Statement(Parser* ctx, TStatement** ppStatement)
         break;
       }
 
-      Match(ctx);
+      Parser_Match(ctx);
     }
   }
 
   //opcional
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
 
   if (token == TK_SEMICOLON)
   {
-    Match(ctx);
+    Parser_Match(ctx);
   }
 }
 
@@ -2737,7 +2777,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
   }
 
   bool bResult = false;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
   const char * lexeme = Lexeme(ctx);
 
   switch (token)
@@ -2773,7 +2813,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
   case TK_ELSE:
     //Ele tem que estar fazendo os statement do IF!
     bResult = true;
-    Match(ctx); //else
+    Parser_Match(ctx); //else
     //poderia retornar uma coisa so  p dizer q eh else
     //Statement(ctx, obj);
     break;
@@ -2941,7 +2981,7 @@ void Block_Item_List(Parser* ctx, TBlockItemList* pBlockItemList)
     TBlockItem* pBlockItem = NULL;
     Block_Item(ctx, &pBlockItem);
     ArrayT_Push(pBlockItemList, pBlockItem);
-    Tokens token = Token(ctx);
+    Tokens token = Parser_CurrentToken(ctx);
 
     if (token == TK_RIGHT_CURLY_BRACKET)
     {
@@ -2964,9 +3004,9 @@ void Compound_Statement(Parser* ctx, TStatement** ppStatement)
   *ppStatement = (TStatement*)pCompoundStatement;
   
   //TNodeClueList_MoveToEnd(&pCompoundStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-  MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
+  Parser_MatchToken(ctx, TK_LEFT_CURLY_BRACKET);
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token != TK_RIGHT_CURLY_BRACKET)
   {
@@ -2974,7 +3014,7 @@ void Compound_Statement(Parser* ctx, TStatement** ppStatement)
   }
 
   //TNodeClueList_MoveToEnd(&pCompoundStatement->NodeClueList, &ctx->Scanner.NodeClueList);
-  MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+  Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
 }
 
 void Struct_Or_Union(Parser* ctx,
@@ -2985,7 +3025,7 @@ void Struct_Or_Union(Parser* ctx,
   struct
   union
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -2993,14 +3033,14 @@ void Struct_Or_Union(Parser* ctx,
     pStructUnionSpecifier->bIsStruct = true;
     
     //TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
     break;
 
   case TK_UNION:
     pStructUnionSpecifier->bIsStruct = false;
     
     //TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     break;
 
@@ -3016,30 +3056,30 @@ void Static_Assert_Declaration(Parser* ctx, TStaticAssertDeclaration* pStaticAss
   static_assert-declaration:
   _Static_assert ( constant-expression , string-literal ) ;
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK__STATIC_ASSERT)
   {
     //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
     ConstantExpression(ctx,
       &pStaticAssertDeclaration->pConstantExpression);
 
     //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_COMMA);
+    Parser_MatchToken(ctx, TK_COMMA);
     
     //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_STRING_LITERAL);
+    Parser_MatchToken(ctx, TK_STRING_LITERAL);
     
     //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
     
     //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_SEMICOLON);
+    Parser_MatchToken(ctx, TK_SEMICOLON);
   }
 }
 
@@ -3079,14 +3119,14 @@ void Struct_Declarator(Parser* ctx,
   declarator
   declaratoropt : constant-expression
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_COLON)
   {
     //AST TODO
     ////TNodeClueList_MoveToEnd(&ppTDeclarator2->NodeClueList, &ctx->Scanner.NodeClueList);
 
-    Match(ctx);
+    Parser_Match(ctx);
     TExpression* p = NULL;
     ConstantExpression(ctx, &p);
     TExpression_Delete(p);
@@ -3102,12 +3142,12 @@ void Struct_Declarator(Parser* ctx,
     ASSERT(pInitDeclarator->pDeclarator == NULL);
     Declarator(ctx, &pInitDeclarator->pDeclarator);
 
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     if (token == TK_COLON)
     {
       //TNodeClueList_MoveToEnd(&pInitDeclarator->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
 
       TExpression* p = NULL;
       ConstantExpression(ctx, &p);
@@ -3119,7 +3159,7 @@ void Struct_Declarator(Parser* ctx,
       //TNodeClueList_MoveToEnd(&pInitDeclarator->NodeClueList, &ctx->Scanner.NodeClueList);
       //TODO COMPILER EXTENSION! SHOW ERROR IF EXTENSIONS NOT ENABLED
       //struct { int i = 1; }
-      Match(ctx);
+      Parser_Match(ctx);
 
       Initializer(ctx, &pInitDeclarator->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
 
@@ -3147,13 +3187,13 @@ void Struct_Declarator_List(Parser* ctx,
     if (ErrorOrEof(ctx))
       break;
 
-    Tokens token = Token(ctx);
+    Tokens token = Parser_CurrentToken(ctx);
 
     if (token == TK_COMMA)
     {
       
       //TNodeClueList_MoveToEnd(&pTDeclarator2->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
 
       Struct_Declarator_List(ctx, pStructDeclarationList);
     }
@@ -3179,7 +3219,7 @@ void Struct_Declaration(Parser* ctx,
   specifier-qualifier-list struct-declarator-listopt ;
   static_assert-declaration
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token != TK__STATIC_ASSERT)
   {
@@ -3188,7 +3228,7 @@ void Struct_Declaration(Parser* ctx,
     Specifier_Qualifier_List(ctx,
       &pStructDeclarationBase->Qualifier,
       &pStructDeclarationBase->pSpecifier);
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     if (token != TK_SEMICOLON)
     {
@@ -3196,13 +3236,13 @@ void Struct_Declaration(Parser* ctx,
         &pStructDeclarationBase->DeclaratorList);
 
       //TNodeClueList_MoveToEnd(&pStructDeclarationBase->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_SEMICOLON);
+      Parser_MatchToken(ctx, TK_SEMICOLON);
     }
 
     else
     {
       //TNodeClueList_MoveToEnd(&pStructDeclarationBase->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_SEMICOLON);
+      Parser_MatchToken(ctx, TK_SEMICOLON);
     }
   }
 
@@ -3231,7 +3271,7 @@ void Struct_Declaration_List(Parser* ctx,
   Struct_Declaration(ctx, &pStructDeclaration);
   ArrayT_Push(pStructDeclarationList, pStructDeclaration);
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
   if (token != TK_RIGHT_CURLY_BRACKET)
   {
     //Tem mais?
@@ -3250,7 +3290,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
   Struct_Or_Union(ctx, pStructUnionSpecifier);//TODO
   
 
-  Tokens token0 = Token(ctx);
+  Tokens token0 = Parser_CurrentToken(ctx);
   const char* lexeme = Lexeme(ctx);
 
   if (token0 == TK_IDENTIFIER)
@@ -3266,9 +3306,9 @@ void Struct_Or_Union_Specifier(Parser* ctx,
 
   //1
   //TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-  Match(ctx);
+  Parser_Match(ctx);
 
-  Tokens token1 = Token(ctx);
+  Tokens token1 = Parser_CurrentToken(ctx);
 
   if (token0 == TK_IDENTIFIER)
   {
@@ -3277,7 +3317,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
     {
       //2
       //TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
 
       ////TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
 
@@ -3286,7 +3326,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
 
       //3
       //TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+      Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
     }
     else
     {
@@ -3302,7 +3342,7 @@ void Struct_Or_Union_Specifier(Parser* ctx,
     Struct_Declaration_List(ctx, &pStructUnionSpecifier->StructDeclarationList);
 
     //TNodeClueList_MoveToEnd(&pStructUnionSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+    Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
   }
 
   else
@@ -3321,7 +3361,7 @@ void Enumeration_Constant(Parser* ctx,
   Map_Set(&ctx->EnumMap, lexeme, (void*)1);
 
   //TNodeClueList_MoveToEnd(&pEnumerator2->NodeClueList, &ctx->Scanner.NodeClueList);
-  MatchToken(ctx, TK_IDENTIFIER);
+  Parser_MatchToken(ctx, TK_IDENTIFIER);
 }
 
 bool EnumeratorC(Parser* ctx, TEnumerator* pEnumerator2)
@@ -3335,12 +3375,12 @@ bool EnumeratorC(Parser* ctx, TEnumerator* pEnumerator2)
   Enumeration_Constant(ctx, pEnumerator2);
 
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_EQUALS_SIGN)
   {
     //TNodeClueList_MoveToEnd(&pEnumerator2->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     ConstantExpression(ctx, &pEnumerator2->pExpression);
     bValueAssigned = true;
@@ -3382,14 +3422,14 @@ void Enumerator_List(Parser* ctx,
     if (ErrorOrEof(ctx))
       break;
 
-    Tokens token = Token(ctx);
+    Tokens token = Parser_CurrentToken(ctx);
 
     if (token == TK_COMMA)
     {
       //tem mais
       ////TNodeClueList_MoveToEnd(&pPointer->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
-      token = Token(ctx);
+      Parser_Match(ctx);
+      token = Parser_CurrentToken(ctx);
 
       //o enum aceita uma , no fim
       if (token != TK_RIGHT_CURLY_BRACKET)
@@ -3425,9 +3465,9 @@ void Enum_Specifier(Parser* ctx, TEnumSpecifier* pEnumSpecifier2)
   */
 
   //TNodeClueList_MoveToEnd(&pEnumSpecifier2->NodeClueList, &ctx->Scanner.NodeClueList);
-  MatchToken(ctx, TK_ENUM);
+  Parser_MatchToken(ctx, TK_ENUM);
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_IDENTIFIER)
   {
@@ -3442,22 +3482,22 @@ void Enum_Specifier(Parser* ctx, TEnumSpecifier* pEnumSpecifier2)
   }
 
   //TNodeClueList_MoveToEnd(&pEnumSpecifier2->NodeClueList, &ctx->Scanner.NodeClueList);
-  Match(ctx);
+  Parser_Match(ctx);
 
   if (token == TK_IDENTIFIER)
   {
     //Ja fez Match do identifier
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     if (token == TK_LEFT_CURLY_BRACKET)
     {
       //TNodeClueList_MoveToEnd(&pEnumSpecifier2->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
 
       Enumerator_List(ctx, &pEnumSpecifier2->EnumeratorList);
 
       //TNodeClueList_MoveToEnd(&pEnumSpecifier2->NodeClueList, &ctx->Scanner.NodeClueList);
-      MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+      Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
     }
 
     else
@@ -3472,7 +3512,7 @@ void Enum_Specifier(Parser* ctx, TEnumSpecifier* pEnumSpecifier2)
     Enumerator_List(ctx, &pEnumSpecifier2->EnumeratorList);
 
     //TNodeClueList_MoveToEnd(&pEnumSpecifier2->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+    Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
   }
 
   else
@@ -3490,19 +3530,19 @@ bool Function_Specifier(Parser* ctx,
   _Noreturn
   */
   bool bResult = false;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
   case TK_INLINE:
     pFunctionSpecifier->bIsInline = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK__NORETURN:
     pFunctionSpecifier->bIsNoReturn = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
@@ -3527,44 +3567,44 @@ bool Storage_Class_Specifier(Parser* ctx,
   register
   */
   bool bResult = false;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   //const char* lexeme = Lexeme(ctx);
   switch (token)
   {
   case TK_TYPEDEF:
     pStorageSpecifier->bIsTypedef = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK_EXTERN:
     pStorageSpecifier->bIsExtern = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK_STATIC:
     pStorageSpecifier->bIsStatic = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK__THREAD_LOCAL:
     pStorageSpecifier->bIsThread_local = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK_AUTO:
     pStorageSpecifier->bIsAuto = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK_REGISTER:
     pStorageSpecifier->bIsRegister = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
@@ -3583,17 +3623,17 @@ void Parameter_List(Parser* ctx,
   parameter-declaration
   parameter-list, parameter-declaration
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   TParameterDeclaration*  pParameter = TParameterDeclaration_Create();
   List_Add(pParameterList, pParameter);
   Parameter_Declaration(ctx, pParameter);
 
   //Tem mais?
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
   if (token == TK_COMMA)
   {
-    Match(ctx);
+    Parser_Match(ctx);
     Parameter_List(ctx, pParameterList);
   }
 }
@@ -3614,7 +3654,7 @@ void AbstractDeclarator(Parser* ctx, TDeclarator** ppTDeclarator2)
 bool AbstractDeclaratorOpt(Parser* ctx, TDeclarator** ppTDeclarator2)
 {
   bool bResult = false;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -3658,12 +3698,12 @@ void Parameter_Type_List(Parser* ctx,
   */
   //TODO  make ... as a type of parameter
   Parameter_List(ctx, pParameterList);
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_DOTDOTDOT)
   {
     //TODO ADD this parameter
-    Match(ctx);
+    Parser_Match(ctx);
   }
 }
 
@@ -3701,18 +3741,18 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     return;
 
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
   case TK_LEFT_PARENTHESIS:
   {
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
     //ASSERT(pDeclarator2->pDeclaratorOpt == NULL);
     ASSERT(pDirectDeclarator == NULL);
     pDirectDeclarator = TDirectDeclarator_Create();
     Declarator(ctx, &pDirectDeclarator->pDeclarator);
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
 
     //Para indicar que eh uma ( declarator )
     pDirectDeclarator->Type = TDirectDeclaratorTypeDeclarator;
@@ -3733,7 +3773,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     String_Set(&pDirectDeclarator->Identifier, lexeme);
     pDirectDeclarator->Position.Line = GetCurrentLine(ctx);
     pDirectDeclarator->Position.FileIndex = GetFileIndex(ctx);
-    Match(ctx);
+    Parser_Match(ctx);
   }
   break;
 
@@ -3768,7 +3808,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
   {
     ASSERT(pDirectDeclarator != NULL);
 
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
     switch (token)
     {
     case TK_LEFT_PARENTHESIS:
@@ -3780,7 +3820,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       //      pDirectDeclarator->token = token;
 //      ASSERT(pDirectDeclarator->pParametersOpt == NULL);
 //      pDirectDeclarator->pParametersOpt = TParameterList_Create();
-      token = MatchToken(ctx, TK_LEFT_PARENTHESIS);
+      token = Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
 
       //Para indicar que eh uma funcao
       
@@ -3791,7 +3831,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
         //opt
         Parameter_Type_List(ctx, &pDirectDeclarator->Parameters);
       }
-      MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+      Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
       break;
 
     case TK_LEFT_SQUARE_BRACKET:
@@ -3809,7 +3849,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
       
       pDirectDeclarator->Type = TDirectDeclaratorTypeArray;
 
-      token = MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
+      token = Parser_MatchToken(ctx, TK_LEFT_SQUARE_BRACKET);
       if (token == TK_STATIC)
       {
       }
@@ -3827,12 +3867,12 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
         }
       }
 
-      MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
+      Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
 
       break;
     }
 
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
     if (token != TK_LEFT_PARENTHESIS &&   token != TK_LEFT_SQUARE_BRACKET)
     {
       break;
@@ -3845,7 +3885,7 @@ void Direct_Declarator(Parser* ctx, TDirectDeclarator** ppDeclarator2)
     }
   }
 
-  token = Token(ctx);
+  token = Parser_CurrentToken(ctx);
   if (token == TK_LEFT_PARENTHESIS ||
     token == TK_IDENTIFIER)
   {
@@ -3868,7 +3908,7 @@ bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
   _Atomic
   */
   bool bResult = false;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   //const char* lexeme = Lexeme(ctx);
   switch (token)
@@ -3879,28 +3919,28 @@ bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
   case TK_CONST:
     pQualifier->bIsConst = true;
     //TNodeClueList_MoveToEnd(&pQualifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK_RESTRICT:
     //TNodeClueList_MoveToEnd(&pQualifier->NodeClueList, &ctx->Scanner.NodeClueList);
     pQualifier->bIsRestrict = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK_VOLATILE:
     //TNodeClueList_MoveToEnd(&pQualifier->NodeClueList, &ctx->Scanner.NodeClueList);
     pQualifier->bIsVolatile = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
   case TK__ATOMIC:
     //TNodeClueList_MoveToEnd(&pQualifier->NodeClueList, &ctx->Scanner.NodeClueList);
     pQualifier->bIsAtomic = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 
@@ -3908,23 +3948,23 @@ bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier)
     //type-qualifier-extensions 
   case TK_OPT_QUALIFIER:
     pQualifier->bIsOpt = true;    
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
   case TK_OWN_QUALIFIER:
     pQualifier->bIsOwner = true;
 
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
   case TK_DTOR_QUALIFIER:
     pQualifier->bIsDestructor = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
   case TK_MDTOR_QUALIFIER:
     pQualifier->bIsMemDestructor = true;
-    Match(ctx);
+    Parser_Match(ctx);
     bResult = true;
     break;
 #endif
@@ -3961,7 +4001,7 @@ int PointerOpt(Parser* ctx, TPointerList* pPointerList)
   */
   int ns = 0;
   //Empilha pointer to
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   while (IsTypeQualifierToken(token) ||
     token == TK_ASTERISK)   //pointer
@@ -3977,10 +4017,10 @@ int PointerOpt(Parser* ctx, TPointerList* pPointerList)
     {
       pPointer->bPointer = true;
       //TNodeClueList_MoveToEnd(&pPointer->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
     }
 
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
     ns++;
   }
 
@@ -4024,13 +4064,13 @@ bool Alignment_Specifier(Parser* ctx,
   _Alignas(type - name)
   _Alignas(constant - expression)
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK__ALIGNAS)
   {
-    MatchToken(ctx, TK_LEFT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS);
     ASSERT(false);//TODO
-    MatchToken(ctx, TK_RIGHT_PARENTHESIS);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS);
     bResult = true;
   }
 
@@ -4082,7 +4122,7 @@ bool Type_Specifier(Parser* ctx,
 
   bool bResult = false;
   const char* lexeme = Lexeme(ctx);
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   switch (token)
   {
@@ -4098,7 +4138,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4116,7 +4156,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4134,7 +4174,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
 
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4152,7 +4192,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4170,7 +4210,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4188,7 +4228,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
 
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4206,7 +4246,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4224,7 +4264,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4242,7 +4282,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
     
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4260,7 +4300,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
 
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4278,7 +4318,7 @@ bool Type_Specifier(Parser* ctx,
     bResult = true;
 
     //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
   }
@@ -4362,7 +4402,7 @@ bool Type_Specifier(Parser* ctx,
           bResult = true;
           
           //TNodeClueList_MoveToEnd(&pSingleTypeSpecifier->NodeClueList, &ctx->Scanner.NodeClueList);
-          Match(ctx);
+          Parser_Match(ctx);
 
           *ppTypeSpecifier = (TTypeSpecifier*)pSingleTypeSpecifier;
         }
@@ -4477,7 +4517,7 @@ void Initializer(Parser* ctx,
   { initializer-list }
   { initializer-list , }
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_LEFT_CURLY_BRACKET)
   {
@@ -4487,12 +4527,12 @@ void Initializer(Parser* ctx,
     *ppInitializer = (TInitializer*)pTInitializerList;
 
     //TNodeClueList_MoveToEnd(&pTInitializerList->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     Initializer_List(ctx, &pTInitializerList->InitializerList);
 
     //TNodeClueList_MoveToEnd(&pTInitializerList->NodeClueList, &ctx->Scanner.NodeClueList);
-    MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
+    Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET);
   }
 
   else
@@ -4517,7 +4557,7 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList)
 
     TInitializerListItem* pTInitializerListItem = TInitializerListItem_Create();
     List_Add(pInitializerList, pTInitializerListItem);
-    Tokens token = Token(ctx);
+    Tokens token = Parser_CurrentToken(ctx);
 #ifdef LANGUAGE_EXTENSIONS
     if (token == TK_RIGHT_CURLY_BRACKET)
     {
@@ -4533,12 +4573,12 @@ void Initializer_List(Parser* ctx, TInitializerList* pInitializerList)
 
     Initializer(ctx, &pTInitializerListItem->pInitializer, TK_COMMA, TK_RIGHT_CURLY_BRACKET);
     //push
-    token = Token(ctx);
+    token = Parser_CurrentToken(ctx);
 
     if (token == TK_COMMA)
     {
       //TNodeClueList_MoveToEnd(&pTInitializerListItem->NodeClueList, &ctx->Scanner.NodeClueList);
-      Match(ctx);
+      Parser_Match(ctx);
       //tem mais
     }
 
@@ -4556,7 +4596,7 @@ void Designation(Parser* ctx, TDesignatorList* pDesignatorList)
   designator-list =
   */
   Designator_List(ctx, pDesignatorList);
-  MatchToken(ctx, TK_EQUALS_SIGN);
+  Parser_MatchToken(ctx, TK_EQUALS_SIGN);
 }
 
 void Designator_List(Parser* ctx, TDesignatorList* pDesignatorList)
@@ -4576,7 +4616,7 @@ void Designator_List(Parser* ctx, TDesignatorList* pDesignatorList)
     if (ErrorOrEof(ctx))
       break;
 
-    Tokens token = Token(ctx);
+    Tokens token = Parser_CurrentToken(ctx);
 
     if (token == TK_LEFT_SQUARE_BRACKET ||
       token == TK_FULL_STOP)
@@ -4600,24 +4640,24 @@ void Designator(Parser* ctx, TDesignator* p)
   [ constant-expression ]
   . identifier
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK_LEFT_SQUARE_BRACKET)
   {
     //TNodeClueList_MoveToEnd(&p->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     ConstantExpression(ctx, &p->pExpression);
-    MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
+    Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET);
   }
 
   else if (token == TK_FULL_STOP)
   {
     //TNodeClueList_MoveToEnd(&p->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     String_Set(&p->Name, Lexeme(ctx));
-    MatchToken(ctx, TK_IDENTIFIER);
+    Parser_MatchToken(ctx, TK_IDENTIFIER);
   }
 }
 
@@ -4634,7 +4674,7 @@ void Init_Declarator(Parser* ctx,
 
   ASSERT(pInitDeclarator->pDeclarator == NULL);
   Declarator(ctx, &pInitDeclarator->pDeclarator);
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   //Antes do =
   *ppDeclarator2 = pInitDeclarator;
@@ -4643,7 +4683,7 @@ void Init_Declarator(Parser* ctx,
   {
     ASSERT(*ppDeclarator2 != NULL);
     //TNodeClueList_MoveToEnd(&pInitDeclarator->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     Initializer(ctx, &pInitDeclarator->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
     ////TNodeClueList_MoveToEnd(&pInitDeclarator->NodeClueList, &ctx->Scanner.NodeClueList);
@@ -4664,11 +4704,11 @@ void Init_Declarator_List(Parser* ctx,
   List_Add(pInitDeclaratorList, pInitDeclarator);
 
   //Tem mais?
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
   if (token == TK_COMMA)
   {
     //TNodeClueList_MoveToEnd(&pInitDeclarator->NodeClueList, &ctx->Scanner.NodeClueList);
-    Match(ctx);
+    Parser_Match(ctx);
 
     Init_Declarator_List(ctx, pInitDeclaratorList);
   }
@@ -4684,13 +4724,13 @@ void TemplateParameter(Parser* ctx,
    type-parameter
    parameter-declaration
   */
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
   if (token == TK_CLASS)
   {
-    MatchToken(ctx, TK_CLASS);
+    Parser_MatchToken(ctx, TK_CLASS);
     TTemplateParameter *p = TTemplateParameter_Create();
     String_Set(&p->Name, Lexeme(ctx));
-    MatchToken(ctx, TK_IDENTIFIER);    
+    Parser_MatchToken(ctx, TK_IDENTIFIER);    
     *ppTemplateParameter = p;
   }
   else
@@ -4713,10 +4753,10 @@ void TemplateParameterList(Parser* ctx, TTemplateParameterList* list)
 
   List_Add(list, pTemplateParameter);
 
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
   if (token == TK_COMMA)
   {
-    Match(ctx);
+    Parser_Match(ctx);
     TemplateParameterList(ctx, list);
   }
 }
@@ -4729,10 +4769,10 @@ void TemplateDeclaration(Parser* ctx,  TDeclaration* pFuncVarDeclaration)
   */
   
   //template
-  MatchToken(ctx, TK_TEMPLATE);
-  MatchToken(ctx, TK_LESS_THAN_SIGN);
+  Parser_MatchToken(ctx, TK_TEMPLATE);
+  Parser_MatchToken(ctx, TK_LESS_THAN_SIGN);
   TemplateParameterList(ctx, &pFuncVarDeclaration->TemplateParameters);
-  MatchToken(ctx, TK_GREATER_THAN_SIGN);
+  Parser_MatchToken(ctx, TK_GREATER_THAN_SIGN);
 }
 
 bool  Declaration(Parser* ctx,
@@ -4745,7 +4785,7 @@ bool  Declaration(Parser* ctx,
   */
 
   bool bHasDeclaration = false;
-  Tokens token = Token(ctx);
+  Tokens token = Parser_CurrentToken(ctx);
 
   if (token == TK__STATIC_ASSERT)
   {
@@ -4796,19 +4836,19 @@ bool  Declaration(Parser* ctx,
       pFuncVarDeclaration->Line = GetCurrentLine(ctx);
       ASSERT(pFuncVarDeclaration->FileIndex >= 0);
 
-      token = Token(ctx);
+      token = Parser_CurrentToken(ctx);
 
       if (token == TK_SEMICOLON)
       {
         //TNodeClueList_MoveToEnd(&pFuncVarDeclaration->NodeClueList, &ctx->Scanner.NodeClueList);
-        Match(ctx);
+        Parser_Match(ctx);
       }
 
       else
       {
         //Agora vem os declaradores que possuem os ponteiros
         Init_Declarator_List(ctx, &pFuncVarDeclaration->InitDeclaratorList);
-        token = Token(ctx);
+        token = Parser_CurrentToken(ctx);
 
         if (token == TK_LEFT_CURLY_BRACKET)
         {
@@ -4820,7 +4860,7 @@ bool  Declaration(Parser* ctx,
 
         else
         {
-          MatchToken(ctx, TK_SEMICOLON);
+          Parser_MatchToken(ctx, TK_SEMICOLON);
         }
       }
 
@@ -4903,7 +4943,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
     }
     else
     {
-      if (Token(ctx) == TK_EOF)
+      if (Parser_CurrentToken(ctx) == TK_EOF)
       {
         //ok
       }

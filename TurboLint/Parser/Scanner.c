@@ -5,62 +5,7 @@
 BasicScanner * Scanner_Top(Scanner * pScanner);;
 void Scanner_MatchDontExpand(Scanner * pScanner);
 
-TNodeClue* TNodeClue_Create()
-{
-    TNodeClue* p = (TNodeClue*)malloc(sizeof * p);
-    if (p)
-    {
-        TNodeClue temp = TNODECLUE_INIT;
-        *p = temp;
-    }
-    return p;
-}
 
-void TNodeClue_Destroy(TNodeClue* p)
-{
-    StrBuilder_Destroy(&p->Text);
-}
-
-void TNodeClue_Delete(TNodeClue* p)
-{
-    if (p)
-    {
-        TNodeClue_Destroy(p);
-        free(p);
-    }
-}
-
-void TNodeClueList_MoveToEnd(TNodeClueList * pDest, TNodeClueList * pSource)
-{
-    if (pSource->pHead != NULL)
-    {
-        int pos = 0;
-        if (pDest->pHead == NULL)
-        {
-            pDest->pHead = pSource->pHead;
-            pDest->pTail = pSource->pTail;
-        }
-        else
-        {
-            pos = pDest->pTail->Position + 1;
-            ForEachListItem(TNodeClue, pItem, pSource)
-            {
-                pItem->Position = pos;
-            }
-            pDest->pTail->pNext = pSource->pHead;
-            pDest->pTail = pSource->pTail;
-        }
-        pSource->pHead = NULL;
-        pSource->pTail = NULL;
-    }
-}
-void TNodeClueList_SetPosition(TNodeClueList * p, int pos)
-{
-    ForEachListItem(TNodeClue, pItem, p)
-    {
-        pItem->Position = pos;
-    }
-}
 PPTokenType TokenToPPToken(Tokens token)
 {
     PPTokenType result = PPTokenType_Other;
@@ -348,11 +293,6 @@ Result PushExpandedMacro(Scanner* pScanner,
   const char* callString,
   const char* defineContent)
 {
-
-    TNodeClue* pClue = TNodeClue_Create();
-    pClue->Type = NodeClueTypeMacroCall;
-    StrBuilder_Append(&pClue->Text, callString);
-//    List_Add(&pScanner->NodeClueList, pClue);
 
     BasicScanner* pNewScanner;
     Result result = BasicScanner_Create(&pNewScanner,
@@ -735,7 +675,7 @@ void Scanner_Destroy(Scanner* pScanner)
     MacroMap_Destroy(&pScanner->Defines2);
     StrBuilder_Destroy(&pScanner->DebugString);
     //StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
-//    List_Destroy(TNodeClue, &pScanner->NodeClueList);
+//    List_Destroy(ScannerItem, &pScanner->NodeClueList);
     //List_Destroy(ScannerItem, &pScanner->AcumulatedTokens);
     StrBuilder_Destroy(&pScanner->ErrorString);
     ArrayInt_Destroy(&pScanner->StackIfDef);

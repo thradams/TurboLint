@@ -31,43 +31,9 @@ void TFile_DeleteVoid(void* p);
 typedef ArrayT(TFile) TFileArray;
 
 
-typedef enum
-{
-  NodeClueTypeNone,
-  NodeClueTypeDefine,
-  NodeClueTypeUndef,
-  NodeClueTypeComment,
-  NodeClueTypeLineComment,
-  NodeClueTypeSpaces,
-  NodeClueTypeBreakLine,
-  NodeClueTypeMacroCall,
-  NodeClueTypeMacroEndExpansion,
-} NodeClueType;
-
-typedef struct TNodeClue
-{
-  NodeClueType Type;
-  StrBuilder Text; //todo - usar string ja pronta
-  
-  //Para nao ter várias lista o position ajuda 
-  //a ter uma lista so com positions difentes
-  //ex position = 0 struct position = 1 name
-  //a lista eh para antes e depois da struct
-  //pelo position se diz se imprime antes ou depois
-  int Position;
-  struct TNodeClue* pNext;
-} TNodeClue;
-#define TNODECLUE_INIT { NodeClueTypeNone, STRBUILDER_INIT, 0, NULL }
-void TNodeClue_Delete(TNodeClue* p);
-
-typedef List(TNodeClue) TNodeClueList;
-#define TNODECLUELIST_INIT LIST_INIT
-#define TNodeClueList_Destroy(p) List_Destroy(TNodeClue, (p))
-//void TNodeClueList_SetPosition(TNodeClueList * p, int pos);
-void TNodeClueList_MoveToEnd(TNodeClueList * pDest, TNodeClueList * pSource);
 
 typedef List(ScannerItem) TScannerItemList;
-//#define TSCANNER_ITEM_LIST LIST_INIT
+#define TSCANNERITEMLIST_INIT LIST_INIT
 #define TScannerItemList_Destroy(p) List_Destroy(ScannerItem, (p))
 
 typedef struct
@@ -106,13 +72,6 @@ typedef struct
   //Quando true o scanner retorna tambem espacos
   bool bIncludeSpaces;
 
-  ///////////////////////////////////////////////////
-  //Indica que foi feita uma leitura especulativa
-//  bool bHasLookAhead;
-
-  //Valor lido na leitura especulativa
-  //ScannerItem LookAhead;
-  //BasicScanner* pLookAheadPreviousScanner;
 
   TScannerItemList AcumulatedTokens;
   ///////////////////////////////////////////////////
@@ -120,7 +79,7 @@ typedef struct
 
   //string para debug
   //StrBuilder PreprocessorAndCommentsString;
-  //TNodeClueList NodeClueList;
+  //TScannerItemList NodeClueList;
   bool bAmalgamationMode;
 
 } Scanner;

@@ -32,52 +32,52 @@ void Output_Append(StrBuilder* p,
     StrBuilder_Append(p, source);
 }
 
-static void TNodeClueList_CodePrint(TNodeClueList* list,
+static void TNodeClueList_CodePrint(TScannerItemList* list,
   StrBuilder* fp, int pos)
 {
-  ForEachListItem(TNodeClue, pNodeClue, list)
+  ForEachListItem(ScannerItem, pNodeClue, list)
   {
-    if (pNodeClue->Position != pos)
-      continue;
+   // if (pNodeClue->Position != pos)
+     // continue;
 
-    switch (pNodeClue->Type)
+    switch (pNodeClue->token)
     {
-    case NodeClueTypeDefine:
-    case NodeClueTypeUndef:
-      Output_Append(fp, pNodeClue->Text.c_str);
+    case TK_PRE_DEFINE:
+    case TK_PRE_UNDEF:
+      Output_Append(fp, pNodeClue->lexeme.c_str);
       Output_Append(fp, "\n");
       break;
 
-    case NodeClueTypeComment:
-      Output_Append(fp, pNodeClue->Text.c_str);
+    case TK_COMMENT:
+      Output_Append(fp, pNodeClue->lexeme.c_str);
       break;
     
-    case NodeClueTypeLineComment:
-      Output_Append(fp, pNodeClue->Text.c_str);
+    case TK_LINE_COMMENT:
+      Output_Append(fp, pNodeClue->lexeme.c_str);
       break;
 
-    case NodeClueTypeBreakLine:
+    case TK_BREAKLINE:
       Output_Append(fp, "\n");
       
       break;
 
-    case NodeClueTypeMacroCall:
+    case TK_MACRO_CALL:
       
       //Output_Append(fp, "/*");
-      Output_Append(fp, pNodeClue->Text.c_str);
+      Output_Append(fp, pNodeClue->lexeme.c_str);
       //Output_Append(fp, "*/");
       bInclude = false;
       break;
 
-    case NodeClueTypeMacroEndExpansion:
+    case TK_MACRO_EOF:
       bInclude = true;
       break;
 
-    case NodeClueTypeSpaces:
-      Output_Append(fp, pNodeClue->Text.c_str);
+    case TK_SPACES:
+      Output_Append(fp, pNodeClue->lexeme.c_str);
       break;
 
-    case NodeClueTypeNone:      
+    //case NodeClueTypeNone:      
     default:
       ASSERT(false);
       break;

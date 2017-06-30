@@ -28,6 +28,7 @@ typedef struct
 
   Map EnumMap;
 
+  TScannerItemList NodeClueList;
   TDeclarations Templates;
   TDeclarations TemplatesInstances;
 } Parser;
@@ -50,5 +51,5 @@ bool GetAST(const char * filename,
             TProgram* pProgram);
 
 
-Tokens MatchToken(Parser* parser, Tokens tk);
+Tokens Parser_MatchToken(Parser* parser, Tokens tk);
 void ConstantExpression(Parser* ctx, TExpression** ppExpression);
