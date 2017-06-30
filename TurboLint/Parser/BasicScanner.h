@@ -148,6 +148,26 @@ typedef enum
     TK__ASM, //visual c++
     TK_TEMPLATE,
     TK_CLASS,
+
+      //
+
+    //Tokens para linhas do pre processador
+    TK_PRE_INCLUDE,
+    TK_PRE_PRAGMA,
+    TK_PRE_IF,
+    TK_PRE_ELIF,
+    TK_PRE_IFNDEF,
+    TK_PRE_IFDEF,
+    TK_PRE_ENDIF,
+    TK_PRE_ELSE,
+    TK_PRE_ERROR,
+    TK_PRE_LINE,
+    TK_PRE_UNDEF,
+    TK_PRE_DEFINE,    
+    //fim tokens preprocessador
+    TK_MACRO_CALL,
+    TK_MACRO_EOF,
+    
 } Tokens;
 
 //APELIDOS PARA TOKENS
@@ -160,10 +180,13 @@ typedef enum
 //
 #define TK_MOVE TK_ANDAND
 
-typedef struct
+typedef struct ScannerItem
 {
     StrBuilder lexeme;
     Tokens token;
+    int Line;
+    int FileIndex;
+    struct ScannerItem* pNext;
 } ScannerItem;
 
 
@@ -174,9 +197,19 @@ void ScannerItem_Reset(ScannerItem* scannerItem);
 void ScannerItem_Swap(ScannerItem* scannerItem, ScannerItem* other);
 void ScannerItem_Destroy(ScannerItem* scannerItem);
 void ScannerItem_Copy(ScannerItem* scannerItem, ScannerItem* other);
+ScannerItem* ScannerItem_Create();
+void ScannerItem_Delete(ScannerItem* scannerItem);
+
+typedef enum 
+{
+  BasicScannerType_Macro,
+  BasicScannerType_Token,
+  BasicScannerType_File,
+} BasicScannerType;
 
 typedef struct BasicScanner
 {
+    BasicScannerType Type;
     SStream stream;
     ScannerItem currentItem;
 
@@ -184,11 +217,12 @@ typedef struct BasicScanner
     bool bLineStart;
     bool bMacroExpanded;
     int FileIndex;
+    Tokens m_Token;
     struct BasicScanner* pPrevious;
 
 } BasicScanner;
 
-Result      BasicScanner_Create(BasicScanner** pp, const char* name, const char* text);
+
 const char* BasicScanner_Lexeme(BasicScanner* scanner);
 bool        BasicScanner_IsLexeme(BasicScanner* scanner, const char* psz);
 void        BasicScanner_Next(BasicScanner* scanner);
@@ -198,7 +232,14 @@ void        BasicScanner_Delete(BasicScanner* pScanner);
 
 Result BasicScanner_Init(BasicScanner* pScanner,
                          const char* name,
-                         const char* text);
+                         const char* text,
+                         BasicScannerType Type);
+
+Result BasicScanner_Create(BasicScanner** pp,
+                           const char* name, 
+                           const char* text,
+                           BasicScannerType Type);
+
 void BasicScanner_Destroy(BasicScanner* pScanner);
 
 

@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
 {
 	printf("Turbo lint " __DATE__ "\n");
   
+  Test();
 
 	if (argc < 2)
 	{
@@ -75,7 +76,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-  Test();
+
 
 	const char* configFileName = argv[1];
 	const char* inputFileName = argv[2];

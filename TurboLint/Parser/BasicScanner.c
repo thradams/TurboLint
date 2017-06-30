@@ -245,11 +245,32 @@ const char* TokenToString(Tokens tk)
     return "???";
 }
 
+ScannerItem* ScannerItem_Create()
+{
+    ScannerItem* p = (ScannerItem*)malloc(sizeof * p);
+    if (p)
+    {
+        ScannerItem_Init(p);
+    }
+    return p;
+}
+void ScannerItem_Delete(ScannerItem* pScannerItem)
+{
+    if (pScannerItem)
+    {
+        ScannerItem_Destroy(pScannerItem);
+        free(pScannerItem);
+    }
+}
+
 void ScannerItem_Init(ScannerItem* scannerItem)
 {
     //scannerItem->lexeme = STRBUILDER_INIT;
     StrBuilder_Init(&scannerItem->lexeme, 100);
     scannerItem->token = TK_NONE;
+    scannerItem->pNext = NULL;
+    scannerItem->Line = 0;
+    scannerItem->FileIndex = -1;
 }
 
 void ScannerItem_Reset(ScannerItem* scannerItem)
@@ -281,8 +302,11 @@ void ScannerItem_Destroy(ScannerItem* scannerItem)
 
 Result BasicScanner_Init(BasicScanner* pBasicScanner,
                          const char* name,
-                         const char* text)
+                         const char* text,
+                         BasicScannerType Type)
 {
+    pBasicScanner->m_Token = TK_BOF;
+    pBasicScanner->Type = Type;
     pBasicScanner->pPrevious = NULL;
     pBasicScanner->FileIndex = -1;
     pBasicScanner->bLineStart = true;
@@ -293,7 +317,8 @@ Result BasicScanner_Init(BasicScanner* pBasicScanner,
     return RESULT_OK;
 }
 
-Result BasicScanner_InitFile(BasicScanner* pBasicScanner, const char* fileName)
+Result BasicScanner_InitFile(BasicScanner* pBasicScanner,
+                             const char* fileName)
 {
     pBasicScanner->pPrevious = NULL;
     pBasicScanner->FileIndex = -1;
@@ -308,13 +333,16 @@ Result BasicScanner_InitFile(BasicScanner* pBasicScanner, const char* fileName)
     return result;
 }
 
-Result BasicScanner_Create(BasicScanner** pp, const char* name, const char* text)
+Result BasicScanner_Create(BasicScanner** pp, 
+                           const char* name, 
+                           const char* text,
+                           BasicScannerType Type)
 {
     Result result = RESULT_OUT_OF_MEM;
     BasicScanner* p = (BasicScanner*)malloc(sizeof(BasicScanner));
     if(p)
     {
-        result = BasicScanner_Init(p, name, text);
+        result = BasicScanner_Init(p, name, text, Type);
         if(result == RESULT_OK)
         {
             *pp = p;
@@ -493,6 +521,33 @@ static struct TkPair keywords[] =
 
 void BasicScanner_Next(BasicScanner* scanner)
 {
+  if (scanner->Type == BasicScannerType_Token)
+  {
+    if (scanner->bLineStart)
+    {
+      ScannerItem_Reset(&scanner->currentItem);
+      scanner->currentItem.token = scanner->m_Token;
+      StrBuilder_Set(&scanner->currentItem.lexeme,
+                     scanner->stream.text);
+      scanner->bLineStart = false;
+    }
+    else
+    {
+      scanner->currentItem.token = TK_EOF;
+    }
+    return;
+  }
+  
+  if (scanner->currentItem.token == TK_MACRO_EOF)
+  {
+      scanner->currentItem.token = TK_EOF;
+      return;
+  }
+
+
+   scanner->currentItem.Line = scanner->stream.currentLine;
+   scanner->currentItem.FileIndex = scanner->FileIndex;
+
     //bool bLineStart = scanner->bLineStart;
     //scanner->bLineStart = false;
     wchar_t ch = '\0';
@@ -717,7 +772,15 @@ void BasicScanner_Next(BasicScanner* scanner)
     }
     if(ch == '\0')
     {
-        scanner->currentItem.token = TK_EOF;
+        if (scanner->bMacroExpanded)
+        {
+            scanner->currentItem.token = TK_MACRO_EOF;
+        }
+        else
+        {
+            scanner->currentItem.token = TK_EOF;
+        }
+        
         scanner->bLineStart = false;
         return;
     }

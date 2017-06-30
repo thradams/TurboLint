@@ -66,6 +66,10 @@ typedef List(TNodeClue) TNodeClueList;
 //void TNodeClueList_SetPosition(TNodeClueList * p, int pos);
 void TNodeClueList_MoveToEnd(TNodeClueList * pDest, TNodeClueList * pSource);
 
+typedef List(ScannerItem) TScannerItemList;
+//#define TSCANNER_ITEM_LIST LIST_INIT
+#define TScannerItemList_Destroy(p) List_Destroy(ScannerItem, (p))
+
 typedef struct
 {
   //Stack de basicscanner
@@ -104,34 +108,35 @@ typedef struct
 
   ///////////////////////////////////////////////////
   //Indica que foi feita uma leitura especulativa
-  bool bHasLookAhead;
+//  bool bHasLookAhead;
 
   //Valor lido na leitura especulativa
-  ScannerItem LookAhead;
+  //ScannerItem LookAhead;
   //BasicScanner* pLookAheadPreviousScanner;
 
+  TScannerItemList AcumulatedTokens;
   ///////////////////////////////////////////////////
 
 
   //string para debug
   //StrBuilder PreprocessorAndCommentsString;
-  TNodeClueList NodeClueList;
+  //TNodeClueList NodeClueList;
   bool bAmalgamationMode;
 
 } Scanner;
 
 void Scanner_SetError(Scanner* pScanner, const char* message);
 
-const char* Scanner_GetStreamName(Scanner* pScanner);
+//const char* Scanner_GetStreamName(Scanner* pScanner);
 Result Scanner_InitString(Scanner* pScanner,
   const char* name,
   const char* text);
 
 Result PushExpandedMacro(Scanner * pScanner, const char * defineName, const char * callString, const char * defineContent);
 
-const char* Scanner_TokenString(Scanner* pScanner);
-Tokens Scanner_Token(Scanner* pScanner);
-const char* Scanner_Lexeme(Scanner* pScanner);
+//const char* Scanner_TokenString(Scanner* pScanner);
+//Tokens Scanner_Token(Scanner* pScanner);
+//const char* Scanner_Lexeme(Scanner* pScanner);
 
 bool Scanner_IsActiveGroup(Scanner* pScanner);
 
@@ -153,17 +158,8 @@ void Scanner_IncludeFile_Version2(Scanner* pScanner,
   FileIncludeType fileIncludeType);
 
 void Scanner_Destroy(Scanner* pScanner);
-int Scanner_GetCurrentLine(Scanner * pScanner);
-int Scanner_GetFileIndex(Scanner * pScanner);
 
-Tokens Scanner_Token(Scanner * pScanner);
-const char * Scanner_Lexeme(Scanner * pScanner);
-
-int Scanner_Line(Scanner* scanner);
-int Scanner_Col(Scanner* scanner);
-void Scanner_Next(Scanner* pScanner);
-void Scanner_NextVersion2(Scanner* pScanner);
-void Scanner_Skip(Scanner* pScanner);
+//int Scanner_GetFileIndex(Scanner * pScanner);
 
 int EvalExpression(const char* s, Scanner* pScanner);
 void Scanner_PrintDebug(Scanner* pScanner);
@@ -173,9 +169,15 @@ void Scanner_GetError(Scanner* pScanner, StrBuilder* str);
 void PrintPreprocessedToFile(const char* fileIn,
   const char* configFileName);
 
-void Scanner_GetScannerItemCopy(Scanner* pScanner,
-  ScannerItem* scannerItem);
 
+//NOVA INTERFACE
 
+Tokens Scanner_CurrentToken(Scanner * pScanner);
+int Scanner_CurrentLine(Scanner * pScanner);
+int Scanner_CurrentFileIndex(Scanner * pScanner);
+const char * Scanner_CurrentLexeme(Scanner * pScanner);
 
-ScannerItem* Scanner_GetLookAhead(Scanner* pScanner);
+Tokens Scanner_LookAheadToken(Scanner * pScanner, int nLookAhead);
+const char * Scanner_LookAheadLexeme(Scanner * pScanner, int nLookAhead);
+
+void Scanner_Match(Scanner * pScanner);

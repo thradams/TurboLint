@@ -500,7 +500,7 @@ typedef struct
 void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifiers);
 
 struct TParameterDeclaration;
-typedef TParameterDeclaration TParameterDeclaration;
+typedef struct TParameterDeclaration TParameterDeclaration;
 typedef List(TParameterDeclaration) TParameterList;
 
 typedef struct TDesignator
