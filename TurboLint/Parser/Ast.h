@@ -535,10 +535,11 @@ typedef struct
 {
   TTypePointer Type;
   TInitializerList InitializerList;
-  TScannerItemList NodeClueList;
+  TScannerItemList NodeClueList1; //{
+  TScannerItemList NodeClueList2; //}
 } TInitializerListType;
 
-#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, TSCANNERITEMLIST_INIT}
+#define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TInitializerListType, TINITIALIZER_LIST_TYPE_INIT)
 
 

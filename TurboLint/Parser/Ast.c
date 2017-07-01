@@ -595,7 +595,8 @@ void TDesignator_Destroy(TDesignator* p)
 void  TInitializerListType_Destroy(TInitializerListType* pTInitializerListType)
 {
   TInitializerList_Destroy(&pTInitializerListType->InitializerList);
-  TScannerItemList_Destroy(&pTInitializerListType->NodeClueList);
+  TScannerItemList_Destroy(&pTInitializerListType->NodeClueList1);
+  TScannerItemList_Destroy(&pTInitializerListType->NodeClueList2);
 }
 
 void TInitializer_Destroy(TInitializer* p)

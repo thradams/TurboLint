@@ -1,6 +1,9 @@
 
 #include "Test\Test7.h"
 
+//a
+
+
 #define NULL  0
 #define F(a) a + 1
 
@@ -10,9 +13,11 @@ int i = 1;
 int i = 2;
 #endif
 
-int /*a*/main() 
+//#define P_INIT {}
+
+int /*a*/main()
 {
-  int* p =  {};
-  F(2);
+    int* p = {};
+    F(2);
 
 }

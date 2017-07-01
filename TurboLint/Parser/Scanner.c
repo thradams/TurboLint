@@ -1164,12 +1164,14 @@ Tokens FindPreToken(const char* lexeme)
     return token;
 }
 
-void GetPPTokens(Scanner* pScanner, TokenArray* pptokens)
+void GetPPTokens(Scanner* pScanner, TokenArray* pptokens, StrBuilder* strBuilder)
 {
     //Corpo da macro
     while (Scanner_CurrentToken(pScanner) != TK_BREAKLINE)
     {
         const char* lexeme = Scanner_CurrentLexeme(pScanner);
+        StrBuilder_Append(strBuilder, lexeme);
+
         //TODO comentarios entram como espaco 
         PPToken* ppToken = PPToken_Create(lexeme, TokenToPPToken(Scanner_CurrentToken(pScanner)));
         TokenArray_Push(pptokens, ppToken);
@@ -1233,6 +1235,7 @@ void ParsePreDefinev2(Scanner* pScanner, StrBuilder* strBuilder)
 
             if (token == TK_RIGHT_PARENTHESIS)
             {
+                StrBuilder_Append(strBuilder, Scanner_CurrentLexeme(pScanner));
                 Scanner_MatchDontExpand(pScanner);
                 break;
             }
@@ -1273,7 +1276,7 @@ void ParsePreDefinev2(Scanner* pScanner, StrBuilder* strBuilder)
 
     Scanner_MatchAllPreprocessorSpaces(pScanner, strBuilder);
 
-    GetPPTokens(pScanner, &pNewMacro->TokenSequence);
+    GetPPTokens(pScanner, &pNewMacro->TokenSequence, strBuilder);
 
 
 
@@ -1283,14 +1286,14 @@ void ParsePreDefinev2(Scanner* pScanner, StrBuilder* strBuilder)
 }
 
 
-int EvalPre(Scanner* pScanner)
+int EvalPre(Scanner* pScanner, StrBuilder* sb)
 {
     //pega todos os tokens ate o final da linha expande e
     //avalia
     //usado no #if #elif etc.
 
     TokenArray pptokens = TOKENARRAY_INIT;
-    GetPPTokens(pScanner, &pptokens);
+    GetPPTokens(pScanner, &pptokens, sb);
     StrBuilder strBuilder = STRBUILDER_INIT;
     ExpandMacroToText(&pptokens,
       &pScanner->Defines2,
@@ -1517,7 +1520,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
                     if (preToken == TK_PRE_IF)
                     {
-                        iRes = EvalPre(pScanner);
+                        iRes = EvalPre(pScanner, &strBuilder);
                     }
 
                     else
@@ -1575,7 +1578,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
                 case I0:
                 {
-                    int iRes = EvalPre(pScanner);
+                    int iRes = EvalPre(pScanner, &strBuilder);
 
                     if (pScanner->StackIfDef.size >= 2)
                     {

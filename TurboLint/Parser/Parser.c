@@ -529,13 +529,12 @@ Tokens Parser_Match(Parser* parser, TScannerItemList* listOpt)
   Tokens token = TK_EOF;
   if (!HasErrors(parser))
   {
-    //mover
+    
     if (listOpt)
     {
         List_Swap(ScannerItem, listOpt, &parser->NodeClueList);
     }
-    //List_Clear(ScannerItem, &parser->NodeClueList);
-
+    
     Scanner_Match(&parser->Scanner);
 
     token = Scanner_CurrentToken(&parser->Scanner);
@@ -4550,19 +4549,15 @@ void Initializer(Parser* ctx,
 
   if (token == TK_LEFT_CURLY_BRACKET)
   {
-
-
     TInitializerListType* pTInitializerList = TInitializerListType_Create();
     *ppInitializer = (TInitializer*)pTInitializerList;
 
-    //TNodeClueList_MoveToEnd(&pTInitializerList->NodeClueList, &ctx->Scanner.NodeClueList);
-    Parser_Match(ctx, &pTInitializerList->NodeClueList);
+    Parser_Match(ctx, &pTInitializerList->NodeClueList1);
 
     Initializer_List(ctx, &pTInitializerList->InitializerList);
 
-    //TNodeClueList_MoveToEnd(&pTInitializerList->NodeClueList, &ctx->Scanner.NodeClueList);
     Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET,
-        &pTInitializerList->NodeClueList);
+        &pTInitializerList->NodeClueList2);
   }
 
   else
