@@ -1,5 +1,8 @@
 #include "Test\Test7.h"
 
+//#ifndef _UCRT
+//#define _UCRT
+//#endif
 //a
 
 

@@ -1420,17 +1420,20 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
                 else if (Scanner_CurrentToken(pScanner) == TK_LESS_THAN_SIGN)
                 {
-                    StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                    Scanner_Match(pScanner);
+                    StrBuilder_Append(&strBuilder, Scanner_CurrentLexeme(pScanner));
+                    
+                    Scanner_MatchDontExpand(pScanner);
+
                     StrBuilder path = STRBUILDER_INIT;
 
                     //StrBuilder_Init(&path, 200);
                     for (;;)
                     {
+                        StrBuilder_Append(&strBuilder, Scanner_CurrentLexeme(pScanner));
+
                         if (Scanner_CurrentToken(pScanner) == TK_GREATER_THAN_SIGN)
                         {
-                            StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                            Scanner_Match(pScanner);
+                            Scanner_MatchDontExpand(pScanner);
                             break;
                         }
 
@@ -1439,9 +1442,9 @@ void Scanner_NextVersion2(Scanner* pScanner)
                             //oopps
                             break;
                         }
-                        StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                        StrBuilder_Append(&path, Scanner_CurrentLexeme(pScanner));
                         
+                        StrBuilder_Append(&path, Scanner_CurrentLexeme(pScanner));
+                        Scanner_MatchDontExpand(pScanner);
                         
                     }
                     IgnorePreProcessorv2(pScanner, &strBuilder);
@@ -1458,6 +1461,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
             if (IsIncludeState(state))
             {
                 StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
+                
                 Scanner_MatchDontExpand(pScanner);
                 Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
@@ -1505,9 +1509,8 @@ void Scanner_NextVersion2(Scanner* pScanner)
           preToken == TK_PRE_IFNDEF)
         {
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-            //Match if
-            BasicScanner_Match(pTopScanner);
-
+            
+            Scanner_MatchDontExpand(pScanner);
             Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
             switch (state)
@@ -1567,7 +1570,9 @@ void Scanner_NextVersion2(Scanner* pScanner)
         {
             //Match elif
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-            BasicScanner_Match(pTopScanner);
+            
+            Scanner_MatchDontExpand(pScanner);
+            Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
             switch (state)
             {
@@ -1618,7 +1623,9 @@ void Scanner_NextVersion2(Scanner* pScanner)
         {
             //Match elif
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-            BasicScanner_Match(pTopScanner);
+            
+            Scanner_MatchDontExpand(pScanner);
+            Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
             IgnorePreProcessorv2(pScanner, &strBuilder);
             StatePop(pScanner);
@@ -1730,7 +1737,6 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
                 
                 Scanner_MatchDontExpand(pScanner);
-
                 Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
                 //se ja existe deletar

@@ -81,6 +81,18 @@ int main(int argc, char* argv[])
 	const char* configFileName = argv[1];
 	const char* inputFileName = argv[2];
 
+    if (argc > 2)
+    {
+        configFileName = argv[1];
+        inputFileName = argv[2];
+    }
+    else
+    {
+        //nao tem config
+        configFileName = NULL;
+        inputFileName = argv[1];
+    }
+
 	bool bAmalgamationMode = false;
 	bool bPrintPreprocessed = false;
 	for (int i = 3; i < argc; i++)
