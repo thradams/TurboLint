@@ -39,7 +39,7 @@ int i = 2;
  int main()
 
 {
-  //int* p =  NULL;
+   int* p = NULL;  
   F(2) 1;
 
 }

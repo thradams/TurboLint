@@ -183,9 +183,63 @@ void Test6()
     ///////////////////////////
 }
 
+void Test7()
+{
+    //
+    Scanner scanner2;
+    Scanner_Init(&scanner2);
+    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test7.h", FileIncludeTypeQuoted);
+    MATCH(&scanner2, TK_BOF)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_PRE_PRAGMA)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_VOID)
+    MATCH(&scanner2, TK_SPACES)
+    MATCH(&scanner2, TK_IDENTIFIER)
+    MATCH(&scanner2, TK_LEFT_PARENTHESIS)
+    MATCH(&scanner2, TK_RIGHT_PARENTHESIS)
+    MATCH(&scanner2, TK_SEMICOLON)
+    MATCH(&scanner2, TK_BREAKLINE)
+    MATCH(&scanner2, TK_EOF)
+    Scanner_Destroy(&scanner2);
+    ///////////////////////////
+
+    Scanner_Init(&scanner2);
+    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test7.c", FileIncludeTypeQuoted);
+    MATCH(&scanner2, TK_BOF)
+        
+        MATCH(&scanner2, TK_PRE_INCLUDE)
+
+        MATCH(&scanner2, TK_BREAKLINE)
+        MATCH(&scanner2, TK_PRE_PRAGMA)
+        MATCH(&scanner2, TK_BREAKLINE)
+        MATCH(&scanner2, TK_VOID)
+        MATCH(&scanner2, TK_SPACES)
+        MATCH(&scanner2, TK_IDENTIFIER)
+        MATCH(&scanner2, TK_LEFT_PARENTHESIS)
+        MATCH(&scanner2, TK_RIGHT_PARENTHESIS)
+        MATCH(&scanner2, TK_SEMICOLON)
+        MATCH(&scanner2, TK_BREAKLINE)
+        //MATCH(&scanner2, TK_EOF)
+
+
+        MATCH(&scanner2, TK_VOID)
+        MATCH(&scanner2, TK_SPACES)
+        MATCH(&scanner2, TK_IDENTIFIER)
+        MATCH(&scanner2, TK_LEFT_PARENTHESIS)
+        MATCH(&scanner2, TK_RIGHT_PARENTHESIS)
+        MATCH(&scanner2, TK_SEMICOLON)
+        MATCH(&scanner2, TK_BREAKLINE)
+
+        MATCH(&scanner2, TK_EOF)
+        Scanner_Destroy(&scanner2);
+
+}
+
 void Test()
 {
     printf("RUNNING TESTS ...\n");
+    Test7();
     Test3();
 
 

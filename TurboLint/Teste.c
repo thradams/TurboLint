@@ -11,7 +11,7 @@ int i = 2;
 
 int /*a*/main() 
 {
-  //int* p =  NULL;
+  int* p =  {};
   F(2) 1;
 
 }

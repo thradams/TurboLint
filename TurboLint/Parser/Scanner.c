@@ -787,7 +787,7 @@ void IgnorePreProcessorv2(Scanner* pScanner, StrBuilder* strBuilder)
     {
         if (pTop->currentItem.token == TK_BREAKLINE)
         {
-            BasicScanner_Next(Scanner_Top(pScanner));
+            BasicScanner_Next(pTop);
             break;
         }
         StrBuilder_Append(strBuilder, pTop->currentItem.lexeme.c_str);
@@ -1330,7 +1330,7 @@ static void Scanner_PushToken(Scanner* pScanner,
     }
 }
 
-void Scanner_NextCorev2(Scanner* pScanner)
+void Scanner_NextVersion2(Scanner* pScanner)
 {
     if (pScanner->bError)
     {
@@ -1384,7 +1384,8 @@ void Scanner_NextCorev2(Scanner* pScanner)
             if (IsIncludeState(state))
             {
                 StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                Scanner_Match(pScanner);
+                Scanner_MatchDontExpand(pScanner);//include
+                Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);//[ ] 
 
                 if (Scanner_CurrentToken(pScanner) == TK_STRING_LITERAL)
                 {
@@ -1395,7 +1396,11 @@ void Scanner_NextCorev2(Scanner* pScanner)
                     Scanner_Match(pScanner);
 
                     fileName[strlen(fileName) - 1] = 0;
+
+                    //tem que ser antes de colocar o outro na pilha
                     IgnorePreProcessorv2(pScanner, &strBuilder);
+
+                    //IgnorePreProcessorv2(pScanner, &strBuilder);
                     //pode ou nao incluir depende do pragma once
                     Scanner_IncludeFile(pScanner, fileName, FileIncludeTypeQuoted);
                     String_Destroy(&fileName);
@@ -1425,14 +1430,15 @@ void Scanner_NextCorev2(Scanner* pScanner)
                         }
                         StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
                         StrBuilder_Append(&path, Scanner_CurrentLexeme(pScanner));
-                        Scanner_Match(pScanner);
+                        
+                        
                     }
-
+                    IgnorePreProcessorv2(pScanner, &strBuilder);
                     //pode ou nao incluir depende do pragma once
                     Scanner_IncludeFile(pScanner, path.c_str, FileIncludeTypeIncludes);
                     StrBuilder_Destroy(&path);
                 }
-                IgnorePreProcessorv2(pScanner, &strBuilder);
+                
                 Scanner_PushToken(pScanner, TK_PRE_INCLUDE, strBuilder.c_str);
             }
         }
@@ -1441,7 +1447,8 @@ void Scanner_NextCorev2(Scanner* pScanner)
             if (IsIncludeState(state))
             {
                 StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                Scanner_Match(pScanner);
+                Scanner_MatchDontExpand(pScanner);
+                Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
                 if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "once"))
                 {
@@ -1473,32 +1480,7 @@ void Scanner_NextCorev2(Scanner* pScanner)
                     String_Destroy(&fileName);
                 }
 
-                else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "mydir"))
-                {
-
-                    pScanner->bAmalgamationMode = true;
-                    StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                    Scanner_Match(pScanner);
-                    String fileName;
-                    String_Init(&fileName, Scanner_CurrentLexeme(pScanner) + 1);
-                    Scanner_Match(pScanner);
-                    fileName[strlen(fileName) - 1] = 0;
-                    StrArray_Push(&pScanner->MySourceDir, fileName);
-                    String_Destroy(&fileName);
-                }
-
-                else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "ignore"))
-                {
-                    StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                    Scanner_Match(pScanner);
-                    String fileName;
-                    String_Init(&fileName, Scanner_CurrentLexeme(pScanner) + 1);
-                    Scanner_Match(pScanner);
-                    fileName[strlen(fileName) - 1] = 0;
-                    TFile* pFile = TFile_Create();
-                    TFileMap_Set(&pScanner->FilesIncluded, fileName, pFile);
-                }
-
+               
                 IgnorePreProcessorv2(pScanner, &strBuilder);
                 Scanner_PushToken(pScanner, TK_PRE_PRAGMA, strBuilder.c_str);
             }
@@ -1831,16 +1813,6 @@ void Scanner_NextCorev2(Scanner* pScanner)
 
 }
 
-void Scanner_NextVersion2(Scanner* pScanner)
-{
-    Scanner_NextCorev2(pScanner);    
-}
-
-//const char* Scanner_TokenString(Scanner* pScanner)
-//{
-  //  return TokenToString(Scanner_Top(pScanner)->currentItem.token);
-//}
-//
 
 
 void PrintPreprocessedToFile(const char* fileIn,
