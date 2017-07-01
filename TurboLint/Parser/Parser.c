@@ -5048,7 +5048,11 @@ bool GetAST(const char*  filename,
   Parser_InitFile(&parser, fullConfigFilePath);
   Parser_Main(&parser, &pProgram->Declarations);
 
-//  StrBuilder_Clear(&parser.Scanner.PreprocessorAndCommentsString);
+  //Some com o arquivo de config
+  List_Clear(ScannerItem, &parser.NodeClueList);
+  BasicScannerStack_Pop(&parser.Scanner.stack);
+  //Some com o arquivo de config
+
 
   parser.Scanner.bAmalgamationMode = bAmalgamationMode;
   if (!parser.Scanner.bAmalgamationMode)
