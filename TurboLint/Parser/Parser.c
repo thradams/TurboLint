@@ -5054,17 +5054,7 @@ bool GetAST(const char*  filename,
   //Some com o arquivo de config
 
 
-  parser.Scanner.bAmalgamationMode = bAmalgamationMode;
-  if (!parser.Scanner.bAmalgamationMode)
-  {
-    StrArray_Clear(&parser.Scanner.MySourceDir);
-    StrArray_Push(&parser.Scanner.MySourceDir, fullFileNamePath);
-  }
-  else
-  {
-    //usar #pragma mydir para definir diretorio do usuario
-  }
-
+  
   //parser.scanner.bPrintIncludes = true;
   if (filename != NULL)
   {
@@ -5078,7 +5068,7 @@ bool GetAST(const char*  filename,
 
   MacroMap_Swap(&parser.Scanner.Defines2, &pProgram->Defines);
   Map_Swap(&parser.EnumMap, &pProgram->EnumMap);
-  StrArray_Swap(&parser.Scanner.MySourceDir, &pProgram->MySourceDir);
+
 
   bResult = !parser.bError;
 

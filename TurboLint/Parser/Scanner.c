@@ -236,7 +236,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
 {
     List_Init(&pScanner->AcumulatedTokens);
 
-    pScanner->bAmalgamationMode = false;
+
     //TFileMap_init
     //pScanner->IncludeDir
     Map_Init(&pScanner->FilesIncluded, 100);
@@ -256,7 +256,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
     BasicScannerStack_Init(&pScanner->stack);
 
     StrArray_Init(&pScanner->IncludeDir);
-    StrArray_Init(&pScanner->MySourceDir);
+
 
     //Indica que foi feita uma leitura especulativa
     //pScanner->bHasLookAhead = false;
@@ -682,7 +682,7 @@ void Scanner_Destroy(Scanner* pScanner)
     BasicScannerStack_Destroy(&pScanner->stack);
     TFileMap_Destroy(&pScanner->FilesIncluded);
     StrArray_Destroy(&pScanner->IncludeDir);
-    StrArray_Destroy(&pScanner->MySourceDir);
+
     //Valor lido na leitura especulativa
     //ScannerItem_Destroy(&pScanner->LookAhead);
 }

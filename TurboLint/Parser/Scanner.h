@@ -53,9 +53,6 @@ typedef struct
   //Lista de diretorios de include
   StrArray IncludeDir;
 
-  //Lista de diretorios considerados codigo do usuario
-  StrArray MySourceDir;
-
   //string para debug
   StrBuilder DebugString;
 
@@ -75,13 +72,6 @@ typedef struct
 
   TScannerItemList AcumulatedTokens;
   ///////////////////////////////////////////////////
-
-
-  //string para debug
-  //StrBuilder PreprocessorAndCommentsString;
-  //TScannerItemList NodeClueList;
-  bool bAmalgamationMode;
-
 } Scanner;
 
 void Scanner_SetError(Scanner* pScanner, const char* message);
