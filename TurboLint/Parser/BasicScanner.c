@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "Parser.h"
 
-wchar_t BasicScanner_Match(BasicScanner* scanner);
+wchar_t BasicScanner_MatchChar(BasicScanner* scanner);
 
 const char* TokenToString(Tokens tk)
 {
@@ -518,6 +518,23 @@ static struct TkPair keywords[] =
     {"class", TK_CLASS}
 
 };
+void BasicScanner_Next(BasicScanner* scanner);
+void BasicScanner_Match(BasicScanner* scanner)
+{
+    BasicScanner_Next(scanner);
+}
+
+bool BasicScanner_MatchToken(BasicScanner* scanner, Tokens token)
+{
+    bool b = false;
+    if (scanner->currentItem.token == token)
+    {
+        b = true;
+        BasicScanner_Match(scanner);
+    }
+    return b;
+}
+
 
 void BasicScanner_Next(BasicScanner* scanner)
 {
@@ -538,7 +555,8 @@ void BasicScanner_Next(BasicScanner* scanner)
     return;
   }
   
-  if (scanner->currentItem.token == TK_MACRO_EOF)
+  if (scanner->currentItem.token == TK_MACRO_EOF ||
+      scanner->currentItem.token == TK_FILE_EOF)
   {
       scanner->currentItem.token = TK_EOF;
       return;
@@ -556,13 +574,13 @@ void BasicScanner_Next(BasicScanner* scanner)
     wchar_t ch1 = SStream_LookAhead(&scanner->stream);
     if(ch == '.' && ch1 == '.')
     {
-        BasicScanner_Match(scanner);
-        ch = BasicScanner_Match(scanner);
+        BasicScanner_MatchChar(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         if(ch != '.')
         {
             scanner->currentItem.token = TK_ERROR;
         }
-        BasicScanner_Match(scanner);
+        BasicScanner_MatchChar(scanner);
         scanner->currentItem.token = TK_DOTDOTDOT;
         return;
     }
@@ -573,8 +591,8 @@ void BasicScanner_Next(BasicScanner* scanner)
                 doubleoperators[i].lexeme[1] == ch1)
         {
             scanner->currentItem.token = doubleoperators[i].token;
-            BasicScanner_Match(scanner);
-            BasicScanner_Match(scanner);
+            BasicScanner_MatchChar(scanner);
+            BasicScanner_MatchChar(scanner);
             scanner->bLineStart = false;
             return;
         }
@@ -585,7 +603,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         if(singleoperators[i].lexeme[0] == ch)
         {
             scanner->currentItem.token = singleoperators[i].token;
-            BasicScanner_Match(scanner);
+            BasicScanner_MatchChar(scanner);
             scanner->bLineStart = false;
             return;
         }
@@ -600,26 +618,26 @@ void BasicScanner_Next(BasicScanner* scanner)
     {
         if(ch == 'L')
         {
-            ch = BasicScanner_Match(scanner); //L
+            ch = BasicScanner_MatchChar(scanner); //L
         }
         scanner->currentItem.token = TK_STRING_LITERAL;
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         for(;;)
         {
             if(ch == '\"')
             {
-                ch = BasicScanner_Match(scanner);
+                ch = BasicScanner_MatchChar(scanner);
                 break;
             }
             else if(ch == '\\')
             {
                 //escape
-                ch = BasicScanner_Match(scanner);
-                ch = BasicScanner_Match(scanner);
+                ch = BasicScanner_MatchChar(scanner);
+                ch = BasicScanner_MatchChar(scanner);
             }
             else
             {
-                ch = BasicScanner_Match(scanner);
+                ch = BasicScanner_MatchChar(scanner);
             }
         }
         scanner->bLineStart = false;
@@ -632,21 +650,21 @@ void BasicScanner_Next(BasicScanner* scanner)
     {
         if(ch == 'L')
         {
-            ch = BasicScanner_Match(scanner); //L
+            ch = BasicScanner_MatchChar(scanner); //L
         }
         scanner->currentItem.token = TK_CHAR_LITERAL;
-        ch = BasicScanner_Match(scanner); //'
+        ch = BasicScanner_MatchChar(scanner); //'
         if(ch == '\\')
         {
             //escape
-            ch = BasicScanner_Match(scanner); //
-            ch = BasicScanner_Match(scanner); //caractere
+            ch = BasicScanner_MatchChar(scanner); //
+            ch = BasicScanner_MatchChar(scanner); //caractere
         }
         else
         {
-            ch = BasicScanner_Match(scanner);//caractere
+            ch = BasicScanner_MatchChar(scanner);//caractere
         }
-        ch = BasicScanner_Match(scanner);//'
+        ch = BasicScanner_MatchChar(scanner);//'
         scanner->bLineStart = false;
         return;
     }
@@ -656,13 +674,13 @@ void BasicScanner_Next(BasicScanner* scanner)
             ch == '_')
     {
         scanner->currentItem.token = TK_IDENTIFIER;
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         while((ch >= 'a' && ch <= 'z') ||
                 (ch >= 'A' && ch <= 'Z') ||
                 (ch >= '0' && ch <= '9') ||
                 ch == '_')
         {
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         //vê se é keywords e corrige o token
         for(size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++)
@@ -680,20 +698,20 @@ void BasicScanner_Next(BasicScanner* scanner)
     }
     if(ch == '0' && (ch1 == 'x' || ch1 == 'X'))
     {
-        ch = BasicScanner_Match(scanner);
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         scanner->currentItem.token = TK_HEX_INTEGER;
         while((ch >= '0' && ch <= '9') ||
                 (ch >= 'A' && ch <= 'F') ||
                 (ch >= 'a' && ch <= 'f'))
         {
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         if(ch == 'L')
         {
             //sufixos! por enquanto so ignoro
             //1L
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         return;
     }
@@ -701,10 +719,10 @@ void BasicScanner_Next(BasicScanner* scanner)
     if(ch >= '0' && ch <= '9')
     {
         scanner->currentItem.token = TK_DECIMAL_INTEGER;
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         while((ch >= '0' && ch <= '9'))
         {
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         
         //integer-suffix:
@@ -712,7 +730,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         bool bHasIntegerSuffix = false;
         while (ch == 'l' || ch == 'L' || ch == 'u' || ch == 'U')
         {
-          ch = BasicScanner_Match(scanner);
+          ch = BasicScanner_MatchChar(scanner);
           bHasIntegerSuffix = true;
         }
         
@@ -724,25 +742,25 @@ void BasicScanner_Next(BasicScanner* scanner)
         {
             if(ch == '.')
             {
-                ch = BasicScanner_Match(scanner);
+                ch = BasicScanner_MatchChar(scanner);
                 scanner->currentItem.token = TK_FLOAT_NUMBER;
                 while((ch >= '0' && ch <= '9'))
                 {
-                    ch = BasicScanner_Match(scanner);
+                    ch = BasicScanner_MatchChar(scanner);
                 }
             }
             if(scanner->stream.currentChar == 'e' ||
                     scanner->stream.currentChar == 'E')
             {
-                ch = BasicScanner_Match(scanner);
+                ch = BasicScanner_MatchChar(scanner);
                 if(ch == '-' ||
                         ch == '+')
                 {
-                    BasicScanner_Match(scanner);
+                    BasicScanner_MatchChar(scanner);
                 }
                 while((ch >= '0' && ch <= '9'))
                 {
-                    ch = BasicScanner_Match(scanner);
+                    ch = BasicScanner_MatchChar(scanner);
                 }
             }
         }
@@ -758,11 +776,11 @@ void BasicScanner_Next(BasicScanner* scanner)
             //so coloca \n
             SStream_Next(&scanner->stream);
             ch = scanner->stream.currentChar;
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         else
         {
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
             StrBuilder_Clear(&scanner->currentItem.lexeme);
             //normaliza para windows?
             StrBuilder_Append(&scanner->currentItem.lexeme, "\r\n");
@@ -778,7 +796,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         }
         else
         {
-            scanner->currentItem.token = TK_EOF;
+            scanner->currentItem.token = TK_FILE_EOF;
         }
         
         scanner->bLineStart = false;
@@ -787,17 +805,17 @@ void BasicScanner_Next(BasicScanner* scanner)
     if(ch == '\f')
     {
         scanner->currentItem.token = TK_SPACES;
-        BasicScanner_Match(scanner);
+        BasicScanner_MatchChar(scanner);
         return;
     }
     //espacos
     if(ch == ' ' || ch == '\t')
     {
         scanner->currentItem.token = TK_SPACES;
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         while(ch == ' ' || ch == '\t')
         {
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         //continua com scanner->bLineStart
         return;
@@ -809,7 +827,7 @@ void BasicScanner_Next(BasicScanner* scanner)
     //
     if(scanner->stream.currentChar == '#')
     {
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         if(scanner->bLineStart)
         {
             scanner->currentItem.token = TK_PREPROCESSOR;
@@ -826,28 +844,28 @@ void BasicScanner_Next(BasicScanner* scanner)
         if(ch1 == '/')
         {
             scanner->currentItem.token = TK_LINE_COMMENT;
-            ch = BasicScanner_Match(scanner);
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
+            ch = BasicScanner_MatchChar(scanner);
             while(ch != '\r' &&
                     ch != '\n' &&
                     ch != '\0')
             {
-                ch = BasicScanner_Match(scanner);
+                ch = BasicScanner_MatchChar(scanner);
             }
         }
         else if(ch1 == '*')
         {
             scanner->currentItem.token = TK_COMMENT;
-            ch = BasicScanner_Match(scanner);
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
+            ch = BasicScanner_MatchChar(scanner);
             for(;;)
             {
                 if(ch == '*')
                 {
-                    ch = BasicScanner_Match(scanner);
+                    ch = BasicScanner_MatchChar(scanner);
                     if(ch == '/')
                     {
-                        ch = BasicScanner_Match(scanner);
+                        ch = BasicScanner_MatchChar(scanner);
                         break;
                     }
                 }
@@ -858,7 +876,7 @@ void BasicScanner_Next(BasicScanner* scanner)
                     ch = scanner->stream.currentChar;
                     if(ch == L'\n')
                     {
-                        ch = BasicScanner_Match(scanner);
+                        ch = BasicScanner_MatchChar(scanner);
                     }
                     else
                     {
@@ -866,11 +884,11 @@ void BasicScanner_Next(BasicScanner* scanner)
                 }
                 else if(ch == L'\n')
                 {
-                    ch = BasicScanner_Match(scanner);
+                    ch = BasicScanner_MatchChar(scanner);
                 }
                 else
                 {
-                    ch = BasicScanner_Match(scanner);
+                    ch = BasicScanner_MatchChar(scanner);
                 }
             }
             //scanner->bLineStart = true;
@@ -879,7 +897,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         else
         {
             scanner->currentItem.token = TK_SOLIDUS;
-            ch = BasicScanner_Match(scanner);
+            ch = BasicScanner_MatchChar(scanner);
         }
         return;
     }
@@ -922,20 +940,20 @@ void BasicScanner_Next(BasicScanner* scanner)
         //StrBuilder_AppendChar(&scanner->currentItem.lexeme, L' ');
         
         scanner->bLineStart = false;
-        BasicScanner_Next(scanner);
+        BasicScanner_Match(scanner);
         
         return;
     }
     if(ch == 2)  //peguei um
     {
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         scanner->currentItem.token = TK_MACROPLACEHOLDER;
         scanner->bLineStart = false;
         return;
     }
     if(ch == '\\')
     {
-        ch = BasicScanner_Match(scanner);
+        ch = BasicScanner_MatchChar(scanner);
         scanner->currentItem.token = REVERSE_SOLIDUS;
         return;
     }
@@ -958,7 +976,7 @@ bool BasicScanner_IsLexeme(BasicScanner* scanner, const char* psz)
     return strcmp(BasicScanner_Lexeme(scanner), psz) == 0;
 }
 
-wchar_t BasicScanner_Match(BasicScanner* scanner)
+wchar_t BasicScanner_MatchChar(BasicScanner* scanner)
 {
     StrBuilder_AppendWChar(&scanner->currentItem.lexeme,
                            scanner->stream.currentChar);

@@ -167,6 +167,7 @@ typedef enum
     //fim tokens preprocessador
     TK_MACRO_CALL,
     TK_MACRO_EOF,
+    TK_FILE_EOF,
     
 } Tokens;
 
@@ -225,7 +226,9 @@ typedef struct BasicScanner
 
 const char* BasicScanner_Lexeme(BasicScanner* scanner);
 bool        BasicScanner_IsLexeme(BasicScanner* scanner, const char* psz);
-void        BasicScanner_Next(BasicScanner* scanner);
+//void        BasicScanner_Match(BasicScanner* scanner);
+void        BasicScanner_Match(BasicScanner* scanner);
+bool         BasicScanner_MatchToken(BasicScanner* scanner, Tokens token);
 Result      BasicScanner_InitFile(BasicScanner* pScanner, const char* fileName);
 Result      BasicScanner_CreateFile(const char* fileName, BasicScanner** pp);
 void        BasicScanner_Delete(BasicScanner* pScanner);

@@ -19,13 +19,13 @@
 #define __int64 
 
 
-#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\shared"
-#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\um"
-#pragma dir "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\include"
-#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\ucrt"
-#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\um"
-#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\shared"
-#pragma dir "C:\Program Files (x86)\Windows Kits\10\Include\shared"
+#pragma dir 
+#pragma dir 
+#pragma dir 
+#pragma dir 
+#pragma dir 
+#pragma dir 
+#pragma dir 
 
 #define NULL  
 #define F(a 

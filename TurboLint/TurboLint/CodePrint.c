@@ -73,6 +73,10 @@ static void TNodeClueList_CodePrint(TScannerItemList* list,
       //Output_Append(fp, "*/");
       bInclude = false;
       break;
+    
+    case TK_FILE_EOF:
+        bInclude = true;
+        break;
 
     case TK_MACRO_EOF:
       bInclude = true;

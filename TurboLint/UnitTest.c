@@ -190,6 +190,7 @@ void Test7()
     Scanner_Init(&scanner2);
     Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test7.h", FileIncludeTypeQuoted);
     MATCH(&scanner2, TK_BOF)
+    //Test7.h
     MATCH(&scanner2, TK_BREAKLINE)
     MATCH(&scanner2, TK_PRE_PRAGMA)
     MATCH(&scanner2, TK_BREAKLINE)
@@ -201,6 +202,7 @@ void Test7()
     MATCH(&scanner2, TK_SEMICOLON)
     MATCH(&scanner2, TK_BREAKLINE)
     MATCH(&scanner2, TK_EOF)
+    //Test7.h
     Scanner_Destroy(&scanner2);
     ///////////////////////////
 
@@ -210,6 +212,7 @@ void Test7()
         
         MATCH(&scanner2, TK_PRE_INCLUDE)
 
+        //Test7.h
         MATCH(&scanner2, TK_BREAKLINE)
         MATCH(&scanner2, TK_PRE_PRAGMA)
         MATCH(&scanner2, TK_BREAKLINE)
@@ -220,9 +223,10 @@ void Test7()
         MATCH(&scanner2, TK_RIGHT_PARENTHESIS)
         MATCH(&scanner2, TK_SEMICOLON)
         MATCH(&scanner2, TK_BREAKLINE)
-        //MATCH(&scanner2, TK_EOF)
+        MATCH(&scanner2, TK_FILE_EOF)
+        //Test7.h
 
-
+        MATCH(&scanner2, TK_BREAKLINE)
         MATCH(&scanner2, TK_VOID)
         MATCH(&scanner2, TK_SPACES)
         MATCH(&scanner2, TK_IDENTIFIER)
@@ -277,61 +281,49 @@ void Test()
 
     BasicScanner_Init(&scanner, "name", "#if 1", BasicScannerType_Token);
     scanner.m_Token = TK_PRE_IF;
-    TEST(scanner.currentItem.token == TK_BOF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_PRE_IF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_EOF);
+    
+    TEST(BasicScanner_MatchToken(&scanner, TK_BOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_PRE_IF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_EOF));
+    
     BasicScanner_Destroy(&scanner);
 
 
 
     BasicScanner_Init(&scanner, "name", "123\r\n", BasicScannerType_File);
-    TEST(scanner.currentItem.token == TK_BOF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_DECIMAL_INTEGER);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_BREAKLINE);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_EOF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_EOF);
-
-
+    
+    TEST(BasicScanner_MatchToken(&scanner, TK_BOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_DECIMAL_INTEGER));
+    TEST(BasicScanner_MatchToken(&scanner, TK_BREAKLINE));
+    TEST(BasicScanner_MatchToken(&scanner, TK_FILE_EOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_EOF));
     BasicScanner_Destroy(&scanner);
+
     BasicScanner_Init(&scanner, "name", "#pragma once\r\n", BasicScannerType_File);
-    TEST(scanner.currentItem.token == TK_BOF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_PREPROCESSOR);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_IDENTIFIER);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_SPACES);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_IDENTIFIER);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_BREAKLINE);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_EOF);
 
+    TEST(BasicScanner_MatchToken(&scanner, TK_BOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_PREPROCESSOR));
+    TEST(BasicScanner_MatchToken(&scanner, TK_IDENTIFIER));
+    TEST(BasicScanner_MatchToken(&scanner, TK_SPACES));
+    TEST(BasicScanner_MatchToken(&scanner, TK_IDENTIFIER));
+    TEST(BasicScanner_MatchToken(&scanner, TK_BREAKLINE));
+    TEST(BasicScanner_MatchToken(&scanner, TK_FILE_EOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_EOF));
     BasicScanner_Destroy(&scanner);
+
     BasicScanner_Init(&scanner, "name", "//comment", BasicScannerType_File);
-
-    TEST(scanner.currentItem.token == TK_BOF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_LINE_COMMENT);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_EOF);
-
-
+    TEST(BasicScanner_MatchToken(&scanner, TK_BOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_LINE_COMMENT));
+    TEST(BasicScanner_MatchToken(&scanner, TK_FILE_EOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_EOF));
     BasicScanner_Destroy(&scanner);
-    BasicScanner_Init(&scanner, "name", "/*comment*/", BasicScannerType_File);
-    TEST(scanner.currentItem.token == TK_BOF);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_COMMENT);
-    BasicScanner_Next(&scanner);
-    TEST(scanner.currentItem.token == TK_EOF);
 
+    BasicScanner_Init(&scanner, "name", "/*comment*/", BasicScannerType_File);
+
+    TEST(BasicScanner_MatchToken(&scanner, TK_BOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_COMMENT));
+    TEST(BasicScanner_MatchToken(&scanner, TK_FILE_EOF));
+    TEST(BasicScanner_MatchToken(&scanner, TK_EOF));
 
     Scanner scanner2;
     Scanner_Init(&scanner2);

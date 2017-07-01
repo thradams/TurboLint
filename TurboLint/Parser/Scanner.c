@@ -303,7 +303,7 @@ Result PushExpandedMacro(Scanner* pScanner,
     if (result == RESULT_OK)
     {
         pNewScanner->bMacroExpanded = true;
-        BasicScanner_Next(pNewScanner);//inicia
+        BasicScanner_Match(pNewScanner);//inicia
         BasicScannerStack_Push(&pScanner->stack, pNewScanner);
     }
 
@@ -518,7 +518,7 @@ void Scanner_IncludeFile(Scanner* pScanner,
                 if (pFile)
                 {
                     pNewScanner->FileIndex = pFile->FileIndex;
-                    BasicScanner_Next(pNewScanner);
+                    BasicScanner_Match(pNewScanner);
                     BasicScannerStack_Push(&pScanner->stack, pNewScanner);
                 }
 
@@ -616,7 +616,7 @@ void Scanner_IncludeFile_Version2(Scanner* pScanner,
                 if (pFile)
                 {
                     pNewScanner->FileIndex = pFile->FileIndex;
-                    // BasicScanner_Next(pNewScanner);
+                    // BasicScanner_Match(pNewScanner);
                     BasicScannerStack_Push(&pScanner->stack, pNewScanner);
                 }
 
@@ -787,11 +787,11 @@ void IgnorePreProcessorv2(Scanner* pScanner, StrBuilder* strBuilder)
     {
         if (pTop->currentItem.token == TK_BREAKLINE)
         {
-            BasicScanner_Next(pTop);
+            BasicScanner_Match(pTop);
             break;
         }
         StrBuilder_Append(strBuilder, pTop->currentItem.lexeme.c_str);
-        BasicScanner_Next(pTop);
+        BasicScanner_Match(pTop);
     }
 }
 
@@ -804,11 +804,11 @@ void IgnorePreProcessorv2(Scanner* pScanner, StrBuilder* strBuilder)
     {
         if (pTop->currentItem.token == TK_BREAKLINE)
         {
-            //BasicScanner_Next(Scanner_Top(pScanner));
+            //BasicScanner_Match(Scanner_Top(pScanner));
             break;
         }
 
-        BasicScanner_Next(pTop);
+        BasicScanner_Match(pTop);
     }
 }
 */
@@ -827,7 +827,7 @@ void GetDefineString(Scanner* pScanner, StrBuilder* strBuilder)
         if (token == TK_BREAKLINE)
         {
             //deixa o break line
-            //BasicScanner_Next(Scanner_Top(pScanner));
+            //BasicScanner_Match(Scanner_Top(pScanner));
             break;
         }
 
@@ -843,7 +843,7 @@ void GetDefineString(Scanner* pScanner, StrBuilder* strBuilder)
             StrBuilder_Append(strBuilder, BasicScanner_Lexeme(Scanner_Top(pScanner)));
         }
 
-        BasicScanner_Next(Scanner_Top(pScanner));
+        BasicScanner_Match(Scanner_Top(pScanner));
     }
 }
 
@@ -1325,7 +1325,7 @@ static void Scanner_PushToken(Scanner* pScanner,
     if (result == RESULT_OK)
     {
         pNewScanner->m_Token = token;
-        BasicScanner_Next(pNewScanner); //sai do bof
+        BasicScanner_Match(pNewScanner); //sai do bof
         BasicScannerStack_Push(&pScanner->stack, pNewScanner);
     }
 }
@@ -1344,9 +1344,17 @@ void Scanner_NextVersion2(Scanner* pScanner)
     }
 
 
-    BasicScanner_Next(pTopScanner);
+    BasicScanner_Match(pTopScanner);
 
     Tokens token = pTopScanner->currentItem.token;
+    
+    //se eh o unico arquivo TK_FILE_EOF vira eof
+    if (token == TK_FILE_EOF && 
+        pScanner->stack->pPrevious == NULL)
+    {
+        pTopScanner->currentItem.token = TK_EOF;
+        return;
+    }
 
     while (token == TK_EOF &&
            pScanner->stack->pPrevious != NULL)
@@ -1370,7 +1378,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
         StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
 
         //Match #
-        BasicScanner_Next(pTopScanner);
+        BasicScanner_Match(pTopScanner);
 
         Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
@@ -1471,7 +1479,10 @@ void Scanner_NextVersion2(Scanner* pScanner)
                 else if (BasicScanner_IsLexeme(Scanner_Top(pScanner), "dir"))
                 {
                     StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                    Scanner_Match(pScanner);
+                    
+                    Scanner_MatchDontExpand(pScanner);
+                    Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
+
                     String fileName;
                     String_Init(&fileName, Scanner_CurrentLexeme(pScanner) + 1);
                     Scanner_Match(pScanner);
@@ -1492,7 +1503,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
         {
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
             //Match if
-            BasicScanner_Next(pTopScanner);
+            BasicScanner_Match(pTopScanner);
 
             Scanner_MatchAllPreprocessorSpaces(pScanner, &strBuilder);
 
@@ -1553,7 +1564,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
         {
             //Match elif
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-            BasicScanner_Next(pTopScanner);
+            BasicScanner_Match(pTopScanner);
 
             switch (state)
             {
@@ -1604,7 +1615,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
         {
             //Match elif
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-            BasicScanner_Next(pTopScanner);
+            BasicScanner_Match(pTopScanner);
 
             IgnorePreProcessorv2(pScanner, &strBuilder);
             StatePop(pScanner);
@@ -1616,7 +1627,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
             //Match else
             StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-            BasicScanner_Next(pTopScanner);
+            BasicScanner_Match(pTopScanner);
 
             switch (state)
             {
@@ -1663,7 +1674,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
             {
                 //Match error
                 StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                BasicScanner_Next(pTopScanner);
+                BasicScanner_Match(pTopScanner);
 
 
                 StrBuilder str = STRBUILDER_INIT;
@@ -1684,7 +1695,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
             {
                 //Match line
                 StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                BasicScanner_Next(pTopScanner);
+                BasicScanner_Match(pTopScanner);
 
                 IgnorePreProcessorv2(pScanner, &strBuilder);
                 Scanner_PushToken(pScanner, TK_PRE_LINE, strBuilder.c_str);
@@ -1697,7 +1708,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
             {
                 //Match undef
                 StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
-                BasicScanner_Next(pTopScanner);
+                BasicScanner_Match(pTopScanner);
 
                 lexeme = BasicScanner_Lexeme(Scanner_Top(pScanner));
 
@@ -2088,7 +2099,7 @@ void Scanner_MatchDontExpand(Scanner * pScanner)
             }
 
 
-            BasicScanner_Next(pTopScanner);
+            BasicScanner_Match(pTopScanner);
 
             Tokens token = pTopScanner->currentItem.token;
 

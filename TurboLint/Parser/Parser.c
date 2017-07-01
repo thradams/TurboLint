@@ -29,7 +29,8 @@ static bool IsPreprocessorTokenPhase(Tokens token)
         token == TK_PRE_ENDIF ||
         token == TK_PRE_IF||
         token == TK_MACRO_CALL ||
-        token == TK_MACRO_EOF;
+        token == TK_MACRO_EOF ||
+        token == TK_FILE_EOF;
 }
 
 bool IsSuffix(const char* s, const char* suffix)
