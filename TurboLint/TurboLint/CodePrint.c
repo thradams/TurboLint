@@ -29,7 +29,7 @@ static int IncludeLevel = 0;
 void Output_Append(StrBuilder* p,
     const char* source)
 {
-    if (bInclude)
+    if (bInclude && IncludeLevel == 0)
         StrBuilder_Append(p, source);
 }
 

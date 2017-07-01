@@ -1,6 +1,18 @@
 #include "Test\Test7.h"
 
-#pragma once
+#define NULL  
+#define F(a 
 
- void f(); 
- int a;
+#if 
+ int i =  1;
+#else
+int i = 2;
+#endif
+
+ int main()
+
+{
+   int* p = NULL;  
+  F(2);
+
+}
