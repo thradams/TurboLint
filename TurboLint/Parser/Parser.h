@@ -53,3 +53,6 @@ bool GetAST(const char * filename,
 
 //Tokens Parser_MatchToken(Parser* parser, Tokens tk);
 void ConstantExpression(Parser* ctx, TExpression** ppExpression);
+Tokens Parser_MatchToken(Parser* parser,
+    Tokens tk,
+    TScannerItemList* listOpt);

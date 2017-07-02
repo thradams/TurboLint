@@ -3,6 +3,8 @@
 #include "Parser\BasicScanner.h"
 #include "Parser\Scanner.h"
 
+#include "Parser\Parser.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -240,9 +242,34 @@ void Test7()
 
 }
 
+void Test8()
+{
+    /*Parser parser;
+    Parser_InitFile(&parser, "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\TurboLint\\Test\\Test7.c");
+    Parser_MatchToken(&parser, TK_VOID, NULL);
+    Parser_MatchToken(&parser, TK_IDENTIFIER, NULL);
+    Parser_MatchToken(&parser, TK_LEFT_PARENTHESIS, NULL);
+    Parser_MatchToken(&parser, TK_RIGHT_PARENTHESIS, NULL);
+    Parser_MatchToken(&parser, TK_SEMICOLON, NULL);
+
+    Parser_MatchToken(&parser, TK_VOID, NULL);
+    Parser_MatchToken(&parser, TK_IDENTIFIER, NULL);
+    Parser_MatchToken(&parser, TK_LEFT_PARENTHESIS, NULL);
+    Parser_MatchToken(&parser, TK_RIGHT_PARENTHESIS, NULL);
+    Parser_MatchToken(&parser, TK_SEMICOLON, NULL);
+
+    Parser_MatchToken(&parser, TK_EOF, NULL);
+
+    TEST(parser.bError == false);
+
+    Parser_Destroy(&parser);
+    */
+}
 void Test()
 {
     printf("RUNNING TESTS ...\n");
+    
+    Test8();
     Test7();
     Test3();
 

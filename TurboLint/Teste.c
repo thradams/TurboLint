@@ -1,8 +1,9 @@
 //a
-#include "Test\Test7.h"
+//#include "Test\Test7.h"
 
-//#include <stdio.h>
+#include "h0.h"
 
+int i;
 
 #define NULL  0
 #define F(a) a + 1

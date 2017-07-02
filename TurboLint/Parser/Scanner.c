@@ -699,7 +699,7 @@ void IgnorePreProcessorv2(Scanner* pScanner, StrBuilder* strBuilder)
             break;
         }
         StrBuilder_Append(strBuilder, pTop->currentItem.lexeme.c_str);
-        BasicScanner_Match(pTop);
+        BasicScanner_Match(pTop);     
     }
 }
 
