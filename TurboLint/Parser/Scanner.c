@@ -696,6 +696,7 @@ void IgnorePreProcessorv2(Scanner* pScanner, StrBuilder* strBuilder)
     {
         if (pTop->currentItem.token == TK_BREAKLINE)
         {
+            //StrBuilder_Append(strBuilder, pTop->currentItem.lexeme.c_str);
             BasicScanner_Match(pTop);
             break;
         }

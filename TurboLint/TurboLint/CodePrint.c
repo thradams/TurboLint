@@ -29,7 +29,7 @@ static int IncludeLevel = 0;
 void Output_Append(StrBuilder* p,
     const char* source)
 {
-    if (bInclude && IncludeLevel == 0)
+    if (bInclude  && IncludeLevel == 0)
         StrBuilder_Append(p, source);
 }
 
@@ -59,6 +59,8 @@ static void TNodeClueList_CodePrint(TScannerItemList* list,
         case TK_PRE_IF:
         case TK_PRE_ENDIF:
         case TK_PRE_ELSE:
+        case TK_PRE_IFDEF:
+        case TK_PRE_IFNDEF:
 
             Output_Append(fp, pNodeClue->lexeme.c_str);
             Output_Append(fp, "\n");
