@@ -1,10 +1,7 @@
 
 #include "Test\Test7.h"
 
-//#ifndef _UCRT
-//#define _UCRT
-//#endif
-//a
+//#include <stdio.h>
 
 
 #define NULL  0

@@ -1440,39 +1440,10 @@ void TProgram_PrintAstToFile(TProgram* pProgram,
   for (size_t i = 0; i < pProgram->Declarations.size; i++)
   {
     TAnyDeclaration* pItem = pProgram->Declarations.pItems[i];
-    int fileIndex = TAnyDeclaration_GetFileIndex(pItem);
-    TFile *pFile = pProgram->Files2.pItems[fileIndex];
-    const char * path = pFile->FullPath;
-
-    bool bPrintThisDeclaration = false;
-    if (inputFileName == NULL)
-    {
-      //Gerando amalgamation
-      for (int i = 0; i < pProgram->MySourceDir.size; i++)
-      {
-        const char* mydir = pProgram->MySourceDir.pItems[i];
-        if (IsInPath(pFile->FullPath, mydir))
-        {
-          bPrintThisDeclaration = true;
-          break;
-        }
-      }
-    }
-    else
-    {
-      //Gerando 1 arquivo
-      if (strcmp(pFile->FullPath, inputFileName) == 0)
-      {
-        bPrintThisDeclaration = true;
-      }
-    }
-
-    if (bPrintThisDeclaration)
-    {
       if (b)
         fprintf(fp, ",");
       b = TAnyDeclaration_Print(pItem, b, fp);
-    }
+    
   }
 
   fprintf(fp, "]");

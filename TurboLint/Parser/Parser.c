@@ -18,16 +18,20 @@ static bool IsPreprocessorTokenPhase(Tokens token)
         token == TK_COMMENT ||
         token == TK_LINE_COMMENT ||
         token == TK_BREAKLINE ||
-        token == TK_PRE_DEFINE ||
+        //Tokens para linhas do pre processador
         token == TK_PRE_INCLUDE ||
-        token == TK_PRE_UNDEF ||
-        token == TK_PRE_ERROR ||
         token == TK_PRE_PRAGMA ||
-        token == TK_PRE_LINE ||
-        token == TK_PRE_ELIF ||
-        token == TK_PRE_ELSE ||
-        token == TK_PRE_ENDIF ||
         token == TK_PRE_IF ||
+        token == TK_PRE_ELIF ||
+        token == TK_PRE_IFNDEF ||
+        token == TK_PRE_IFDEF ||
+        token == TK_PRE_ENDIF ||
+        token == TK_PRE_ELSE ||
+        token == TK_PRE_ERROR ||
+        token == TK_PRE_LINE ||
+        token == TK_PRE_UNDEF ||
+        token == TK_PRE_DEFINE ||
+        //fim tokens preprocessador
         token == TK_MACRO_CALL ||
         token == TK_MACRO_EOF ||
         token == TK_FILE_EOF;
@@ -314,6 +318,9 @@ Result Parser_InitString(Parser* parser,
     Scanner_InitString(&parser->Scanner, name, text);
     ArrayT_Init(&parser->Templates);
     ArrayT_Init(&parser->TemplatesInstances);
+
+    //sair do BOF
+    Parser_Match(parser, NULL);
 
     return RESULT_OK;
 }
@@ -1224,6 +1231,11 @@ bool IsTypeName(Parser* ctx, Tokens token, const char * lexeme)
 {
     bool bResult = false;
 
+    if (lexeme == NULL)
+    {
+        return false;
+    }
+
     switch (token)
     {
 
@@ -1422,7 +1434,8 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
         //Match
         ASSERT(false);
         break;
-
+    case TK_EOF:
+        break;
     default:
         //ASSERT(false);
         SetUnexpectedError(ctx, "Assert", "");
@@ -4859,7 +4872,7 @@ bool  Declaration(Parser* ctx,
             *ppDeclaration = (TAnyDeclaration*)pFuncVarDeclaration;
             pFuncVarDeclaration->FileIndex = GetFileIndex(ctx);
             pFuncVarDeclaration->Line = GetCurrentLine(ctx);
-            ASSERT(pFuncVarDeclaration->FileIndex >= 0);
+            //ASSERT(pFuncVarDeclaration->FileIndex >= 0);
 
             token = Parser_CurrentToken(ctx);
 

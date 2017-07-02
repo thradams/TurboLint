@@ -1726,9 +1726,9 @@ void TProgram_PrintCodeToFile(TProgram* pProgram,
     for (size_t i = 0; i < pProgram->Declarations.size; i++)
     {
         TAnyDeclaration* pItem = pProgram->Declarations.pItems[i];
-        int fileIndex = TAnyDeclaration_GetFileIndex(pItem);
-        TFile *pFile = pProgram->Files2.pItems[fileIndex];
-        const char * path = pFile->FullPath;
+        //int fileIndex = TAnyDeclaration_GetFileIndex(pItem);
+        //TFile *pFile = pProgram->Files2.pItems[fileIndex];
+        //const char * path = pFile->FullPath;
 
         b = TAnyDeclaration_CodePrint(pProgram, pItem, b, &sb);
 

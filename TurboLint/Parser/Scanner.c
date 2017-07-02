@@ -518,7 +518,10 @@ void Scanner_IncludeFile(Scanner* pScanner,
                 if (pFile)
                 {
                     pNewScanner->FileIndex = pFile->FileIndex;
+                    
+                    //sair do bof
                     BasicScanner_Match(pNewScanner);
+
                     BasicScannerStack_Push(&pScanner->stack, pNewScanner);
                 }
 
@@ -900,7 +903,7 @@ int EvalExpression(const char* s, Scanner* pScanner)
         MacroMap_Swap(&parser.Scanner.Defines2, pDefines);
     }
 
-    Scanner_Match(&parser.Scanner);
+//    Scanner_Match(&parser.Scanner);
     int iRes = PreprocessorExpression(&parser);
 
     //printf(" %d\n", iRes);
