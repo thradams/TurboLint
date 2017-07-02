@@ -244,7 +244,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
     StrBuilder_Init(&pScanner->DebugString, 100);
     //StrBuilder_Init(&pScanner->PreprocessorAndCommentsString, 100);
     StrBuilder_Init(&pScanner->ErrorString, 100);
-//    List_Init(&pScanner->NodeClueList);
+//    List_Init(&pScanner->ClueList);
 
     //StrBuilder_Init(&pScanner->DebugString, 100);
     //StrBuilder_Init(&pScanner->ErrorString, 100);
@@ -583,7 +583,7 @@ void Scanner_Destroy(Scanner* pScanner)
     MacroMap_Destroy(&pScanner->Defines2);
     StrBuilder_Destroy(&pScanner->DebugString);
     //StrBuilder_Destroy(&pScanner->PreprocessorAndCommentsString);
-//    List_Destroy(ScannerItem, &pScanner->NodeClueList);
+//    List_Destroy(ScannerItem, &pScanner->ClueList);
     //List_Destroy(ScannerItem, &pScanner->AcumulatedTokens);
     StrBuilder_Destroy(&pScanner->ErrorString);
     ArrayInt_Destroy(&pScanner->StackIfDef);

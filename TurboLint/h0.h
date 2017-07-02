@@ -1,2 +1,5 @@
+#ifndef X
+#define X 
+#endif
 
-#define X 1
+void f1();

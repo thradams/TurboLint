@@ -267,6 +267,7 @@ void ScannerItem_Init(ScannerItem* scannerItem)
 {
     //scannerItem->lexeme = STRBUILDER_INIT;
     StrBuilder_Init(&scannerItem->lexeme, 100);
+    scannerItem->bActive = true;
     scannerItem->token = TK_NONE;
     scannerItem->pNext = NULL;
     scannerItem->Line = 0;

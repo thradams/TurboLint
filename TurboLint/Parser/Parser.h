@@ -28,7 +28,7 @@ typedef struct
 
   Map EnumMap;
 
-  TScannerItemList NodeClueList;
+  TScannerItemList ClueList;
   TDeclarations Templates;
   TDeclarations TemplatesInstances;
 } Parser;

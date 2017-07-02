@@ -187,6 +187,7 @@ typedef struct ScannerItem
     Tokens token;
     int Line;
     int FileIndex;
+    bool bActive;
     struct ScannerItem* pNext;
 } ScannerItem;
 
