@@ -326,7 +326,7 @@ void TInitDeclarator_Destroy(TInitDeclarator* p)
   //TInitDeclarator_Delete(p->pInitDeclaratorNext);
   TDeclarator_Delete(p->pDeclarator);
   TInitializer_Delete(p->pInitializer);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
 }
 
 
@@ -608,8 +608,8 @@ void TDesignator_Destroy(TDesignator* p)
 void  TInitializerListType_Destroy(TInitializerListType* pTInitializerListType)
 {
   TInitializerList_Destroy(&pTInitializerListType->InitializerList);
-  TScannerItemList_Destroy(&pTInitializerListType->NodeClueList1);
-  TScannerItemList_Destroy(&pTInitializerListType->NodeClueList2);
+  TScannerItemList_Destroy(&pTInitializerListType->ClueList0);
+  TScannerItemList_Destroy(&pTInitializerListType->ClueList1);
 }
 
 void TInitializer_Destroy(TInitializer* p)

@@ -25,7 +25,7 @@ typedef struct Point
 #define F(a) a + 1
 
 #if 1
-int i =  1;
+int i = 1;
 #else
 int i = 2;
 #endif
@@ -34,8 +34,8 @@ int i = 2;
 
 int /*a*/main()
 {
-    Point pt =  {{  1,  2}};
-    int* p =  {NULL};
+    Point pt = {1, 2};
+    int* p = NULL
     p = /*a*/0;
     p = /*a*/(0 /*b*/);
     F(2);

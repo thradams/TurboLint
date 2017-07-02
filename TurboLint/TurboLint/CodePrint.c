@@ -1034,16 +1034,23 @@ static bool TInitializerList_CodePrint(TProgram* program,
     return true;
 }
 
-static bool TInitializerListType_CodePrint(TProgram* program, TTypeSpecifier* pTypeSpecifier, bool bIsPointer, TInitializerListType*p, bool b, StrBuilder* fp)
+static bool TInitializerListType_CodePrint(TProgram* program,
+    TTypeSpecifier* pTypeSpecifier,
+    bool bIsPointer, 
+    TInitializerListType*p,
+    bool b,
+    StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&p->NodeClueList1, fp);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
     Output_Append(fp, "{");
+
     b = TInitializerList_CodePrint(program, pTypeSpecifier,
         bIsPointer,
         &p->InitializerList, b, fp);
+
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
     Output_Append(fp, "}");
-    TNodeClueList_CodePrint(&p->NodeClueList2, fp);
 
     return true;
 }
@@ -1334,7 +1341,10 @@ static bool TStructDeclaratorList_CodePrint(TProgram* program, TStructDeclarator
     ForEachListItem(TInitDeclarator, pItem, p)
     {
         if (!List_IsFirstItem(p, pItem))
+        {
+            TNodeClueList_CodePrint(&pItem->ClueList0, fp);
             Output_Append(fp, ",");
+        }
         b = TStructDeclarator_CodePrint(program, pItem, b, fp);
     }
 
@@ -1493,7 +1503,8 @@ bool TInitDeclarator_CodePrint(TProgram* program,
     b = TDeclarator_CodePrint(program, p->pDeclarator, b, fp);
     if (p->pInitializer)
     {
-        Output_Append(fp, " = ");
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
+        Output_Append(fp, "=");
         b = TInitializer_CodePrint(program, pTypeSpecifier, bIsPointer, p->pInitializer, b, fp);
     }
     return true;

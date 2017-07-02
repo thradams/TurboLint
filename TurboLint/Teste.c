@@ -34,8 +34,8 @@ int i = 2;
 
 int /*a*/main()
 {
-    Point pt = {};
-    int* p = {};
+    Point pt = {1, 2};
+    int* p = NULL;
     p = /*a*/0;
     p = /*a*/(0 /*b*/);
     F(2);

@@ -542,8 +542,8 @@ typedef struct
 {
   TTypePointer Type;
   TInitializerList InitializerList;
-  TScannerItemList NodeClueList1; //{
-  TScannerItemList NodeClueList2; //}
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
 } TInitializerListType;
 
 #define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
@@ -610,7 +610,7 @@ typedef struct TInitDeclarator
   TDeclarator* pDeclarator;
   TInitializer* pInitializer;
   struct TInitDeclarator * pNext;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
 } TInitDeclarator;
 
 #define TINITDECLARATOR_INIT {NULL, NULL, NULL, TSCANNERITEMLIST_INIT}

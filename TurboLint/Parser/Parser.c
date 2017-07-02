@@ -3166,8 +3166,7 @@ void Struct_Declarator(Parser* ctx,
 
         if (token == TK_COLON)
         {
-            //TNodeClueList_MoveToEnd(&pInitDeclarator->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pInitDeclarator->ClueList);
+            Parser_Match(ctx, &pInitDeclarator->ClueList0);
 
             TExpression* p = NULL;
             ConstantExpression(ctx, &p);
@@ -3212,8 +3211,8 @@ void Struct_Declarator_List(Parser* ctx,
         if (token == TK_COMMA)
         {
 
-            //TNodeClueList_MoveToEnd(&pTDeclarator2->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pTDeclarator2->ClueList);
+            
+            Parser_Match(ctx, &pTDeclarator2->ClueList0);
 
             Struct_Declarator_List(ctx, pStructDeclarationList);
         }
@@ -4530,12 +4529,12 @@ void Initializer(Parser* ctx,
         TInitializerListType* pTInitializerList = TInitializerListType_Create();
         *ppInitializer = (TInitializer*)pTInitializerList;
 
-        Parser_Match(ctx, &pTInitializerList->NodeClueList1);
+        Parser_Match(ctx, &pTInitializerList->ClueList0);
 
         Initializer_List(ctx, &pTInitializerList->InitializerList);
 
         Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET,
-            &pTInitializerList->NodeClueList2);
+            &pTInitializerList->ClueList1);
     }
 
     else
@@ -4685,8 +4684,8 @@ void Init_Declarator(Parser* ctx,
     if (token == TK_EQUALS_SIGN)
     {
         ASSERT(*ppDeclarator2 != NULL);
-        //TNodeClueList_MoveToEnd(&pInitDeclarator->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pInitDeclarator->ClueList);
+        
+        Parser_Match(ctx, &pInitDeclarator->ClueList0);
 
         Initializer(ctx, &pInitDeclarator->pInitializer, TK_SEMICOLON, TK_SEMICOLON);
         ////TNodeClueList_MoveToEnd(&pInitDeclarator->ClueList, &ctx->Scanner.ClueList);
@@ -4709,9 +4708,8 @@ void Init_Declarator_List(Parser* ctx,
     //Tem mais?
     Tokens token = Parser_CurrentToken(ctx);
     if (token == TK_COMMA)
-    {
-        //TNodeClueList_MoveToEnd(&pInitDeclarator->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pInitDeclarator->ClueList);
+    {        
+        Parser_Match(ctx, &pInitDeclarator->ClueList0);
 
         Init_Declarator_List(ctx, pInitDeclaratorList);
     }
