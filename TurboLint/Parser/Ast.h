@@ -245,7 +245,7 @@ typedef struct
 	bool bIsDestructor;
 	bool bIsMemDestructor;
 	//
-  TScannerItemList ClueList;
+  TScannerItemList ClueList1;
 } TTypeQualifier;
 
 #define TTYPE_QUALIFIER_INIT {false, false, false, false /*extensoes*/, false, false /**/, false, false, TSCANNERITEMLIST_INIT}
@@ -416,7 +416,7 @@ typedef struct
   bool bIsThread_local;
   bool bIsAuto;
   bool bIsRegister;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
 } TStorageSpecifier;
 #define TSTORAGE_SPECIFIER_INIT {false, false, false, false, false, false, TSCANNERITEMLIST_INIT}
 
@@ -452,10 +452,13 @@ typedef struct
   TTypePointer Type;
   String Name;
   TEnumeratorList EnumeratorList;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
+  TScannerItemList ClueList2;
+  TScannerItemList ClueList3;
 } TEnumSpecifier;
 
-#define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, LIST_INIT, LIST_INIT}
+#define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, LIST_INIT, LIST_INIT, LIST_INIT, LIST_INIT, LIST_INIT }
 CREATETYPE(TEnumSpecifier, ENUM_SPECIFIER_INIT)
 
 typedef struct
@@ -477,7 +480,7 @@ typedef struct
   bool bIsTypeDef;
   String TypedefName;
 
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
 } TSingleTypeSpecifier;
 
 #define TBUILDINTYPE_SPECIFIER_INIT { {TSingleTypeSpecifier_ID}, false, false, false, false, 0, false, false , false, false, false, false, false, STRING_INIT, LIST_INIT}
@@ -622,7 +625,7 @@ typedef struct
   TTypeSpecifier*   pSpecifier;
   TTypeQualifier Qualifier;
   TStructDeclaratorList DeclaratorList;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList1;
 } TStructDeclaration;
 #define TSTRUCT_DECLARATION_BASE_INIT {{TStructDeclaration_ID}, NULL, TTYPE_QUALIFIER_INIT, LIST_INIT, TSCANNERITEMLIST_INIT}
 
@@ -641,9 +644,13 @@ typedef struct
   TStructDeclarationList StructDeclarationList;
   String Name;
   bool bIsStruct;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
+  TScannerItemList ClueList2;
+  TScannerItemList ClueList3;
+
 } TStructUnionSpecifier;
-#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true , LIST_INIT}
+#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true , LIST_INIT, LIST_INIT}
 
 CREATETYPE(TStructUnionSpecifier, TSTRUCT_UNION_SPECIFIER_INIT)
 

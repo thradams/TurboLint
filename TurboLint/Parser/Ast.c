@@ -267,20 +267,27 @@ void TEnumSpecifier_Destroy(TEnumSpecifier* p)
 {
   String_Destroy(&p->Name);
   List_Destroy(TEnumerator, &p->EnumeratorList);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
+
 }
 
 void TStructUnionSpecifier_Destroy(TStructUnionSpecifier* p)
 {
   String_Destroy(&p->Name);
   ArrayT_Destroy(TAnyStructDeclaration, &p->StructDeclarationList);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
 }
 
 void TSingleTypeSpecifier_Destroy(TSingleTypeSpecifier* p)
 {
   String_Destroy(&p->TypedefName);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
 }
 
 
@@ -377,7 +384,7 @@ void TStructDeclaration_Destroy(TStructDeclaration* p)
   List_Destroy(TInitDeclarator, &p->DeclaratorList);
   TTypeSpecifier_Delete(p->pSpecifier);
   //TTypeQualifier_Destroy(&p->Qualifier);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TAnyStructDeclaration_Destroy(TAnyStructDeclaration* p)

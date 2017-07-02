@@ -796,19 +796,18 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
 {
     b = true;
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 0);
-    Output_Append(fp, " enum ");
+    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
+    Output_Append(fp, "enum");
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 1);
+    TNodeClueList_CodePrint(&p->ClueList1, fp, 1);
     Output_Append(fp, p->Name);
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 2);
+    TNodeClueList_CodePrint(&p->ClueList2, fp, 2);
     Output_Append(fp, "{");
     //TNodeClueList_CodePrint(&p->ClueList, fp, 3);
 
     ForEachListItem(TEnumerator, pTEnumerator, &p->EnumeratorList)
     {
-
         TEnumerator_CodePrint(program, pTEnumerator, false, fp);
 
         if (List_IsLastItem(&p->EnumeratorList, pTEnumerator))
@@ -822,7 +821,7 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
         }
     }
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 3);
+    TNodeClueList_CodePrint(&p->ClueList3, fp, 3);
     Output_Append(fp, "}");
     return true;
 }
@@ -830,52 +829,34 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
 
 static bool TStructUnionSpecifier_CodePrint(TProgram* program, TStructUnionSpecifier* p, bool b, StrBuilder* fp)
 {
-    TNodeClueList_CodePrint(&p->ClueList, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
 
     b = true;
 
     if (p->bIsStruct)
-        Output_Append(fp, " struct ");
+        Output_Append(fp, "struct");
 
     else
-        Output_Append(fp, " union ");
+        Output_Append(fp, "union");
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 1);
+    TNodeClueList_CodePrint(&p->ClueList1, fp, 0);
     Output_Append(fp, p->Name);
 
     if (p->StructDeclarationList.size > 0)
     {
-        TNodeClueList_CodePrint(&p->ClueList, fp, 2);
+        TNodeClueList_CodePrint(&p->ClueList2, fp, 0);
 
-        Output_Append(fp, " {");
-        TNodeClueList_CodePrint(&p->ClueList, fp, 3);
-
+        Output_Append(fp, "{");
 
         for (size_t i = 0; i < p->StructDeclarationList.size; i++)
         {
             TAnyStructDeclaration * pStructDeclaration = p->StructDeclarationList.pItems[i];
-            b = TAnyStructDeclaration_CodePrint(program, pStructDeclaration, b, fp);
-            Output_Append(fp, ";");
+            b = TAnyStructDeclaration_CodePrint(program, pStructDeclaration, b, fp);            
         }
 
-        TNodeClueList_CodePrint(&p->ClueList, fp, 4);
-
-        //TNodeClueList_CodePrint(&p->ClueList, fp, 4);
-
+        TNodeClueList_CodePrint(&p->ClueList3, fp, 0);
         Output_Append(fp, "}");
     }
-    /* Output_Append(fp, "typedef struct ");
-     Output_Append(fp, p->Name);
-     Output_Append(fp, " ");
-     Output_Append(fp, p->Name);
-     Output_Append(fp, ";\n");
-
-     Output_Append(fp, "#define ");
-     Output_Append(fp, p->Name);
-     Output_Append(fp, "_INIT ");
-
-     Output_Append(fp, "\n");
-     */
 
     return true;
 }
@@ -883,7 +864,7 @@ static bool TStructUnionSpecifier_CodePrint(TProgram* program, TStructUnionSpeci
 static bool TSingleTypeSpecifier_CodePrint(TProgram* program, TSingleTypeSpecifier* p, bool b, StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
 
 
     b = true;
@@ -892,62 +873,60 @@ static bool TSingleTypeSpecifier_CodePrint(TProgram* program, TSingleTypeSpecifi
 
     if (p->bIsVoid)
     {
-        Output_Append(fp, " void");
+        Output_Append(fp, "void");
         b = true;
     }
 
     if (p->bIsUnsigned)
     {
-        Output_Append(fp, " unsigned");
+        Output_Append(fp, "unsigned");
         b = true;
     }
 
     if (p->bIsBool)
     {
-        //Output_Append(fp, " _Bool");
-        Output_Append(fp, " bool");
+        Output_Append(fp, "bool");
         b = true;
     }
 
     if (p->bIsChar)
     {
-        Output_Append(fp, " char");
+        Output_Append(fp, "char");
         b = true;
     }
 
     if (p->bIsShort)
     {
-        Output_Append(fp, " short");
+        Output_Append(fp, "short");
         b = true;
     }
 
     for (int j = 0; j < p->nLong; j++)
     {
-        Output_Append(fp, " long");
+        Output_Append(fp, "long");
         b = true;
     }
 
     if (p->bIsInt)
     {
-        Output_Append(fp, " int");
+        Output_Append(fp, "int");
         b = true;
     }
 
     if (p->bIsDouble)
     {
-        Output_Append(fp, " double");
+        Output_Append(fp, "double");
         b = true;
     }
 
     if (p->bIsFloat)
     {
-        Output_Append(fp, " float");
+        Output_Append(fp, "float");
         b = true;
     }
 
     if (p->bIsTypeDef)
     {
-        Output_Append(fp, " ");
         Output_Append(fp, p->TypedefName);
         b = true;
     }
@@ -1358,6 +1337,11 @@ static bool TStructDeclaration_CodePrint(TProgram* program, TStructDeclaration* 
     b = TTypeQualifier_CodePrint(program, &p->Qualifier, false, fp);
     b = TTypeSpecifier_CodePrint(program, p->pSpecifier, b, fp);
     b = TStructDeclaratorList_CodePrint(program, &p->DeclaratorList, b, fp);
+
+    
+    TNodeClueList_CodePrint(&p->ClueList1, fp, 0);
+    Output_Append(fp, ";");
+
     return true;
 }
 
@@ -1380,27 +1364,29 @@ static bool TAnyStructDeclaration_CodePrint(TProgram* program, TAnyStructDeclara
 static bool StorageSpecifier_CodePrint(TProgram* program, TStorageSpecifier* p, bool b, StrBuilder* fp)
 {
 
+    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
+
     if (p->bIsAuto)
     {
-        Output_Append(fp, " auto");
+        Output_Append(fp, "auto");
         b = true;
     }
 
     if (p->bIsExtern)
     {
-        Output_Append(fp, " extern");
+        Output_Append(fp, "extern");
         b = true;
     }
 
     if (p->bIsRegister)
     {
-        Output_Append(fp, " register");
+        Output_Append(fp, "register");
         b = true;
     }
 
     if (p->bIsStatic)
     {
-        Output_Append(fp, " static");
+        Output_Append(fp, "static");
         b = true;
     }
 
@@ -1409,13 +1395,13 @@ static bool StorageSpecifier_CodePrint(TProgram* program, TStorageSpecifier* p, 
 
     if (p->bIsThread_local)
     {
-        Output_Append(fp, " [Thread_local]");
+        Output_Append(fp, "[Thread_local]");
         b = true;
     }
 
     if (p->bIsTypedef)
     {
-        Output_Append(fp, " typedef");
+        Output_Append(fp, "typedef");
         b = true;
     }
 
@@ -1440,6 +1426,7 @@ static bool TFunctionSpecifier_CodePrint(TProgram* program, TFunctionSpecifier* 
 
 static bool TTypeQualifier_CodePrint(TProgram* program, TTypeQualifier* p, bool b, StrBuilder* fp)
 {
+    TNodeClueList_CodePrint(&p->ClueList1, fp, 0);
 
     if (p->bIsAtomic)
     {
