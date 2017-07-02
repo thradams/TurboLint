@@ -34,13 +34,10 @@ void Output_Append(StrBuilder* p,
 }
 
 static void TNodeClueList_CodePrint(TScannerItemList* list,
-    StrBuilder* fp, int pos)
+    StrBuilder* fp)
 {
     ForEachListItem(ScannerItem, pNodeClue, list)
     {
-        // if (pNodeClue->Position != pos)
-          // continue;
-
         switch (pNodeClue->token)
         {
         case TK_PRE_INCLUDE:
@@ -233,7 +230,7 @@ static bool TCompoundStatement_CodePrint(TProgram* program, TCompoundStatement *
     //
     b = true;
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
     Output_Append(fp, "{");
 
     for (size_t j = 0; j < p->BlockItemList.size; j++)
@@ -242,7 +239,7 @@ static bool TCompoundStatement_CodePrint(TProgram* program, TCompoundStatement *
         TBlockItem_CodePrint(program, pBlockItem, j > 0, fp);
     }
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 1);
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
     Output_Append(fp, "}");
     return b;
 }
@@ -344,7 +341,7 @@ static bool TExpressionStatement_CodePrint(TProgram* program, TExpressionStateme
 {
     TExpression_CodePrint(program, p->pExpression, "", b, fp);
 
-    TNodeClueList_CodePrint(&p->ClueList, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
     Output_Append(fp, ";");
 
     return true;
@@ -661,16 +658,23 @@ static bool TExpression_CodePrint(TProgram* program, TExpression *  p,
     switch (p->type)
     {
         CASE(TBinaryExpression) :
-            b = TExpression_CodePrint(program, ((TBinaryExpression*)p)->pExpressionLeft, "l-expr", b, fp);
-        Output_Append(fp, TokenToString(((TBinaryExpression*)p)->token));
-        b = TExpression_CodePrint(program, ((TBinaryExpression*)p)->pExpressionRight, "r-expr", b, fp);
+        {
+            TBinaryExpression* pBinaryExpression = (TBinaryExpression*)p;
+
+            b = TExpression_CodePrint(program, pBinaryExpression->pExpressionLeft, "l-expr", b, fp);
+
+            TNodeClueList_CodePrint(&pBinaryExpression->ClueList0, fp);
+            Output_Append(fp, TokenToString(pBinaryExpression->token));
+
+            b = TExpression_CodePrint(program, ((TBinaryExpression*)p)->pExpressionRight, "r-expr", b, fp);
+        }
         break;
 
         CASE(TTernaryExpression) :
             b = TExpression_CodePrint(program, ((TTernaryExpression*)p)->pExpressionLeft, "l-expr", b, fp);
-        Output_Append(fp, " ? ");
+        Output_Append(fp, "?");
         b = TExpression_CodePrint(program, ((TTernaryExpression*)p)->pExpressionMiddle, "m-expr", b, fp);
-        Output_Append(fp, " : ");
+        Output_Append(fp, ":");
         b = TExpression_CodePrint(program, ((TTernaryExpression*)p)->pExpressionRight, "r-expr", b, fp);
 
         break;
@@ -680,17 +684,18 @@ static bool TExpression_CodePrint(TProgram* program, TExpression *  p,
             TPrimaryExpressionValue* pPrimaryExpressionValue =
                 (TPrimaryExpressionValue*)p;
 
-
-            TNodeClueList_CodePrint(&pPrimaryExpressionValue->ClueList, fp, 0);
-
             if (pPrimaryExpressionValue->pExpressionOpt != NULL)
             {
+                TNodeClueList_CodePrint(&pPrimaryExpressionValue->ClueList0, fp);
                 Output_Append(fp, "(");
                 b = TExpression_CodePrint(program, pPrimaryExpressionValue->pExpressionOpt, "expr", b, fp);
+
+                TNodeClueList_CodePrint(&pPrimaryExpressionValue->ClueList1, fp);
                 Output_Append(fp, ")");
             }
             else
             {
+                TNodeClueList_CodePrint(&pPrimaryExpressionValue->ClueList0, fp);
                 Output_Append(fp, pPrimaryExpressionValue->lexeme);
             }
         }
@@ -769,17 +774,17 @@ static bool TExpression_CodePrint(TProgram* program, TExpression *  p,
 static   bool TEnumerator_CodePrint(TProgram* program, TEnumerator* pTEnumerator, bool b, StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp, 0);
+    TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp);
     Output_Append(fp, pTEnumerator->Name);
 
     if (pTEnumerator->pExpression)
     {
-        TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp, 1);
+        TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp);
         Output_Append(fp, " = ");
 
         TExpression_CodePrint(program, pTEnumerator->pExpression, "expr", true, fp);
 
-        TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp, 2);
+        TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp);
         //int r;
         //EvaluateConstantExpression(pTEnumerator->pExpression,  &r);
 
@@ -796,15 +801,15 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
 {
     b = true;
 
-    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
     Output_Append(fp, "enum");
 
-    TNodeClueList_CodePrint(&p->ClueList1, fp, 1);
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
     Output_Append(fp, p->Name);
 
-    TNodeClueList_CodePrint(&p->ClueList2, fp, 2);
+    TNodeClueList_CodePrint(&p->ClueList2, fp);
     Output_Append(fp, "{");
-    //TNodeClueList_CodePrint(&p->ClueList, fp, 3);
+
 
     ForEachListItem(TEnumerator, pTEnumerator, &p->EnumeratorList)
     {
@@ -821,7 +826,7 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
         }
     }
 
-    TNodeClueList_CodePrint(&p->ClueList3, fp, 3);
+    TNodeClueList_CodePrint(&p->ClueList3, fp);
     Output_Append(fp, "}");
     return true;
 }
@@ -829,7 +834,7 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
 
 static bool TStructUnionSpecifier_CodePrint(TProgram* program, TStructUnionSpecifier* p, bool b, StrBuilder* fp)
 {
-    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
 
     b = true;
 
@@ -839,22 +844,22 @@ static bool TStructUnionSpecifier_CodePrint(TProgram* program, TStructUnionSpeci
     else
         Output_Append(fp, "union");
 
-    TNodeClueList_CodePrint(&p->ClueList1, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
     Output_Append(fp, p->Name);
 
     if (p->StructDeclarationList.size > 0)
     {
-        TNodeClueList_CodePrint(&p->ClueList2, fp, 0);
+        TNodeClueList_CodePrint(&p->ClueList2, fp);
 
         Output_Append(fp, "{");
 
         for (size_t i = 0; i < p->StructDeclarationList.size; i++)
         {
             TAnyStructDeclaration * pStructDeclaration = p->StructDeclarationList.pItems[i];
-            b = TAnyStructDeclaration_CodePrint(program, pStructDeclaration, b, fp);            
+            b = TAnyStructDeclaration_CodePrint(program, pStructDeclaration, b, fp);
         }
 
-        TNodeClueList_CodePrint(&p->ClueList3, fp, 0);
+        TNodeClueList_CodePrint(&p->ClueList3, fp);
         Output_Append(fp, "}");
     }
 
@@ -864,7 +869,7 @@ static bool TStructUnionSpecifier_CodePrint(TProgram* program, TStructUnionSpeci
 static bool TSingleTypeSpecifier_CodePrint(TProgram* program, TSingleTypeSpecifier* p, bool b, StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
 
 
     b = true;
@@ -997,7 +1002,7 @@ static bool TInitializerList_CodePrint(TProgram* program,
     TInitializerList*p,
     bool b, StrBuilder* fp)
 {
-    
+
 
     b = false;
 
@@ -1011,7 +1016,7 @@ static bool TInitializerList_CodePrint(TProgram* program,
     else
     {
         //TNodeClueList_CodePrint(&p->ClueList, fp, 0);
-        
+
         //Output_Append(fp, "{");
 
         ForEachListItem(TInitializerListItem, pItem, p)
@@ -1032,13 +1037,13 @@ static bool TInitializerList_CodePrint(TProgram* program,
 static bool TInitializerListType_CodePrint(TProgram* program, TTypeSpecifier* pTypeSpecifier, bool bIsPointer, TInitializerListType*p, bool b, StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&p->NodeClueList1, fp, 0);
+    TNodeClueList_CodePrint(&p->NodeClueList1, fp);
     Output_Append(fp, "{");
     b = TInitializerList_CodePrint(program, pTypeSpecifier,
         bIsPointer,
         &p->InitializerList, b, fp);
     Output_Append(fp, "}");
-    TNodeClueList_CodePrint(&p->NodeClueList2, fp, 0);
+    TNodeClueList_CodePrint(&p->NodeClueList2, fp);
 
     return true;
 }
@@ -1231,15 +1236,19 @@ static bool TDirectDeclarator_CodePrint(TProgram* program, TDirectDeclarator* pD
     if (pDirectDeclarator->Identifier)
     {
         //identifier
-        Output_Append(fp, " ");
+        TNodeClueList_CodePrint(&pDirectDeclarator->ClueList0, fp);
         Output_Append(fp, pDirectDeclarator->Identifier);
         b = true;
     }
     else  if (pDirectDeclarator->pDeclarator)
     {
         //( declarator )
+        TNodeClueList_CodePrint(&pDirectDeclarator->ClueList0, fp);
         Output_Append(fp, "(");
+
         b = TDeclarator_CodePrint(program, pDirectDeclarator->pDeclarator, b, fp);
+
+        TNodeClueList_CodePrint(&pDirectDeclarator->ClueList0, fp);
         Output_Append(fp, ")");
     }
 
@@ -1250,12 +1259,13 @@ static bool TDirectDeclarator_CodePrint(TProgram* program, TDirectDeclarator* pD
         direct-declarator [ static type-qualifier-listopt assignment-expression ]
         direct-declarator [ type-qualifier-list static assignment-expression ]
         */
-
+        TNodeClueList_CodePrint(&pDirectDeclarator->ClueList2, fp);
         Output_Append(fp, "[");
         if (pDirectDeclarator->pExpression)
         {
             b = TExpression_CodePrint(program, pDirectDeclarator->pExpression, "assignment-expression", b, fp);
         }
+        TNodeClueList_CodePrint(&pDirectDeclarator->ClueList3, fp);
         Output_Append(fp, "]");
     }
 
@@ -1338,8 +1348,8 @@ static bool TStructDeclaration_CodePrint(TProgram* program, TStructDeclaration* 
     b = TTypeSpecifier_CodePrint(program, p->pSpecifier, b, fp);
     b = TStructDeclaratorList_CodePrint(program, &p->DeclaratorList, b, fp);
 
-    
-    TNodeClueList_CodePrint(&p->ClueList1, fp, 0);
+
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
     Output_Append(fp, ";");
 
     return true;
@@ -1364,7 +1374,7 @@ static bool TAnyStructDeclaration_CodePrint(TProgram* program, TAnyStructDeclara
 static bool StorageSpecifier_CodePrint(TProgram* program, TStorageSpecifier* p, bool b, StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&p->ClueList0, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
 
     if (p->bIsAuto)
     {
@@ -1426,7 +1436,7 @@ static bool TFunctionSpecifier_CodePrint(TProgram* program, TFunctionSpecifier* 
 
 static bool TTypeQualifier_CodePrint(TProgram* program, TTypeQualifier* p, bool b, StrBuilder* fp)
 {
-    TNodeClueList_CodePrint(&p->ClueList1, fp, 0);
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
 
     if (p->bIsAtomic)
     {
@@ -1532,7 +1542,7 @@ static bool TDeclaration_CodePrint(TProgram* program,
         if (!p->Specifiers.StorageSpecifiers.bIsStatic)
         {
             p->Specifiers.StorageSpecifiers.bIsStatic = true;
-        }
+}
     }
 #endif
 
@@ -1549,6 +1559,7 @@ static bool TDeclaration_CodePrint(TProgram* program,
     }
     else
     {
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
         Output_Append(fp, ";");
     }
 

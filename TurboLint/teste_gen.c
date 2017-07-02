@@ -7,19 +7,19 @@
 #define Y 2
 #endif
 
-int i; 
+int i;
 
 typedef enum E
 {
     E1,
     E2
-} E; 
+} E;
 
 typedef struct Point
 {
-    int x /* =    1 */;
-    int y /* =    2 */;
-} Point; 
+    int x /* =   1 */;
+    int y /* =   2 */;
+} Point;
 
 #define NULL  0
 #define F(a) a + 1
@@ -32,11 +32,12 @@ int i = 2;
 
 //#define P_INIT {} 2
 
-int main()
-
+int /*a*/main()
 {
-    Point pt =  {{   1,   2}};
+    Point pt =  {{  1,  2}};
     int* p =  {NULL};
+    p = /*a*/0;
+    p = /*a*/(0 /*b*/);
     F(2);
 
 }

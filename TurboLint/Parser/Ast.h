@@ -156,7 +156,8 @@ typedef struct
 {
   TTypePointer Type;
   TBlockItemList BlockItemList;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
 } TCompoundStatement;
 
 #define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TSCANNERITEMLIST_INIT}
@@ -172,10 +173,11 @@ typedef struct
   Tokens token;
   String lexeme;
   TExpression*  pExpressionOpt;  
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
 } TPrimaryExpressionValue;
 
-#define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, TSCANNERITEMLIST_INIT}
+#define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
 
 
@@ -210,7 +212,9 @@ typedef struct
   TExpression*  pExpressionLeft;
   TExpression*  pExpressionRight;
   TPosition Position;
-  TScannerItemList ClueList;
+  
+  TScannerItemList ClueList0;
+  
 
 } TBinaryExpression;
 #define TBINARYEXPRESSION_INIT { {TBinaryExpression_ID}, TK_NONE, NULL, NULL, TPOSITION_INIT, TSCANNERITEMLIST_INIT}
@@ -256,7 +260,7 @@ typedef struct
 {
   TTypePointer Type;  
   TExpression *   pExpression;  
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
 } TExpressionStatement;
 #define TEXPRESSION_STATEMENT_INIT { {TExpressionStatement_ID}, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TExpressionStatement, TEXPRESSION_STATEMENT_INIT)
@@ -591,10 +595,13 @@ typedef struct TDirectDeclarator
   TParameterList  Parameters;
   TExpression*   pExpression;
   TDirectDeclaratorType Type; //para diferenciar pois null nao basta []
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
+  TScannerItemList ClueList2;
+  TScannerItemList ClueList3;
 } TDirectDeclarator;
 
-#define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TDirectDeclaratorTypeNone, TSCANNERITEMLIST_INIT}
+#define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TDirectDeclaratorTypeNone, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TDirectDeclarator, TDIRECTDECLARATOR_INIT)
 
 
@@ -685,7 +692,7 @@ typedef struct
   int FileIndex;
   int Line;
 
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
   
   
 } TDeclaration;

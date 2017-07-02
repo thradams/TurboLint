@@ -7,7 +7,8 @@
 void TCompoundStatement_Destroy(TCompoundStatement *p)
 {
   ArrayT_Destroy(TBlockItem, &p->BlockItemList);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TLabeledStatement_Destroy(TLabeledStatement *p)
@@ -51,7 +52,7 @@ void TDoStatement_Destroy(TDoStatement *p)
 void TExpressionStatement_Destroy(TExpressionStatement *p)
 {
   TExpression_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
 }
 
 void TJumpStatement_Destroy(TJumpStatement *p)
@@ -174,7 +175,8 @@ void TPrimaryExpressionValue_Destroy(TPrimaryExpressionValue* p)
 {
   TExpression_Delete(p->pExpressionOpt);
   String_Destroy(&p->lexeme);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TPostfixExpressionCore_Destroy(TPostfixExpressionCore* p)
@@ -192,7 +194,8 @@ void TBinaryExpression_Destroy(TBinaryExpression* p)
 {
   TExpression_Delete(p->pExpressionLeft);
   TExpression_Delete(p->pExpressionRight);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  
 }
 
 void TUnaryExpressionOperator_Destroy(TUnaryExpressionOperator* p)
@@ -336,7 +339,10 @@ void TDirectDeclarator_Destroy(TDirectDeclarator* p)
   TDeclarator_Delete(p->pDeclarator);
   //TInitializer_Delete(p->pInitializer);
   //TExpression_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
 }
 
 
@@ -515,7 +521,7 @@ void TDeclaration_Destroy(TDeclaration* p)
   TDeclarationSpecifiers_Destroy(&p->Specifiers);
   List_Destroy(TInitDeclarator, &p->InitDeclaratorList);
   List_Destroy(TTemplateParameter, &p->TemplateParameters);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
 }
 
 void TParameterDeclaration_Swap(TParameterDeclaration* a, TParameterDeclaration* b)
