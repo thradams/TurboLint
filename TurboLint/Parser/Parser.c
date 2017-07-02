@@ -342,7 +342,7 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
 
     ////////
-    Scanner_IncludeFile(&parser->Scanner, fileName, FileIncludeTypeFullPath);
+    Scanner_IncludeFile(&parser->Scanner, fileName, FileIncludeTypeFullPath, false);
 
     //Scanner_Match(&parser->Scanner);
     //sair do BOF
@@ -353,7 +353,7 @@ Result Parser_InitFile(Parser* parser, const char* fileName)
 
 void Parser_PushFile(Parser* parser, const char* fileName)
 {
-    Scanner_IncludeFile(&parser->Scanner, fileName, FileIncludeTypeFullPath);
+    Scanner_IncludeFile(&parser->Scanner, fileName, FileIncludeTypeFullPath, false);
     Parser_Match(parser, NULL);
 }
 
@@ -541,6 +541,20 @@ Tokens Parser_Match(Parser* parser, TScannerItemList* listOpt)
         {
             List_Swap(ScannerItem, listOpt, &parser->NodeClueList);
         }
+
+
+    //    token = Scanner_CurrentToken(&parser->Scanner);
+      //  while (!Scanner_IsActiveGroup(&parser->Scanner) ||
+        //    IsPreprocessorTokenPhase(token))
+        //{
+          //  ScannerItem* pNew = ScannerItem_Create();
+//            StrBuilder_Set(&pNew->lexeme, Scanner_CurrentLexeme(&parser->Scanner));
+  //          pNew->token = Scanner_CurrentToken(&parser->Scanner);
+    //        List_Add(&parser->NodeClueList, pNew);
+
+      //      Scanner_Match(&parser->Scanner);
+        //    token = Scanner_CurrentToken(&parser->Scanner);
+        //}
 
         Scanner_Match(&parser->Scanner);
 

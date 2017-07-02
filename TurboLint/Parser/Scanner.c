@@ -422,7 +422,8 @@ bool Scanner_GetFullPath(Scanner* pScanner,
 
 void Scanner_IncludeFile(Scanner* pScanner,
   const char* includeFileName,
-  FileIncludeType fileIncludeType)
+  FileIncludeType fileIncludeType,
+    bool bSkipBof)
 {
     bool bDirectInclude = false;
 
@@ -519,107 +520,11 @@ void Scanner_IncludeFile(Scanner* pScanner,
                 {
                     pNewScanner->FileIndex = pFile->FileIndex;
                     
-                    //sair do bof
-                    BasicScanner_Match(pNewScanner);
+                    if (bSkipBof)
+                    {
+                        BasicScanner_Match(pNewScanner);
+                    }
 
-                    BasicScannerStack_Push(&pScanner->stack, pNewScanner);
-                }
-
-                else
-                {
-                    Scanner_SetError(pScanner, "mem");
-                }
-            }
-
-            else
-            {
-                ASSERT(false);
-                Scanner_SetError(pScanner, "error in file '");
-                StrBuilder_Append(&pScanner->ErrorString, fullPath);
-                StrBuilder_Append(&pScanner->ErrorString, "'");
-            }
-        }
-    }
-
-    else
-    {
-        Scanner_SetError(pScanner, "file '");
-        StrBuilder_Append(&pScanner->ErrorString, includeFileName);
-        StrBuilder_Append(&pScanner->ErrorString, "' not found");
-    }
-
-    String_Destroy(&fullPath);
-}
-
-
-void Scanner_IncludeFile_Version2(Scanner* pScanner,
-  const char* includeFileName,
-  FileIncludeType fileIncludeType)
-{
-    bool bDirectInclude = false;
-
-    String fullPath = STRING_INIT;
-    String_Init(&fullPath, "");
-    //Faz a procura nos diretorios como se tivesse adicinando o include
-    //seguindo as mesmas regras. Caso o include seja possivel ele retorna o path completo
-    //este path completo que eh usado para efeitos do pragma once.
-    bool bHasFullPath = false;
-
-    switch (fileIncludeType)
-    {
-        case FileIncludeTypeQuoted:
-        case FileIncludeTypeIncludes:
-        bHasFullPath = Scanner_GetFullPath(pScanner,
-          includeFileName,
-          fileIncludeType == FileIncludeTypeQuoted,
-          &fullPath);
-        break;
-
-        case FileIncludeTypeFullPath:
-        String_Set(&fullPath, includeFileName);
-        bHasFullPath = true;
-        break;
-    };
-
-    if (bHasFullPath)
-    {
-        //Se o arquivo esta sendo incluído de um arquivo
-        //que é do usuário e este arquivo não é do usuário
-        //então ele é marcado para ser incluído para fazer 
-        //os includes lah do almagamations
-
-        TFile*  pFile = TFileMap_Find(&pScanner->FilesIncluded, fullPath);
-
-        if (pFile != NULL && pFile->PragmaOnce)
-        {
-            //foi marcado como pragma once.. nao faz nada
-        }
-        else
-        {
-            if (pFile == NULL)
-            {
-                pFile = TFile_Create();
-                pFile->bDirectInclude = bDirectInclude;
-                pFile->bSystemLikeInclude =
-                    (fileIncludeType == FileIncludeTypeIncludes);
-                String_Set(&pFile->IncludePath, includeFileName);
-                TFileMap_Set(&pScanner->FilesIncluded, fullPath, pFile); //pfile Moved
-            }
-
-            BasicScanner* pNewScanner = NULL;
-            Result result = BasicScanner_CreateFile(fullPath, &pNewScanner);
-
-            if (result == RESULT_OK)
-            {
-                if (pScanner->bPrintIncludes)
-                {
-                    printf("%s\n", fullPath);
-                }
-
-                if (pFile)
-                {
-                    pNewScanner->FileIndex = pFile->FileIndex;
-                    // BasicScanner_Match(pNewScanner);
                     BasicScannerStack_Push(&pScanner->stack, pNewScanner);
                 }
 
@@ -1416,7 +1321,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
                     //IgnorePreProcessorv2(pScanner, &strBuilder);
                     //pode ou nao incluir depende do pragma once
-                    Scanner_IncludeFile(pScanner, fileName, FileIncludeTypeQuoted);
+                    Scanner_IncludeFile(pScanner, fileName, FileIncludeTypeQuoted, true);
                     String_Destroy(&fileName);
                     //break;
                 }
@@ -1452,7 +1357,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
                     }
                     IgnorePreProcessorv2(pScanner, &strBuilder);
                     //pode ou nao incluir depende do pragma once
-                    Scanner_IncludeFile(pScanner, path.c_str, FileIncludeTypeIncludes);
+                    Scanner_IncludeFile(pScanner, path.c_str, FileIncludeTypeIncludes, true);
                     StrBuilder_Destroy(&path);
                 }
                 
@@ -1849,8 +1754,8 @@ void PrintPreprocessedToFile(const char* fileIn,
     Scanner scanner;
     Scanner_Init(&scanner);
     scanner.bIncludeSpaces = true;
-    Scanner_IncludeFile(&scanner, fullFileNamePath, FileIncludeTypeFullPath);
-    Scanner_IncludeFile(&scanner, configFullPath, FileIncludeTypeFullPath);
+    Scanner_IncludeFile(&scanner, fullFileNamePath, FileIncludeTypeFullPath, true);
+    Scanner_IncludeFile(&scanner, configFullPath, FileIncludeTypeFullPath, true);
     Scanner_Match(&scanner);
 
 

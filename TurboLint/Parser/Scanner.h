@@ -100,11 +100,8 @@ typedef enum
 
 void Scanner_IncludeFile(Scanner* pScanner,
   const char* fileName,
-  FileIncludeType fileIncludeType);
+  FileIncludeType fileIncludeType, bool bSkipeBof);
 
-void Scanner_IncludeFile_Version2(Scanner* pScanner,
-  const char* includeFileName,
-  FileIncludeType fileIncludeType);
 
 void Scanner_Destroy(Scanner* pScanner);
 

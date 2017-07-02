@@ -47,7 +47,7 @@ void Test1()
 {
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted, false);
 
     MATCH(&scanner2, TK_BOF)
         MATCH(&scanner2, TK_PRE_DEFINE)
@@ -73,7 +73,7 @@ void Test2()
 {
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test2.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test2.h", FileIncludeTypeQuoted, false);
 
     MATCH(&scanner2, TK_BOF)
         MATCH(&scanner2, TK_PRE_DEFINE)
@@ -89,7 +89,7 @@ void Test3()
 {
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test3.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test3.h", FileIncludeTypeQuoted,  false);
 
     MATCH(&scanner2, TK_BOF)
         MATCH(&scanner2, TK_PRE_DEFINE)
@@ -116,7 +116,7 @@ void Test4()
 {
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test4.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test4.h", FileIncludeTypeQuoted, false);
 
     MATCH(&scanner2, TK_BOF)
 
@@ -140,7 +140,7 @@ void Test5()
 {
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test5.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test5.h", FileIncludeTypeQuoted, false);
 
     MATCH(&scanner2, TK_BOF)
         MATCH(&scanner2, TK_PRE_DEFINE)
@@ -157,7 +157,7 @@ void Test6()
 {
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test6.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test6.h", FileIncludeTypeQuoted, false);
     MATCH(&scanner2, TK_BOF)
         MATCH2(&scanner2, TK_IDENTIFIER, "BEGIN")
         MATCH(&scanner2, TK_BREAKLINE)
@@ -188,7 +188,7 @@ void Test7()
     //
     Scanner scanner2;
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test7.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test7.h", FileIncludeTypeQuoted, false);
     MATCH(&scanner2, TK_BOF)
     //Test7.h
     MATCH(&scanner2, TK_BREAKLINE)
@@ -207,7 +207,7 @@ void Test7()
     ///////////////////////////
 
     Scanner_Init(&scanner2);
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test7.c", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test7.c", FileIncludeTypeQuoted, false);
     MATCH(&scanner2, TK_BOF)
         
         MATCH(&scanner2, TK_PRE_INCLUDE)
@@ -329,7 +329,7 @@ void Test()
     Scanner_Init(&scanner2);
     TEST(Scanner_CurrentToken(&scanner2) == TK_EOF);
 
-    Scanner_IncludeFile_Version2(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted);
+    Scanner_IncludeFile(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted, false);
 
     MATCH(&scanner2, TK_BOF)
         MATCH(&scanner2, TK_PRE_DEFINE)
