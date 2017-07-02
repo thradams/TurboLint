@@ -691,7 +691,8 @@ void IgnorePreProcessorv2(Scanner* pScanner, StrBuilder* strBuilder)
     BasicScanner* pTop = Scanner_Top(pScanner);
 
     // ASSERT(pTop->currentItem.token != TK_BREAKLINE);
-    while (pTop->currentItem.token != TK_EOF)
+    while (pTop->currentItem.token != TK_EOF &&
+           pTop->currentItem.token != TK_FILE_EOF)
     {
         if (pTop->currentItem.token == TK_BREAKLINE)
         {
@@ -1075,7 +1076,9 @@ Tokens FindPreToken(const char* lexeme)
 void GetPPTokens(Scanner* pScanner, TokenArray* pptokens, StrBuilder* strBuilder)
 {
     //Corpo da macro
-    while (Scanner_CurrentToken(pScanner) != TK_BREAKLINE)
+    while (Scanner_CurrentToken(pScanner) != TK_BREAKLINE && 
+           Scanner_CurrentToken(pScanner) != TK_EOF &&
+           Scanner_CurrentToken(pScanner) != TK_FILE_EOF)
     {
         const char* lexeme = Scanner_CurrentLexeme(pScanner);
         StrBuilder_Append(strBuilder, lexeme);
@@ -1259,21 +1262,23 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
     Tokens token = pTopScanner->currentItem.token;
     
-    //se eh o unico arquivo TK_FILE_EOF vira eof
-    if (token == TK_FILE_EOF && 
-        pScanner->stack->pPrevious == NULL)
-    {
-        pTopScanner->currentItem.token = TK_EOF;
-        return;
-    }
-
-    while (token == TK_EOF &&
+    
+    while ((token == TK_EOF) &&
            pScanner->stack->pPrevious != NULL)
     {
         BasicScannerStack_PopIfNotLast(&pScanner->stack);
         pTopScanner = Scanner_Top(pScanner);
         token = pTopScanner->currentItem.token;
     }
+    
+    //se eh o unico arquivo TK_FILE_EOF vira eof
+    if (token == TK_FILE_EOF &&
+        pScanner->stack->pPrevious == NULL)
+    {
+        pTopScanner->currentItem.token = TK_EOF;
+        return;
+    }
+
 
     if (token == TK_EOF)
     {

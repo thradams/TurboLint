@@ -244,26 +244,43 @@ void Test7()
 
 void Test8()
 {
-    /*Parser parser;
-    Parser_InitFile(&parser, "C:\\Users\\kiki\\Source\\Repos\\TurboLint\\TurboLint\\Test\\Test7.c");
-    Parser_MatchToken(&parser, TK_VOID, NULL);
-    Parser_MatchToken(&parser, TK_IDENTIFIER, NULL);
-    Parser_MatchToken(&parser, TK_LEFT_PARENTHESIS, NULL);
-    Parser_MatchToken(&parser, TK_RIGHT_PARENTHESIS, NULL);
-    Parser_MatchToken(&parser, TK_SEMICOLON, NULL);
 
-    Parser_MatchToken(&parser, TK_VOID, NULL);
-    Parser_MatchToken(&parser, TK_IDENTIFIER, NULL);
-    Parser_MatchToken(&parser, TK_LEFT_PARENTHESIS, NULL);
-    Parser_MatchToken(&parser, TK_RIGHT_PARENTHESIS, NULL);
-    Parser_MatchToken(&parser, TK_SEMICOLON, NULL);
+ //
+        Scanner scanner2;
+        Scanner_Init(&scanner2);
+        Scanner_IncludeFile(&scanner2, ".\\Test\\Test8.h", FileIncludeTypeQuoted, false);
+        MATCH(&scanner2, TK_BOF)
+            //Test8.h
+            MATCH(&scanner2, TK_BREAKLINE)
+            MATCH(&scanner2, TK_PRE_DEFINE)
+            MATCH(&scanner2, TK_EOF)
+            //Test7.h
+            Scanner_Destroy(&scanner2);
+        ///////////////////////////
 
-    Parser_MatchToken(&parser, TK_EOF, NULL);
+        Scanner_Init(&scanner2);
+        Scanner_IncludeFile(&scanner2, ".\\Test\\Test8.c", FileIncludeTypeQuoted, false);
+        MATCH(&scanner2, TK_BOF)
 
-    TEST(parser.bError == false);
+            MATCH(&scanner2, TK_PRE_INCLUDE)
 
-    Parser_Destroy(&parser);
-    */
+            //Test8.h
+            MATCH(&scanner2, TK_BREAKLINE)
+            MATCH(&scanner2, TK_PRE_DEFINE)
+            MATCH(&scanner2, TK_FILE_EOF)
+            //Test8.h
+
+            MATCH(&scanner2, TK_BREAKLINE)
+            MATCH(&scanner2, TK_INT )
+            MATCH(&scanner2, TK_SPACES)
+            MATCH(&scanner2, TK_IDENTIFIER)
+            MATCH(&scanner2, TK_SEMICOLON)
+            MATCH(&scanner2, TK_BREAKLINE)
+            MATCH(&scanner2, TK_EOF)
+            Scanner_Destroy(&scanner2);
+
+    
+
 }
 void Test()
 {
