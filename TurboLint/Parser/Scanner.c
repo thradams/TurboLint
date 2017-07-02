@@ -419,6 +419,10 @@ bool Scanner_GetFullPath(Scanner* pScanner,
     return bFullPathFound;
 }
 
+static void Scanner_PushToken(Scanner* pScanner,
+    Tokens token,
+    const char* lexeme);
+
 
 void Scanner_IncludeFile(Scanner* pScanner,
   const char* includeFileName,
@@ -493,6 +497,8 @@ void Scanner_IncludeFile(Scanner* pScanner,
         if (pFile != NULL && pFile->PragmaOnce)
         {
             //foi marcado como pragma once.. nao faz nada
+            //tenho q enviar um comando
+            Scanner_PushToken(pScanner, TK_FILE_EOF, "pragma once file");
         }
         else
         {

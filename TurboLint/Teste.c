@@ -1,6 +1,6 @@
 //a
 //#include "Test\Test7.h"
-//#include <stdio.h>
+#include <stdio.h>
 #include "h0.h"
 
 #ifndef Y
