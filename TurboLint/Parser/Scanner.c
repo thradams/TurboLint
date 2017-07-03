@@ -1760,7 +1760,7 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
 
 void PrintPreprocessedToFile(const char* fileIn,
-  const char* configFileName)
+    const char* configFileName)
 {
     String fullFileNamePath = STRING_INIT;
     GetFullPath(fileIn, &fullFileNamePath);
@@ -1769,7 +1769,7 @@ void PrintPreprocessedToFile(const char* fileIn,
 
     Scanner scanner;
     Scanner_Init(&scanner);
-    scanner.bIncludeSpaces = true;
+
     Scanner_IncludeFile(&scanner, fullFileNamePath, FileIncludeTypeFullPath, true);
     Scanner_IncludeFile(&scanner, configFullPath, FileIncludeTypeFullPath, true);
     Scanner_Match(&scanner);
@@ -1792,20 +1792,41 @@ void PrintPreprocessedToFile(const char* fileIn,
     {
         Tokens token = Scanner_CurrentToken(&scanner);
         const char* lexeme = Scanner_CurrentLexeme(&scanner);
+        if (Scanner_CurrentTokenIsActive(&scanner))
+        {
+            switch (token)
+            {
+                //Tokens para linhas do pre processador
+            case TK_PRE_INCLUDE:
+            case TK_PRE_PRAGMA:
+            case TK_PRE_IF:
+            case TK_PRE_ELIF:
+            case TK_PRE_IFNDEF:
+            case TK_PRE_IFDEF:
+            case TK_PRE_ENDIF:
+            case TK_PRE_ELSE:
+            case TK_PRE_ERROR:
+            case TK_PRE_LINE:
+            case TK_PRE_UNDEF:
+            case TK_PRE_DEFINE:
+                fprintf(fp, "\n");
+                break;
 
-        if (token == TK_BREAKLINE)
-        {
-            fprintf(fp, "%s", lexeme);
-        }
+                //fim tokens preprocessador
+            case TK_LINE_COMMENT:
+            case TK_COMMENT:
+                fprintf(fp, " ");
+                break;
 
-        if (token == TK_LINE_COMMENT ||
-          token == TK_COMMENT)
-        {
-            //fprintf(fp, "%s", lexeme);
-        }
-        else
-        {
-            fprintf(fp, "%s", lexeme);
+            case TK_MACRO_CALL:
+            case TK_MACRO_EOF:
+            case TK_FILE_EOF:
+                break;
+
+            default:
+                fprintf(fp, "%s", lexeme);
+                break;
+            }
         }
 
         Scanner_Match(&scanner);
@@ -1816,7 +1837,6 @@ void PrintPreprocessedToFile(const char* fileIn,
     String_Destroy(&fullFileNamePath);
     String_Destroy(&configFullPath);
 }
-
 
 void Scanner_LookAhead(Scanner* pScanner)
 {
