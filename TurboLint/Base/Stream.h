@@ -34,4 +34,5 @@ void SStream_Destroy(SStream* pfStream);
 
 wchar_t SStream_LookAhead(SStream* pStream);
 
-void SStream_Next(SStream* pStream);
+void SStream_Match(SStream* pStream);
+bool SStream_MatchChar(SStream* pStream, wchar_t ch);

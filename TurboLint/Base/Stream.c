@@ -136,7 +136,14 @@ wchar_t SStream_LookAhead(SStream* pStream)
   return pStream->text[pStream->position + 1];
 }
 
-void SStream_Next(SStream* pStream)
+bool SStream_MatchChar(SStream* pStream, wchar_t ch)
+{
+    bool b = pStream->currentChar == ch;
+    SStream_Match(pStream);
+    return b;
+}
+
+void SStream_Match(SStream* pStream)
 {
   if (pStream->position >= pStream->text_length)
   {

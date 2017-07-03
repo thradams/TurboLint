@@ -87,7 +87,7 @@ Result PushExpandedMacro(Scanner * pScanner, const char * defineName, const char
 //Tokens Scanner_Token(Scanner* pScanner);
 //const char* Scanner_Lexeme(Scanner* pScanner);
 
-bool Scanner_IsActiveGroup(Scanner* pScanner);
+//bool Scanner_IsActiveGroup(Scanner* pScanner);
 
 Result Scanner_Init(Scanner* pScanner);
 
@@ -122,8 +122,12 @@ Tokens Scanner_CurrentToken(Scanner * pScanner);
 int Scanner_CurrentLine(Scanner * pScanner);
 int Scanner_CurrentFileIndex(Scanner * pScanner);
 const char * Scanner_CurrentLexeme(Scanner * pScanner);
+bool Scanner_CurrentTokenIsActive(Scanner* pScanner);
 
 Tokens Scanner_LookAheadToken(Scanner * pScanner, int nLookAhead);
 const char * Scanner_LookAheadLexeme(Scanner * pScanner, int nLookAhead);
+bool Scanner_LookAheadTokenActive(Scanner* pScanner, int nLookAhead);
 
 void Scanner_Match(Scanner * pScanner);
+bool Scanner_MatchToken(Scanner * pScanner, Tokens token, bool bActive);
+

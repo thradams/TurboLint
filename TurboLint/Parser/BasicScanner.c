@@ -775,7 +775,7 @@ void BasicScanner_Next(BasicScanner* scanner)
         if(ch == L'\r' && ch1 == L'\n')
         {
             //so coloca \n
-            SStream_Next(&scanner->stream);
+            SStream_Match(&scanner->stream);
             ch = scanner->stream.currentChar;
             ch = BasicScanner_MatchChar(scanner);
         }
@@ -873,7 +873,7 @@ void BasicScanner_Next(BasicScanner* scanner)
                 else if(ch == L'\r')
                 {
                     //so coloca \n
-                    SStream_Next(&scanner->stream);
+                    SStream_Match(&scanner->stream);
                     ch = scanner->stream.currentChar;
                     if(ch == L'\n')
                     {
@@ -916,21 +916,21 @@ void BasicScanner_Next(BasicScanner* scanner)
       //If a universal character name(\uXXX) is formed in this 
       //phase, the behavior is undefined.
 
-      SStream_Next(&scanner->stream);
+      SStream_Match(&scanner->stream);
       ch = scanner->stream.currentChar;
         if(ch == L'\r')
         {
-          SStream_Next(&scanner->stream);
+          SStream_Match(&scanner->stream);
           ch = scanner->stream.currentChar;
             if(ch == L'\n')
             {
-              SStream_Next(&scanner->stream);
+              SStream_Match(&scanner->stream);
               ch = scanner->stream.currentChar;
             }
         }
         else if(ch == L'\n')
         {
-          SStream_Next(&scanner->stream);
+          SStream_Match(&scanner->stream);
           ch = scanner->stream.currentChar;
         }
         ////acho que o padrao manda sumir...
@@ -981,7 +981,7 @@ wchar_t BasicScanner_MatchChar(BasicScanner* scanner)
 {
     StrBuilder_AppendWChar(&scanner->currentItem.lexeme,
                            scanner->stream.currentChar);
-    SStream_Next(&scanner->stream);
+    SStream_Match(&scanner->stream);
     return scanner->stream.currentChar;
 }
 

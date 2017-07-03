@@ -1227,11 +1227,11 @@ int EvalPre(Scanner* pScanner, StrBuilder* sb)
     return iRes;
 }
 
-bool Scanner_IsActiveGroup(Scanner* pScanner)
-{
-    State state = StateTop(pScanner);
-    return IsIncludeState(state);
-}
+//bool Scanner_IsActiveGroup(Scanner* pScanner)
+//{
+  //  State state = StateTop(pScanner);
+//    return IsIncludeState(state);
+//}
 
 static void Scanner_PushToken(Scanner* pScanner,
                        Tokens token,
@@ -1294,10 +1294,14 @@ void Scanner_NextVersion2(Scanner* pScanner)
 
     StrBuilder strBuilder = STRBUILDER_INIT;
 
-    State state = StateTop(pScanner);
+    
+    State state = StateTop(pScanner);    
+    pTopScanner->currentItem.bActive = IsIncludeState(state);
+    
 
     if (token == TK_PREPROCESSOR)
     {
+
         StrBuilder_Append(&strBuilder, pTopScanner->currentItem.lexeme.c_str);
 
         //Match #
@@ -1827,10 +1831,13 @@ void Scanner_LookAhead(Scanner* pScanner)
 
             Tokens currentToken = 
                 pScanner->stack->currentItem.token;
+            bool bActive = 
+                pScanner->stack->currentItem.bActive;
 
             ScannerItem* pNew = ScannerItem_Create();
             StrBuilder_Set(&pNew->lexeme, currentLexeme);
             pNew->token = currentToken;
+            pNew->bActive = bActive;
             List_Add(&pScanner->AcumulatedTokens, pNew);
             Scanner_NextVersion2(pScanner);
         }
@@ -1895,6 +1902,24 @@ Tokens Scanner_CurrentToken(Scanner* pScanner)
     return token;
 }
 
+bool Scanner_CurrentTokenIsActive(Scanner* pScanner)
+{
+    bool bActive = false;
+
+    if (!pScanner->bError)
+    {
+        if (pScanner->AcumulatedTokens.pHead)
+        {
+            bActive = pScanner->AcumulatedTokens.pHead->bActive;            
+        }
+        else if (pScanner->stack != NULL)
+        {
+            bActive = pScanner->stack->currentItem.bActive;
+        }
+    }
+
+    return bActive;
+}
 
 
 
@@ -1917,6 +1942,52 @@ const char* Scanner_CurrentLexeme(Scanner* pScanner)
     return lexeme;
 }
 
+
+bool Scanner_LookAheadTokenActive(Scanner* pScanner, int nLookAhead)
+{
+    bool bActive = false;
+    ASSERT(nLookAhead > 0);
+
+    Tokens token = TK_EOF;
+
+    if (!pScanner->bError)
+    {
+
+        int nCount = 0;
+        ForEachListItem(ScannerItem, pItem, &pScanner->AcumulatedTokens)
+        {
+            nCount++;
+        }
+
+        if (nLookAhead > nCount)
+        {
+            //Vou precisar ver mais adiante
+            for (int i = nCount; i < nLookAhead; i++)
+            {
+                Scanner_LookAhead(pScanner);
+            }
+            bActive = pScanner->stack->currentItem.bActive;
+        }
+        else if (nLookAhead == nCount)
+        {
+            bActive = pScanner->stack->currentItem.bActive;
+        }
+        else
+        {
+            int n = 0;
+            ForEachListItem(ScannerItem, pItem, &pScanner->AcumulatedTokens)
+            {
+                if (n == nLookAhead)
+                {
+                    bActive = pItem->bActive;
+                    break;
+                }
+            }
+        }
+    }
+
+    return bActive;
+}
 
 Tokens Scanner_LookAheadToken(Scanner* pScanner, int nLookAhead)
 {
@@ -2056,4 +2127,13 @@ void Scanner_Match(Scanner * pScanner)
             Scanner_NextVersion2(pScanner);
         }
     }
+}
+
+bool Scanner_MatchToken(Scanner * pScanner,
+                        Tokens token,
+                        bool bActive)
+{
+    bool b = Scanner_CurrentToken(pScanner) == token;
+    Scanner_Match(pScanner);
+    return b;
 }

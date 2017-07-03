@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 {
 	printf("Turbo lint " __DATE__ "\n");
   
-  Test();
+  AllTests();
 
 	if (argc < 2)
 	{

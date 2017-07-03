@@ -41,6 +41,8 @@ Result Parser_InitString(Parser* parser,
 
 void Parser_Destroy(Parser* parser);
 
+bool Parser_HasError(Parser * pParser);
+
 
 const char* GetCompletationMessage(Parser* parser);
 
@@ -56,3 +58,5 @@ void ConstantExpression(Parser* ctx, TExpression** ppExpression);
 Tokens Parser_MatchToken(Parser* parser,
     Tokens tk,
     TScannerItemList* listOpt);
+
+Tokens Parser_LookAheadToken(Parser* parser);

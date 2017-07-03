@@ -415,7 +415,7 @@ static const char* GetName()
     return buffer;
 }
 
-static bool HasErrors(Parser* pParser)
+bool Parser_HasError(Parser* pParser)
 {
     return pParser->bError || pParser->Scanner.bError;
 }
@@ -425,7 +425,7 @@ static bool HasErrors(Parser* pParser)
 void SetError2(Parser* parser, const char* message, const char* message2)
 {
     //    ASSERT(false);
-    if (!HasErrors(parser))
+    if (!Parser_HasError(parser))
     {
         Scanner_GetError(&parser->Scanner, &parser->ErrorMessage);
         parser->bError = true;
@@ -458,7 +458,7 @@ void SetUnexpectedError(Parser* parser, const char* message, const char* message
 
 int GetCurrentLine(Parser* parser)
 {
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         return -1;
     }
@@ -468,7 +468,7 @@ int GetCurrentLine(Parser* parser)
 
 int GetFileIndex(Parser* parser)
 {
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         return -1;
     }
@@ -485,17 +485,28 @@ static void GetPosition(Parser* ctx, TPosition* pPosition)
 
 Tokens Parser_LookAheadToken(Parser* parser)
 {
-    if (HasErrors(parser))
+    Tokens token = TK_ERROR;
+
+    if (!Parser_HasError(parser))
     {
-        return TK_ERROR;
+        for (int i = 1; i < 10; i++)
+        {
+            token = Scanner_LookAheadToken(&parser->Scanner, i);
+            bool bActive = Scanner_LookAheadTokenActive(&parser->Scanner, i);
+            if (bActive && !IsPreprocessorTokenPhase(token))
+            {
+                break;
+            }
+        }
     }
 
-    return Scanner_LookAheadToken(&parser->Scanner, 1);
+    return token;
 }
+
 
 const char* Parser_LookAheadLexeme(Parser* parser)
 {
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         return "";
     }
@@ -506,7 +517,7 @@ const char* Parser_LookAheadLexeme(Parser* parser)
 
 Tokens Parser_CurrentToken(Parser* parser)
 {
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         return TK_ERROR;
     }
@@ -524,7 +535,7 @@ Tokens Parser_CurrentToken(Parser* parser)
 Tokens Parser_Match(Parser* parser, TScannerItemList* listOpt)
 {
     Tokens token = TK_EOF;
-    if (!HasErrors(parser))
+    if (!Parser_HasError(parser))
     {
 
         if (listOpt)
@@ -535,8 +546,9 @@ Tokens Parser_Match(Parser* parser, TScannerItemList* listOpt)
         Scanner_Match(&parser->Scanner);
 
         token = Scanner_CurrentToken(&parser->Scanner);
-        while (!Scanner_IsActiveGroup(&parser->Scanner) ||
-            IsPreprocessorTokenPhase(token))
+        while (token != TK_EOF &&
+               (!Scanner_CurrentTokenIsActive(&parser->Scanner) ||
+               IsPreprocessorTokenPhase(token)))
         {
             ScannerItem* pNew = ScannerItem_Create();
             StrBuilder_Set(&pNew->lexeme, Scanner_CurrentLexeme(&parser->Scanner));
@@ -555,7 +567,7 @@ Tokens Parser_MatchToken(Parser* parser,
     Tokens tk,
     TScannerItemList* listOpt)
 {
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         return TK_EOF;
     }
@@ -576,7 +588,7 @@ const char* GetCompletationMessage(Parser* parser)
 {
     const char* pMessage = "ok";
 
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         if (parser->Scanner.bError)
         {
@@ -594,7 +606,7 @@ const char* GetCompletationMessage(Parser* parser)
 
 const char* Lexeme(Parser* parser)
 {
-    if (HasErrors(parser))
+    if (Parser_HasError(parser))
     {
         ASSERT(false);
         return "";
@@ -605,7 +617,7 @@ const char* Lexeme(Parser* parser)
 
 bool ErrorOrEof(Parser* parser)
 {
-    return HasErrors(parser) ||
+    return Parser_HasError(parser) ||
         Parser_CurrentToken(parser) == TK_EOF;
 }
 //////////////////////////////////////////////////////////////
@@ -2797,7 +2809,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
 {
     ASSERT(*ppStatement == NULL);
 
-    if (HasErrors(ctx))
+    if (Parser_HasError(ctx))
     {
         return false;
     }
@@ -4881,7 +4893,7 @@ bool  Declaration(Parser* ctx,
 void SetSymbolsFromDeclaration(Parser* ctx,
     TAnyDeclaration* pDeclaration2)
 {
-    if (HasErrors(ctx))
+    if (Parser_HasError(ctx))
     {
         return;
     }
@@ -4955,7 +4967,7 @@ void Parse_Declarations(Parser* ctx, TDeclarations* declarations)
             break;
         }
 
-        if (HasErrors(ctx))
+        if (Parser_HasError(ctx))
             break;
 
     }
