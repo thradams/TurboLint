@@ -393,10 +393,16 @@ static bool TSwitchStatement_CodePrint(TProgram* program, TSwitchStatement * p, 
 static bool TIfStatement_CodePrint(TProgram* program, TIfStatement * p, bool b, StrBuilder* fp)
 {
     b = true;
-    Output_Append(fp, "if (");
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
+    Output_Append(fp, "if");
 
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
+    Output_Append(fp, "(");
+    
 
     b = TExpression_CodePrint(program, p->pConditionExpression, "expr", false, fp);
+
+    TNodeClueList_CodePrint(&p->ClueList2, fp);
     Output_Append(fp, ")");
 
     if (p->pStatement->type != TCompoundStatement_ID)
@@ -409,6 +415,7 @@ static bool TIfStatement_CodePrint(TProgram* program, TIfStatement * p, bool b, 
 
     if (p->pElseStatement)
     {
+        TNodeClueList_CodePrint(&p->ClueList3, fp);
         Output_Append(fp, "else");
         b = TStatement_CodePrint(program, p->pElseStatement, false, fp);
     }

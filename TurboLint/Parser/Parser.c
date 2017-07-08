@@ -2335,30 +2335,21 @@ void Selection_Statement(Parser* ctx, TStatement** ppStatement)
         TIfStatement* pIfStatement = TIfStatement_Create();
         *ppStatement = (TStatement*)pIfStatement;
 
-        //TNodeClueList_MoveToEnd(&pIfStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pIfStatement->ClueList);
+        Parser_Match(ctx, &pIfStatement->ClueList0);
 
-        //TNodeClueList_MoveToEnd(&pIfStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pIfStatement->ClueList);
+        Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pIfStatement->ClueList1);
 
-        //      TExpression0 * pExpression =
-        //      NewObject(pStatement, "expression");
+        
         Expression0(ctx, &pIfStatement->pConditionExpression);
 
-        //    //TNodeClueList_MoveToEnd(&pIfStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pIfStatement->ClueList);
+        Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pIfStatement->ClueList2);
 
-        //TStatement0 * pTrueStatement =
-        //NewObject(pStatement, "statement-true");
         Statement(ctx, &pIfStatement->pStatement);
         token = Parser_CurrentToken(ctx);
 
         if (token == TK_ELSE)
         {
-            //TNodeClueList_MoveToEnd(&pIfStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pIfStatement->ClueList);
-            // TStatement0 * pElseStatement =
-            //  NewObject(pStatement, "statement-else");
+            Parser_Match(ctx, &pIfStatement->ClueList3);
             Statement(ctx, &pIfStatement->pElseStatement);
         }
     }

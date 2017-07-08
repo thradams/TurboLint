@@ -80,7 +80,11 @@ void TIfStatement_Destroy(TIfStatement *p)
   TExpression_Delete(p->pConditionExpression);
   TStatement_Delete(p->pStatement);
   TStatement_Delete(p->pElseStatement);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
+
 }
 
 void TStatement_Destroy(TStatement* p)

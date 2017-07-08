@@ -368,7 +368,10 @@ typedef struct
   TExpression*    pConditionExpression;
   TStatement*   pStatement;
   TStatement*   pElseStatement;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0; //if 
+  TScannerItemList ClueList1; //(
+  TScannerItemList ClueList2; //)
+  TScannerItemList ClueList3; //else
 } TIfStatement;
 #define TIFSTATEMENT_INIT { {TIfStatement_ID}, NULL, NULL, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TIfStatement, TIFSTATEMENT_INIT)
