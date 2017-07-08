@@ -517,13 +517,23 @@ typedef struct TDesignator
   String Name;
   TExpression *  pExpression;
   struct TDesignator *pNext;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0; //. ou [
+  TScannerItemList ClueList1; //]
 } TDesignator;
 
 #define TDESIGNATOR_INIT { STRING_INIT , NULL, NULL,TSCANNERITEMLIST_INIT}
 CREATETYPE(TDesignator, TDESIGNATOR_INIT)
 typedef List(TDesignator) TDesignatorList;
 
+
+typedef struct TDesignation
+{    
+    TDesignatorList DesignatorList;
+    TScannerItemList ClueList0;    
+} TDesignation;
+
+#define TDESIGNATION_INIT { LIST_INIT, TSCANNERITEMLIST_INIT}
+CREATETYPE(TDesignation, TDESIGNATION_INIT)
 
 typedef TTypePointer TInitializer;
 

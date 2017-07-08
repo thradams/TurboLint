@@ -990,23 +990,26 @@ static bool TDesignator_CodePrint(TProgram* program, TDesignator* p, bool b, Str
     if (b)
         Output_Append(fp, ",");
 
-    Output_Append(fp, "{");
 
     //
     if (p->Name)
     {
         //.identifier
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
         Output_Append(fp, ".");
         Output_Append(fp, p->Name);
+        Output_Append(fp, "=");
+        TExpression_CodePrint(program, p->pExpression, "index", b, fp);
     }
-
     else
     {
         //[constant-expression]
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
         TExpression_CodePrint(program, p->pExpression, "index", b, fp);
+        TNodeClueList_CodePrint(&p->ClueList1, fp);
     }
 
-    Output_Append(fp, "}");
+
     return b;
 }
 

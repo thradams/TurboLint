@@ -4588,7 +4588,7 @@ void Designation(Parser* ctx, TDesignatorList* pDesignatorList)
     designator-list =
     */
     Designator_List(ctx, pDesignatorList);
-    Parser_MatchToken(ctx, TK_EQUALS_SIGN, NULL);
+    Parser_MatchToken(ctx, TK_EQUALS_SIGN, NULL);//tODO
 }
 
 void Designator_List(Parser* ctx, TDesignatorList* pDesignatorList)
@@ -4636,17 +4636,18 @@ void Designator(Parser* ctx, TDesignator* p)
 
     if (token == TK_LEFT_SQUARE_BRACKET)
     {
-        //TNodeClueList_MoveToEnd(&p->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &p->ClueList);
+        Parser_Match(ctx, &p->ClueList0);
 
         ConstantExpression(ctx, &p->pExpression);
+
+        Parser_Match(ctx, &p->ClueList1);
         Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET, NULL);
     }
 
     else if (token == TK_FULL_STOP)
     {
         //TNodeClueList_MoveToEnd(&p->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &p->ClueList);
+        Parser_Match(ctx, &p->ClueList0);
 
         String_Set(&p->Name, Lexeme(ctx));
         Parser_MatchToken(ctx, TK_IDENTIFIER, NULL);

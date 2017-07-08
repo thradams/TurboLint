@@ -599,12 +599,20 @@ void TAnyDeclaration_Destroy(TAnyDeclaration* pDeclaration)
   }
 }
 
+void TDesignation_Destroy(TDesignation* pDesignation)
+{
+    
+    List_Destroy(TDesignator, &pDesignation->DesignatorList);
+    TScannerItemList_Destroy(&pDesignation->ClueList0);
+    
+}
 
 void TDesignator_Destroy(TDesignator* p)
 {
   TExpression_Delete(p->pExpression);
   String_Destroy(&p->Name);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void  TInitializerListType_Destroy(TInitializerListType* pTInitializerListType)
