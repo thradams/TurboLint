@@ -203,7 +203,7 @@ void TUnaryExpressionOperator_Destroy(TUnaryExpressionOperator* p)
 {
   TExpression_Delete(p->pExpressionLeft);
   TParameterDeclaration_Destroy(&p->TypeName);  
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
 }
 
 void TCastExpressionType_Destroy(TCastExpressionType* p)

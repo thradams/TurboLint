@@ -819,9 +819,9 @@ typedef struct
 {
 	TTypePointer Type;
 	Tokens token;
-	TExpression*   pExpressionLeft;
+	TExpression*  pExpressionLeft;
 	TTypeName TypeName;
-  TScannerItemList ClueList;
+    TScannerItemList ClueList0;
 } TUnaryExpressionOperator;
 
 #define TUNARY_EXPRESSION_OPERATOR_INIT { {TUnaryExpressionOperator_ID}, TK_NONE,  NULL, TTYPENAME_INIT, TSCANNERITEMLIST_INIT}

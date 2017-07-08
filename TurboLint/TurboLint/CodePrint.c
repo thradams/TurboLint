@@ -718,6 +718,8 @@ static bool TExpression_CodePrint(TProgram* program, TExpression *  p,
             TUnaryExpressionOperator* pTUnaryExpressionOperator =
                 (TUnaryExpressionOperator*)p;
 
+            TNodeClueList_CodePrint(&pTUnaryExpressionOperator->ClueList0, fp);
+
             if (pTUnaryExpressionOperator->token == TK_SIZEOF)
             {
 

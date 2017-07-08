@@ -244,15 +244,11 @@ static Result Scanner_InitCore(Scanner* pScanner)
     StrBuilder_Init(&pScanner->DebugString, 100);
     //StrBuilder_Init(&pScanner->PreprocessorAndCommentsString, 100);
     StrBuilder_Init(&pScanner->ErrorString, 100);
-//    List_Init(&pScanner->ClueList);
 
-    //StrBuilder_Init(&pScanner->DebugString, 100);
-    //StrBuilder_Init(&pScanner->ErrorString, 100);
     pScanner->bError = false;
     ArrayInt_Init(&pScanner->StackIfDef);
     pScanner->bPrintIncludes = false;
 
-    pScanner->bIncludeSpaces = false;
     BasicScannerStack_Init(&pScanner->stack);
 
     StrArray_Init(&pScanner->IncludeDir);

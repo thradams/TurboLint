@@ -66,28 +66,19 @@ typedef struct
   //Imprime includes no console
   bool bPrintIncludes;
 
-  //Quando true o scanner retorna tambem espacos
-  bool bIncludeSpaces;
-
-
   TScannerItemList AcumulatedTokens;
   ///////////////////////////////////////////////////
 } Scanner;
 
 void Scanner_SetError(Scanner* pScanner, const char* message);
 
-//const char* Scanner_GetStreamName(Scanner* pScanner);
+
 Result Scanner_InitString(Scanner* pScanner,
   const char* name,
   const char* text);
 
 Result PushExpandedMacro(Scanner * pScanner, const char * defineName, const char * callString, const char * defineContent);
 
-//const char* Scanner_TokenString(Scanner* pScanner);
-//Tokens Scanner_Token(Scanner* pScanner);
-//const char* Scanner_Lexeme(Scanner* pScanner);
-
-//bool Scanner_IsActiveGroup(Scanner* pScanner);
 
 Result Scanner_Init(Scanner* pScanner);
 

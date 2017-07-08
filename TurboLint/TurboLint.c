@@ -67,8 +67,8 @@ void RunLint(const char* configFileName,
 int main(int argc, char* argv[])
 {
 	printf("Turbo lint " __DATE__ "\n");
-  
-  AllTests();
+
+  //AllTests();
 
 	if (argc < 2)
 	{

@@ -1324,14 +1324,15 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
     case TK_PLUSPLUS:
     case TK_MINUSMINUS:
     {
-        ////TNodeClueList_MoveToEnd(&pUnaryExpressionOperator->ClueList, &ctx->Scanner.ClueList);
+        TUnaryExpressionOperator* pUnaryExpressionOperator =
+            TUnaryExpressionOperator_Create();
 
-        Parser_Match(ctx, NULL);// &pUnaryExpressionOperator->ClueList);
+        Parser_Match(ctx, &pUnaryExpressionOperator->ClueList0);
+
         TExpression *pUnaryExpression;
         UnaryExpression(ctx, &pUnaryExpression);
 
-        TUnaryExpressionOperator* pUnaryExpressionOperator =
-            TUnaryExpressionOperator_Create();
+
         pUnaryExpressionOperator->token = token0;
         pUnaryExpressionOperator->pExpressionLeft = pUnaryExpression;
         *ppExpression = (TExpression*)pUnaryExpressionOperator;
@@ -2180,6 +2181,7 @@ void ConditionalExpression(Parser* ctx, TExpression**ppExpression)
 
         TTernaryExpression* pTernaryExpression =
             TTernaryExpression_Create();
+
         pTernaryExpression->token = TK_QUESTION_MARK;
         pTernaryExpression->pExpressionLeft = pLogicalOrExpressionLeft;
         pTernaryExpression->pExpressionMiddle = pTExpression;
