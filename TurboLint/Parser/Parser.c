@@ -3360,8 +3360,7 @@ void Enumeration_Constant(Parser* ctx,
     //TODO colocar um ponteiro
     Map_Set(&ctx->EnumMap, lexeme, (void*)1);
 
-    //TNodeClueList_MoveToEnd(&pEnumerator2->ClueList, &ctx->Scanner.ClueList);
-    Parser_MatchToken(ctx, TK_IDENTIFIER, &pEnumerator2->ClueList);
+    Parser_MatchToken(ctx, TK_IDENTIFIER, &pEnumerator2->ClueList0);
 }
 
 bool EnumeratorC(Parser* ctx, TEnumerator* pEnumerator2)
@@ -3379,9 +3378,7 @@ bool EnumeratorC(Parser* ctx, TEnumerator* pEnumerator2)
 
     if (token == TK_EQUALS_SIGN)
     {
-        //TNodeClueList_MoveToEnd(&pEnumerator2->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pEnumerator2->ClueList);
-
+        Parser_Match(ctx, &pEnumerator2->ClueList1);
         ConstantExpression(ctx, &pEnumerator2->pExpression);
         bValueAssigned = true;
     }
@@ -3426,9 +3423,8 @@ void Enumerator_List(Parser* ctx,
 
         if (token == TK_COMMA)
         {
-            //tem mais
-            ////TNodeClueList_MoveToEnd(&pPointer->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, NULL);
+            Parser_Match(ctx, &pEnumerator2->ClueList2);
+
             token = Parser_CurrentToken(ctx);
 
             //o enum aceita uma , no fim

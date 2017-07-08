@@ -265,7 +265,9 @@ void TEnumerator_Destroy(TEnumerator* p)
 {
   String_Destroy(&p->Name);
   TExpression_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
 }
 
 void TEnumSpecifier_Destroy(TEnumSpecifier* p)

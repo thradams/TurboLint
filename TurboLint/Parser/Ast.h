@@ -444,7 +444,9 @@ typedef struct TEnumerator
   String Name;  
   TExpression*   pExpression;
   struct TEnumerator *pNext;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1; // =
+  TScannerItemList ClueList2; // ,
 } TEnumerator;
 
 #define TENUMERATOR_INIT { STRING_INIT , NULL, NULL, TSCANNERITEMLIST_INIT}

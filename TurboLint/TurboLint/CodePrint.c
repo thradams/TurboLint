@@ -789,20 +789,17 @@ static bool TExpression_CodePrint(TProgram* program, TExpression *  p,
 static   bool TEnumerator_CodePrint(TProgram* program, TEnumerator* pTEnumerator, bool b, StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp);
+    TNodeClueList_CodePrint(&pTEnumerator->ClueList0, fp);
     Output_Append(fp, pTEnumerator->Name);
 
     if (pTEnumerator->pExpression)
     {
-        TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp);
+        TNodeClueList_CodePrint(&pTEnumerator->ClueList1, fp);
         Output_Append(fp, " = ");
 
         TExpression_CodePrint(program, pTEnumerator->pExpression, "expr", true, fp);
 
-        TNodeClueList_CodePrint(&pTEnumerator->ClueList, fp);
-        //int r;
-        //EvaluateConstantExpression(pTEnumerator->pExpression,  &r);
-
+        
     }
     else
     {
@@ -835,8 +832,8 @@ static bool TEnumSpecifier_CodePrint(TProgram* program, TEnumSpecifier* p, bool 
             //Output_Append(fp, "\n");
         }
         else
-        {
-            //tem mais
+        {            
+            TNodeClueList_CodePrint(&pTEnumerator->ClueList2, fp);
             Output_Append(fp, ",");
         }
     }
