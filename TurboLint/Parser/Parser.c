@@ -4872,7 +4872,7 @@ bool  Declaration(Parser* ctx,
 
                 else
                 {
-                    Parser_MatchToken(ctx, TK_SEMICOLON, NULL);
+                    Parser_MatchToken(ctx, TK_SEMICOLON, &pFuncVarDeclaration->ClueList0);
                 }
             }
 
