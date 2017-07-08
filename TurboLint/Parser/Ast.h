@@ -227,7 +227,8 @@ typedef struct
   TExpression*  pExpressionLeft;
   TExpression*   pExpressionMiddle;
   TExpression*   pExpressionRight;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
 } TTernaryExpression;
 #define TTERNARYEXPRESSION_INIT { {TTernaryExpression_ID}, TK_NONE, NULL, NULL, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TTernaryExpression, TTERNARYEXPRESSION_INIT)

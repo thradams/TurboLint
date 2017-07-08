@@ -218,7 +218,8 @@ void TTernaryExpression_Destroy(TTernaryExpression* p)
   TExpression_Delete(p->pExpressionLeft);
   TExpression_Delete(p->pExpressionMiddle);
   TExpression_Delete(p->pExpressionRight);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TExpression_Destroy(TExpression* p)

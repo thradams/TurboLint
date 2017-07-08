@@ -673,12 +673,23 @@ static bool TExpression_CodePrint(TProgram* program, TExpression *  p,
         break;
 
         CASE(TTernaryExpression) :
-            b = TExpression_CodePrint(program, ((TTernaryExpression*)p)->pExpressionLeft, "l-expr", b, fp);
-        Output_Append(fp, "?");
-        b = TExpression_CodePrint(program, ((TTernaryExpression*)p)->pExpressionMiddle, "m-expr", b, fp);
-        Output_Append(fp, ":");
-        b = TExpression_CodePrint(program, ((TTernaryExpression*)p)->pExpressionRight, "r-expr", b, fp);
+        {
+            TTernaryExpression* pTernaryExpression =
+                (TTernaryExpression*)p;
 
+            
+            b = TExpression_CodePrint(program, pTernaryExpression->pExpressionLeft, "l-expr", b, fp);
+            
+            TNodeClueList_CodePrint(&pTernaryExpression->ClueList0, fp);
+            Output_Append(fp, "?");
+
+            b = TExpression_CodePrint(program, pTernaryExpression->pExpressionMiddle, "m-expr", b, fp);
+            
+            TNodeClueList_CodePrint(&pTernaryExpression->ClueList1, fp);
+            Output_Append(fp, ":");
+
+            b = TExpression_CodePrint(program, pTernaryExpression->pExpressionRight, "r-expr", b, fp);
+        }
         break;
 
         CASE(TPrimaryExpressionValue) :

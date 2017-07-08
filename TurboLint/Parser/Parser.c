@@ -856,8 +856,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
         pPostfixExpressionCore->token = token;
 
 
-        //  postfix-expression ( argument-expression-listopt )
-    //    //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
+        //  postfix-expression ( argument-expression-listopt )    
         token = Parser_Match(ctx,
             &pPostfixExpressionCore->ClueList);
 
@@ -865,8 +864,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
         {
             ArgumentExpressionList(ctx, &pPostfixExpressionCore->pExpressionRight);
         }
-
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
+        
         Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS,
             &pPostfixExpressionCore->ClueList);
     }
@@ -877,13 +875,11 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
         pPostfixExpressionCore->token = token;
         // postfix-expression [ expression ]
 
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_MatchToken(ctx, TK_LEFT_SQUARE_BRACKET,
             &pPostfixExpressionCore->ClueList);
 
         Expression0(ctx, &pPostfixExpressionCore->pExpressionRight);
-
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
+        
         Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET, NULL);
     }
     break;
@@ -892,13 +888,11 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     {
         // postfix-expression . identifier
         pPostfixExpressionCore->token = token;
-
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
+      
         Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
 
         String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
 
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_MatchToken(ctx, TK_IDENTIFIER,
             &pPostfixExpressionCore->ClueList);
     }
@@ -909,12 +903,10 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
         // postfix-expression -> identifier
         pPostfixExpressionCore->token = token;
 
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
 
         String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
 
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_MatchToken(ctx, TK_IDENTIFIER, &pPostfixExpressionCore->ClueList);
     }
     break;
@@ -924,9 +916,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
         pPostfixExpressionCore->token = token;
         //postfix-expression ++
 
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
-
     }
     break;
 
@@ -934,10 +924,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
     {
         //  postfix-expression --
         pPostfixExpressionCore->token = token;
-
-        //TNodeClueList_MoveToEnd(&pPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
-
     }
     break;
 
@@ -1008,29 +995,22 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
             TPostfixExpressionCore *  pTPostfixExpressionCore =
                 TPostfixExpressionCore_Create();
 
-            //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
             Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pTPostfixExpressionCore->ClueList);
 
             TTypeName typeName = TTYPENAME_INIT;
             TypeName(ctx, &typeName);
             TParameterDeclaration_Destroy(&typeName);
 
-            //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
             Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pTPostfixExpressionCore->ClueList);
 
-            //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
             Parser_MatchToken(ctx, TK_LEFT_CURLY_BRACKET, &pTPostfixExpressionCore->ClueList);
 
-            //pTPostfixExpressionCore->pInitializerList = TInitializerList_Create();
             Initializer_List(ctx, &pTPostfixExpressionCore->InitializerList);
 
-            //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET,
-                &pTPostfixExpressionCore->ClueList);
+            Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET, &pTPostfixExpressionCore->ClueList);
 
             if (Parser_CurrentToken(ctx) == TK_COMMA)
             {
-                //TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);        
                 Parser_Match(ctx, &pTPostfixExpressionCore->ClueList);
             }
 
@@ -1157,7 +1137,6 @@ void ArgumentExpressionList(Parser* ctx, TExpression** ppExpression)
 
     if (token == TK_COMMA)
     {
-        ////TNodeClueList_MoveToEnd(&pAssignmentExpression->ClueList, &ctx->Scanner.ClueList);
         Parser_Match(ctx, NULL);// &pAssignmentExpression->ClueList);
 
         TExpression* pAssignmentExpressionRight;
@@ -1371,7 +1350,6 @@ void UnaryExpression(Parser* ctx, TExpression** ppExpression)
 
     case TK_SIZEOF:
 
-        ////TNodeClueList_MoveToEnd(&pTPostfixExpressionCore->ClueList, &ctx->Scanner.ClueList);
         Parser_MatchToken(ctx, TK_SIZEOF, NULL);// &pTPostfixExpressionCore->ClueList);
 
         if (Parser_CurrentToken(ctx) == TK_LEFT_PARENTHESIS)
@@ -1567,7 +1545,6 @@ void MultiplicativeExpression(Parser* ctx, TExpression** ppExpression)
         GetPosition(ctx, &pBinaryExpression->Position);
         pBinaryExpression->token = token;
         pBinaryExpression->pExpressionLeft = *ppExpression;
-
         
         Parser_Match(ctx, &pBinaryExpression->ClueList0);
 
@@ -2168,19 +2145,20 @@ void ConditionalExpression(Parser* ctx, TExpression**ppExpression)
     *ppExpression = pLogicalOrExpressionLeft;
 
     if (Parser_CurrentToken(ctx) == TK_QUESTION_MARK)
-    {
-        ////TNodeClueList_MoveToEnd(&pLogicalOrExpressionLeft->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, NULL);
+    {   
+        TTernaryExpression* pTernaryExpression =
+            TTernaryExpression_Create();
+
+        Parser_Match(ctx, &pTernaryExpression->ClueList0);
 
         TExpression* pTExpression;
         Expression0(ctx, &pTExpression);
-        Parser_MatchToken(ctx, TK_COLON, NULL);
+
+        Parser_MatchToken(ctx, TK_COLON, &pTernaryExpression->ClueList1);
 
         TExpression* pConditionalExpressionRight;
         ConditionalExpression(ctx, &pConditionalExpressionRight);
-
-        TTernaryExpression* pTernaryExpression =
-            TTernaryExpression_Create();
+        
 
         pTernaryExpression->token = TK_QUESTION_MARK;
         pTernaryExpression->pExpressionLeft = pLogicalOrExpressionLeft;
