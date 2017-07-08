@@ -439,7 +439,28 @@ void Parser_Test2()
     Parser_Destroy(&parser);
 }
 
+
 void Parser_Test3()
+{
+    Parser parser;
+    Parser_InitString(&parser, "a", "int a  =  1 + 2;");
+    ParserMatch(&parser, TK_INT);
+    ParserMatch(&parser, TK_IDENTIFIER);
+    TEST(Parser_LookAheadToken(&parser) == TK_DECIMAL_INTEGER);
+    TEST(Parser_LookAheadToken(&parser) == TK_DECIMAL_INTEGER);
+
+    ParserMatch(&parser, TK_EQUALS_SIGN);
+    ParserMatch(&parser, TK_DECIMAL_INTEGER);
+    ParserMatch(&parser, TK_PLUS_SIGN);
+    ParserMatch(&parser, TK_DECIMAL_INTEGER);
+    ParserMatch(&parser, TK_SEMICOLON);
+    ParserMatch(&parser, TK_EOF);
+    ParserMatch(&parser, TK_EOF);
+    Parser_Destroy(&parser);
+}
+
+
+void Parser_Test4()
 {
     const char* code =
         "a = \n"
@@ -489,6 +510,7 @@ void AllTests()
     Parser_Test1();
     Parser_Test2();
     Parser_Test3();
+    Parser_Test4();
 
     if (error_count == 0)
     {
