@@ -39,7 +39,8 @@ void TWhileStatement_Destroy(TWhileStatement *p)
 void TReturnStatement_Destroy(TReturnStatement *p)
 {
   TExpression_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TDoStatement_Destroy(TDoStatement *p)

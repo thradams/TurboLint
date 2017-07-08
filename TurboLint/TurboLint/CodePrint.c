@@ -318,8 +318,10 @@ static bool TWhileStatement_CodePrint(TProgram* program, TWhileStatement * p, bo
 
 static bool TReturnStatement_CodePrint(TProgram* program, TReturnStatement * p, bool b, StrBuilder* fp)
 {
+    TNodeClueList_CodePrint(&p->ClueList0, fp);
     Output_Append(fp, "return ");
-    TExpression_CodePrint(program, p->pExpression, "return-statement", false, fp);
+    TExpression_CodePrint(program, p->pExpression, "return-statement", false, fp);    
+    TNodeClueList_CodePrint(&p->ClueList1, fp);
     Output_Append(fp, ";");
     return true;
 }
@@ -1042,15 +1044,28 @@ static bool TInitializerListType_CodePrint(TProgram* program,
     StrBuilder* fp)
 {
 
-    TNodeClueList_CodePrint(&p->ClueList0, fp);
-    Output_Append(fp, "{");
+    if (List_HasOneItem(&p->InitializerList) &&
+        List_Back(&p->InitializerList)->pInitializer == NULL &&
+        pTypeSpecifier != NULL)
+    {
+        //a partir de {} e um tipo consegue gerar o final
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
+        BuildInitialization(program, pTypeSpecifier, bIsPointer, fp);        
+    }
+    else
+    {
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
+        Output_Append(fp, "{");
 
-    b = TInitializerList_CodePrint(program, pTypeSpecifier,
-        bIsPointer,
-        &p->InitializerList, b, fp);
+        b = TInitializerList_CodePrint(program, pTypeSpecifier,
+            bIsPointer,
+            &p->InitializerList, b, fp);
 
-    TNodeClueList_CodePrint(&p->ClueList1, fp);
-    Output_Append(fp, "}");
+        TNodeClueList_CodePrint(&p->ClueList1, fp);
+        Output_Append(fp, "}");
+    }
+
+    
 
     return true;
 }

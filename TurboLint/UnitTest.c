@@ -171,9 +171,9 @@ void Scanner_Test6()
         MATCH(&scanner2, TK_PRE_ELSE)
 
         //MATCH_INACTIVE(&scanner2, TK_BREAKLINE) //#else
-        MATCH_INACTIVE(&scanner2, TK_IDENTIFIER, "B")
+        MATCH_INACTIVE2(&scanner2, TK_IDENTIFIER, "B")
         MATCH_INACTIVE(&scanner2, TK_SPACES)
-        MATCH_INACTIVE(&scanner2, TK_IDENTIFIER, "D")
+        MATCH_INACTIVE2(&scanner2, TK_IDENTIFIER, "D")
         MATCH_INACTIVE(&scanner2, TK_BREAKLINE)
         MATCH(&scanner2, TK_PRE_ENDIF)
         //MATCH(&scanner2, TK_BREAKLINE) //#endif
@@ -262,9 +262,9 @@ void Scanner_Test9()
         MATCH(&scanner2, TK_PRE_ELSE)
 
         //MATCH_INACTIVE(&scanner2, TK_BREAKLINE) //#else
-        MATCH_INACTIVE(&scanner2, TK_IDENTIFIER, "B")
+        MATCH_INACTIVE2(&scanner2, TK_IDENTIFIER, "B")
         MATCH_INACTIVE(&scanner2, TK_SPACES)
-        MATCH_INACTIVE(&scanner2, TK_IDENTIFIER, "D")
+        MATCH_INACTIVE2(&scanner2, TK_IDENTIFIER, "D")
         MATCH_INACTIVE(&scanner2, TK_BREAKLINE)
         MATCH(&scanner2, TK_PRE_ENDIF)
         //MATCH(&scanner2, TK_BREAKLINE) //#endif

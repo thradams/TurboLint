@@ -316,10 +316,11 @@ typedef struct
 {
   TTypePointer Type;
   TExpression*   pExpression;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
+  TScannerItemList ClueList1;
 } TReturnStatement;
 
-#define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL, TSCANNERITEMLIST_INIT}
+#define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TReturnStatement, TRETURN_STATEMENT_INIT)
 
 

@@ -2476,16 +2476,14 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
 
         *ppStatement = (TStatement*)pReturnStatement;
 
-        //TNodeClueList_MoveToEnd(&pReturnStatement->ClueList, &ctx->Scanner.ClueList);
-        token = Parser_Match(ctx, &pReturnStatement->ClueList);
+        token = Parser_Match(ctx, &pReturnStatement->ClueList0);
 
         if (token != TK_SEMICOLON)
         {
             Expression0(ctx, &pReturnStatement->pExpression);
         }
-
-        //TNodeClueList_MoveToEnd(&pReturnStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_SEMICOLON, &pReturnStatement->ClueList);
+        
+        Parser_MatchToken(ctx, TK_SEMICOLON, &pReturnStatement->ClueList1);
     }
     break;
 
