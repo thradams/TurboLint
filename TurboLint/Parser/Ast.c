@@ -438,6 +438,7 @@ void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifie
   TAlignmentSpecifier_Destroy(&pDeclarationSpecifiers->AlignmentSpecifier);
   TTypeSpecifier_Delete(pDeclarationSpecifiers->pTypeSpecifierOpt);
   TScannerItemList_Destroy(&pDeclarationSpecifiers->ClueList);
+  TFunctionSpecifier_Destroy(&pDeclarationSpecifiers->FunctionSpecifiers);
 }
 
 TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
@@ -462,6 +463,11 @@ TDeclarator* TDeclaration_FindDeclarator(TDeclaration*  p, const char* name)
     }
   }
   return pResult;
+}
+
+void TFunctionSpecifier_Destroy(TFunctionSpecifier* p)
+{
+    TScannerItemList_Destroy(&p->ClueList0);
 }
 
 /*

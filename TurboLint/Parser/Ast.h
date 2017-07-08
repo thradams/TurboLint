@@ -408,9 +408,10 @@ typedef struct
 {
   bool bIsInline;
   bool bIsNoReturn;
-  TScannerItemList ClueList;
+  TScannerItemList ClueList0;
 } TFunctionSpecifier;
 
+void TFunctionSpecifier_Destroy(TFunctionSpecifier* p);
 
 #define TFUNCTION_SPECIFIER_INIT {false, false, TSCANNERITEMLIST_INIT}
 

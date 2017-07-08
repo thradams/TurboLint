@@ -1460,11 +1460,13 @@ static bool TFunctionSpecifier_CodePrint(TProgram* program, TFunctionSpecifier* 
 {
     if (p->bIsInline)
     {
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
         Output_Append(fp, " inline");
         b = true;
     }
     if (p->bIsNoReturn)
     {
+        TNodeClueList_CodePrint(&p->ClueList0, fp);
         Output_Append(fp, " [noreturn]");
         b = true;
     }

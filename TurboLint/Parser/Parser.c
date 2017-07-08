@@ -3530,13 +3530,13 @@ bool Function_Specifier(Parser* ctx,
     {
     case TK_INLINE:
         pFunctionSpecifier->bIsInline = true;
-        Parser_Match(ctx, NULL);
+        Parser_Match(ctx, &pFunctionSpecifier->ClueList0);
         bResult = true;
         break;
 
     case TK__NORETURN:
         pFunctionSpecifier->bIsNoReturn = true;
-        Parser_Match(ctx, NULL);
+        Parser_Match(ctx, &pFunctionSpecifier->ClueList0);
         bResult = true;
         break;
 
