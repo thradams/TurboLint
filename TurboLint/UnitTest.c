@@ -18,7 +18,7 @@ if (condition)\
 }\
 else\
 {\
-  printf("LINE %d FAILED!\n", __LINE__); \
+  printf("%s LINE %d FAILED!\n", __FUNCTION__, __LINE__); \
   error_count++;\
 }
 
@@ -46,7 +46,7 @@ TEST(Scanner_CurrentToken((scanner)) == TK &&\
 Scanner_Match((scanner));
 
 void Scanner_Test1()
-{
+{    
     Scanner scanner2;
     Scanner_Init(&scanner2);
     Scanner_IncludeFile(&scanner2, ".\\Test\\Test1.h", FileIncludeTypeQuoted, false);
@@ -72,7 +72,7 @@ void Scanner_Test1()
 }
 
 void Scanner_Test2()
-{
+{    
     Scanner scanner2;
     Scanner_Init(&scanner2);
     Scanner_IncludeFile(&scanner2, ".\\Test\\Test2.h", FileIncludeTypeQuoted, false);
@@ -95,7 +95,13 @@ void Scanner_Test3()
 
     MATCH(&scanner2, TK_BOF)
         MATCH(&scanner2, TK_PRE_DEFINE)
+
+    
         MATCH(&scanner2, TK_MACRO_CALL)
+
+   
+
+
         MATCH(&scanner2, TK_DECIMAL_INTEGER)
         MATCH(&scanner2, TK_SPACES)
         MATCH(&scanner2, TK_DECIMAL_INTEGER)
@@ -110,8 +116,10 @@ void Scanner_Test3()
         MATCH(&scanner2, TK_EOF)
 
 
-
+        
         Scanner_Destroy(&scanner2);
+
+   
 }
 
 void Scanner_Test4()

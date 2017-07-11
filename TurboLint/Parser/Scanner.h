@@ -35,6 +35,8 @@ typedef ArrayT(TFile) TFileArray;
 typedef List(ScannerItem) TScannerItemList;
 #define TSCANNERITEMLIST_INIT LIST_INIT
 #define TScannerItemList_Destroy(p) List_Destroy(ScannerItem, (p))
+#define TScannerItemList_Swap(a, b) List_Swap(ScannerItem, (a), (b))
+
 
 typedef struct
 {
@@ -62,9 +64,6 @@ typedef struct
 
   //True indica error
   bool bError;
-
-  //Imprime includes no console
-  bool bPrintIncludes;
 
   TScannerItemList AcumulatedTokens;
   ///////////////////////////////////////////////////

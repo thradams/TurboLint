@@ -12,7 +12,7 @@
 #define CAST(FROM, TO) \
 inline TO *  FROM##_As_##TO(FROM*  p)\
 {\
-if (p != NULL && p->type == TO##_ID)\
+if (p != NULL && p->Type == TO##_ID)\
     return ( TO * )p;\
   return NULL;\
 }\
@@ -32,36 +32,39 @@ inline FROM * TO##_As_##FROM(TO* p) { return p; }
 
 typedef enum
 {
-	TypeNull,
-	TDeclaration_ID,
-	TStaticAssertDeclaration_ID,
+    TypeNull,
+    TDeclaration_ID,
+    TStaticAssertDeclaration_ID,
 
-	TSingleTypeSpecifier_ID,
-	TEnumSpecifier_ID,
-	TStructUnionSpecifier_ID,
+    TSingleTypeSpecifier_ID,
+    TEnumSpecifier_ID,
+    TStructUnionSpecifier_ID,
+    TStorageSpecifier_ID,
+    TStructDeclaration_ID,
+    TAlignmentSpecifier_ID,
+    TTypeQualifier_ID,
+    TFunctionSpecifier_ID,
+    TCompoundStatement_ID,
+    TExpressionStatement_ID,
+    TSwitchStatement_ID,
+    TLabeledStatement_ID,
+    TForStatement_ID,
+    TJumpStatement_ID,
+    TAsmStatement_ID,
+    TWhileStatement_ID,
+    TDoStatement_ID,
+    TIfStatement_ID,
+    TypeName_ID,
+    TReturnStatement_ID,
+    TInitializerListType_ID,
 
-	TStructDeclaration_ID,
-
-	TCompoundStatement_ID,
-	TExpressionStatement_ID,
-	TSwitchStatement_ID,
-	TLabeledStatement_ID,
-	TForStatement_ID,
-	TJumpStatement_ID,
-	TAsmStatement_ID,
-	TWhileStatement_ID,
-	TDoStatement_ID,
-	TIfStatement_ID,
-	TReturnStatement_ID,
-	TInitializerListType_ID,
-
-	TPrimaryExpression_ID,
-	TUnaryExpressionOperator_ID,
-	TCastExpressionType_ID,
-	TPrimaryExpressionValue_ID,
-	TPostfixExpressionCore_ID,
-	TBinaryExpression_ID,
-	TTernaryExpression_ID
+    TPrimaryExpression_ID,
+    TUnaryExpressionOperator_ID,
+    TCastExpressionType_ID,
+    TPrimaryExpressionValue_ID,
+    TPostfixExpressionCore_ID,
+    TBinaryExpression_ID,
+    TTernaryExpression_ID
 } Type;
 #define CASE(T) case T##_ID
 
@@ -121,18 +124,18 @@ typedef struct
 
 typedef struct TTypePointer
 {
-  Type type;
-  struct TTypePointer *pNext;
+    Type Type;
+    struct TTypePointer *pNext;
 } TTypePointer;
 
 typedef TTypePointer TExpression;
 
 typedef struct
 {
-  TTypePointer Type;
-  
-  TExpression* pConstantExpression;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+
+    TExpression* pConstantExpression;
+    TScannerItemList ClueList;
 
 } TStaticAssertDeclaration;
 #define TSTATIC_ASSERT_DECLARATION_INIT { {TStaticAssertDeclaration_ID} , NULL, TSCANNERITEMLIST_INIT}
@@ -154,10 +157,10 @@ typedef ArrayT(TBlockItem) TBlockItemList;
 
 typedef struct
 {
-  TTypePointer Type;
-  TBlockItemList BlockItemList;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
+    TTypePointer Type;
+    TBlockItemList BlockItemList;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
 } TCompoundStatement;
 
 #define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TSCANNERITEMLIST_INIT}
@@ -169,12 +172,12 @@ CREATETYPE(TCompoundStatement, TCOMPOUNDSTATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  Tokens token;
-  String lexeme;
-  TExpression*  pExpressionOpt;  
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
+    TTypePointer Type;
+    Tokens token;
+    String lexeme;
+    TExpression*  pExpressionOpt;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
 } TPrimaryExpressionValue;
 
 #define TPRIMARY_EXPRESSION_VALUE { {TPrimaryExpressionValue_ID}, TK_NONE, STRING_INIT, NULL, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
@@ -184,37 +187,18 @@ CREATETYPE(TPrimaryExpressionValue, TPRIMARY_EXPRESSION_VALUE)
 typedef  struct TInitializerListItem TInitializerListItem;
 typedef List(TInitializerListItem) TInitializerList;
 
-typedef struct TPostfixExpressionCoreTag
-{
-  TTypePointer Type;
-  Tokens token;
-  String lexeme;
-  TExpression*  pExpressionLeft;
-  TExpression*  pExpressionRight;
-  
-  //cast
-  
-  
-  struct TPostfixExpressionCoreTag*  pNext;
-  TInitializerList InitializerList;
-  String Identifier;
-  struct TParameterDeclaration* pTypeName; /*typename*/
-  TScannerItemList ClueList;
-} TPostfixExpressionCore;
-#define TPOSTFIX_EXPRESSION_CORE { {TPostfixExpressionCore_ID}, TK_NONE, STRING_INIT, NULL, NULL, NULL, LIST_INIT, STRING_INIT, NULL, TSCANNERITEMLIST_INIT}
-CREATETYPE(TPostfixExpressionCore, TPOSTFIX_EXPRESSION_CORE)
 
 
 typedef struct
 {
-  TTypePointer Type;
-  Tokens token;
-  TExpression*  pExpressionLeft;
-  TExpression*  pExpressionRight;
-  TPosition Position;
-  
-  TScannerItemList ClueList0;
-  
+    TTypePointer Type;
+    Tokens token;
+    TExpression*  pExpressionLeft;
+    TExpression*  pExpressionRight;
+    TPosition Position;
+
+    TScannerItemList ClueList0;
+
 
 } TBinaryExpression;
 #define TBINARYEXPRESSION_INIT { {TBinaryExpression_ID}, TK_NONE, NULL, NULL, TPOSITION_INIT, TSCANNERITEMLIST_INIT}
@@ -222,13 +206,13 @@ CREATETYPE(TBinaryExpression, TBINARYEXPRESSION_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  Tokens token;
-  TExpression*  pExpressionLeft;
-  TExpression*   pExpressionMiddle;
-  TExpression*   pExpressionRight;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
+    TTypePointer Type;
+    Tokens token;
+    TExpression*  pExpressionLeft;
+    TExpression*   pExpressionMiddle;
+    TExpression*   pExpressionRight;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
 } TTernaryExpression;
 #define TTERNARYEXPRESSION_INIT { {TTernaryExpression_ID}, TK_NONE, NULL, NULL, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TTernaryExpression, TTERNARYEXPRESSION_INIT)
@@ -237,41 +221,50 @@ CREATETYPE(TTernaryExpression, TTERNARYEXPRESSION_INIT)
 
 CREATETYPEOR(TExpression)
 
-typedef struct
+typedef struct TTypeQualifier
 {
-	bool bIsConst;
-	bool bIsRestrict;
-	bool bIsVolatile;
-	bool bIsAtomic;
-	
-	//type-qualifier-extensions 
-	bool bIsOpt;
-	bool bIsOwner;
-	bool bIsDestructor;
-	bool bIsMemDestructor;
-	//
-  TScannerItemList ClueList1;
+    Type Type;
+    TTypeQualifier* pNext;
+
+    bool bIsConst;
+    bool bIsRestrict;
+    bool bIsVolatile;
+    bool bIsAtomic;
+
+    //type-qualifier-extensions 
+    bool bIsOpt;
+    bool bIsOwner;
+    bool bIsDestructor;
+    bool bIsMemDestructor;
+    //
+    TScannerItemList ClueList0;
+
 } TTypeQualifier;
 
-#define TTYPE_QUALIFIER_INIT {false, false, false, false /*extensoes*/, false, false /**/, false, false, TSCANNERITEMLIST_INIT}
+typedef List(TTypeQualifier) TTypeQualifierList;
+#define TTYPEQUALIFIERLIST_INIT LIST_INIT
+#define TTypeQualifierList_Destroy(p) List_Destroy(TTypeQualifier, p)
+
+#define TTYPE_QUALIFIER_INIT {{TTypeQualifier_ID}, NULL, false, false, false, false /*extensoes*/, false, false /**/, false, false, TSCANNERITEMLIST_INIT}
+CREATETYPE(TTypeQualifier, TTYPE_QUALIFIER_INIT)
 
 ////////////////////////////
 
 typedef struct
 {
-  TTypePointer Type;  
-  TExpression *   pExpression;  
-  TScannerItemList ClueList0;
+    TTypePointer Type;
+    TExpression *   pExpression;
+    TScannerItemList ClueList0;
 } TExpressionStatement;
 #define TEXPRESSION_STATEMENT_INIT { {TExpressionStatement_ID}, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TExpressionStatement, TEXPRESSION_STATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  Tokens token;
-  TExpression *  pExpression;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    Tokens token;
+    TExpression *  pExpression;
+    TScannerItemList ClueList;
 } TJumpStatement;
 
 #define TJUMP_STATEMENT_INIT {{TJumpStatement_ID}, TK_NONE, NULL, TSCANNERITEMLIST_INIT }
@@ -280,8 +273,8 @@ CREATETYPE(TJumpStatement, TJUMP_STATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    TScannerItemList ClueList;
 } TAsmStatement;
 
 #define TASM_STATEMENT_INIT {{TAsmStatement_ID} , TSCANNERITEMLIST_INIT}
@@ -290,13 +283,13 @@ CREATETYPE(TAsmStatement, TASM_STATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TAnyDeclaration*  pInitDeclarationOpt;
-  TExpression*  pExpression1;
-  TExpression* pExpression2;
-  TExpression*  pExpression3;
-  TStatement*  pStatement;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    TAnyDeclaration*  pInitDeclarationOpt;
+    TExpression*  pExpression1;
+    TExpression* pExpression2;
+    TExpression*  pExpression3;
+    TStatement*  pStatement;
+    TScannerItemList ClueList;
 } TForStatement;
 
 #define TFORSTATEMENT_INIT {{TForStatement_ID}, NULL, NULL, NULL, NULL, NULL, TSCANNERITEMLIST_INIT}
@@ -304,10 +297,10 @@ CREATETYPE(TForStatement, TFORSTATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TExpression*  pExpression;
-  TStatement*  pStatement;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    TExpression*  pExpression;
+    TStatement*  pStatement;
+    TScannerItemList ClueList;
 } TWhileStatement;
 
 #define TWHILESTATEMENT_INIT { {TWhileStatement_ID}, NULL, NULL, TSCANNERITEMLIST_INIT}
@@ -315,10 +308,10 @@ CREATETYPE(TWhileStatement, TWHILESTATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TExpression*   pExpression;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
+    TTypePointer Type;
+    TExpression*   pExpression;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
 } TReturnStatement;
 
 #define TRETURN_STATEMENT_INIT { {TReturnStatement_ID}, NULL, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
@@ -327,23 +320,23 @@ CREATETYPE(TReturnStatement, TRETURN_STATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TExpression *   pExpression;
-  TStatement*   pStatement;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    TExpression *   pExpression;
+    TStatement*   pStatement;
+    TScannerItemList ClueList;
 } TDoStatement;
 #define TDOSTATEMENT_INIT {{TDoStatement_ID}, NULL, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TDoStatement, TDOSTATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  
-  TStatement *   pStatementOpt;
-  TExpression *   pExpression;
-  String Identifier;
-  Tokens token;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+
+    TStatement *   pStatementOpt;
+    TExpression *   pExpression;
+    String Identifier;
+    Tokens token;
+    TScannerItemList ClueList;
 } TLabeledStatement;
 
 #define TLABEDSTATEMENT_INIT {{TLabeledStatement_ID},  NULL, NULL, STRING_INIT, TK_NONE, TSCANNERITEMLIST_INIT}
@@ -352,10 +345,10 @@ CREATETYPE(TLabeledStatement, TLABEDSTATEMENT_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TExpression *   pConditionExpression;
-  TStatement*   pExpression;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    TExpression *   pConditionExpression;
+    TStatement*   pExpression;
+    TScannerItemList ClueList;
 } TSwitchStatement;
 
 #define TSWITCH_STATEMENT { {TSwitchStatement_ID}, NULL, NULL, TSCANNERITEMLIST_INIT}
@@ -364,14 +357,14 @@ CREATETYPE(TSwitchStatement, TSWITCH_STATEMENT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TExpression*    pConditionExpression;
-  TStatement*   pStatement;
-  TStatement*   pElseStatement;
-  TScannerItemList ClueList0; //if 
-  TScannerItemList ClueList1; //(
-  TScannerItemList ClueList2; //)
-  TScannerItemList ClueList3; //else
+    TTypePointer Type;
+    TExpression*    pConditionExpression;
+    TStatement*   pStatement;
+    TStatement*   pElseStatement;
+    TScannerItemList ClueList0; //if 
+    TScannerItemList ClueList1; //(
+    TScannerItemList ClueList2; //)
+    TScannerItemList ClueList3; //else
 } TIfStatement;
 #define TIFSTATEMENT_INIT { {TIfStatement_ID}, NULL, NULL, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TIfStatement, TIFSTATEMENT_INIT)
@@ -395,12 +388,13 @@ CAST(TStatement, TSwitchStatement)
 
 typedef struct TPointer
 {
-  TTypeQualifier Qualifier;
-  bool bPointer;
-  struct TPointer* pNext;
-  TScannerItemList ClueList;
+    TTypeQualifierList Qualifier;
+    bool bPointer;
+    struct TPointer* pNext;
+    TScannerItemList ClueList0;
 } TPointer;
-#define TPOINTER_INIT {TTYPE_QUALIFIER_INIT, false, NULL, TSCANNERITEMLIST_INIT}
+
+#define TPOINTER_INIT {TTYPEQUALIFIERLIST_INIT, false, NULL, TSCANNERITEMLIST_INIT}
 CREATETYPE(TPointer, TPOINTER_INIT)
 
 
@@ -409,48 +403,57 @@ bool TPointerList_IsPointer(TPointerList* pPointerlist);
 
 typedef struct
 {
-  bool bIsInline;
-  bool bIsNoReturn;
-  TScannerItemList ClueList0;
+    Type Type;
+    void* pNext;
+    bool bIsInline;
+    bool bIsNoReturn;
+    TScannerItemList ClueList0;
 } TFunctionSpecifier;
+
 
 void TFunctionSpecifier_Destroy(TFunctionSpecifier* p);
 
-#define TFUNCTION_SPECIFIER_INIT {false, false, TSCANNERITEMLIST_INIT}
+#define TFUNCTION_SPECIFIER_INIT {{TFunctionSpecifier_ID}, NULL, false, false, TSCANNERITEMLIST_INIT}
+CREATETYPE(TFunctionSpecifier, TFUNCTION_SPECIFIER_INIT)
 
 typedef struct
 {
-  bool bIsTypedef;
-  bool bIsExtern;
-  bool bIsStatic;
-  bool bIsThread_local;
-  bool bIsAuto;
-  bool bIsRegister;
-  TScannerItemList ClueList0;
+    Type Type;
+    void* pNext;
+    bool bIsTypedef;
+    bool bIsExtern;
+    bool bIsStatic;
+    bool bIsThread_local;
+    bool bIsAuto;
+    bool bIsRegister;
+    TScannerItemList ClueList0;
 } TStorageSpecifier;
-#define TSTORAGE_SPECIFIER_INIT {false, false, false, false, false, false, TSCANNERITEMLIST_INIT}
-
+#define TSTORAGE_SPECIFIER_INIT {{TStorageSpecifier_ID}, NULL, false, false, false, false, false, false, TSCANNERITEMLIST_INIT}
+CREATETYPE(TStorageSpecifier, TSTORAGE_SPECIFIER_INIT)
 
 typedef struct
 {
-  String TypeName;
-  //_Alignas(type - name)
-  //  _Alignas(constant - expression)
+    Type Type;
+    void *pNext;
+    String TypeName;
+    //_Alignas(type - name)
+    //  _Alignas(constant - expression)
 } TAlignmentSpecifier;
-#define TALIGNMENT_SPECIFIER { STRING_INIT }
+#define TALIGNMENT_SPECIFIER { {TAlignmentSpecifier_ID}, NULL, STRING_INIT }
 
+CREATETYPE(TAlignmentSpecifier, TALIGNMENT_SPECIFIER)
 void TAlignmentSpecifier_Destroy(TAlignmentSpecifier* p);
 
 
 
 typedef struct TEnumerator
 {
-  String Name;  
-  TExpression*   pExpression;
-  struct TEnumerator *pNext;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1; // =
-  TScannerItemList ClueList2; // ,
+    String Name;
+    TExpression*   pExpression;
+    struct TEnumerator *pNext;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1; // =
+    TScannerItemList ClueList2; // ,
 } TEnumerator;
 
 #define TENUMERATOR_INIT { STRING_INIT , NULL, NULL, TSCANNERITEMLIST_INIT}
@@ -461,13 +464,13 @@ typedef List(TEnumerator) TEnumeratorList;
 
 typedef struct
 {
-  TTypePointer Type;
-  String Name;
-  TEnumeratorList EnumeratorList;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
-  TScannerItemList ClueList2;
-  TScannerItemList ClueList3;
+    TTypePointer Type;
+    String Name;
+    TEnumeratorList EnumeratorList;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
+    TScannerItemList ClueList2;
+    TScannerItemList ClueList3;
 } TEnumSpecifier;
 
 #define ENUM_SPECIFIER_INIT { {TEnumSpecifier_ID}, STRING_INIT, LIST_INIT, LIST_INIT, LIST_INIT, LIST_INIT, LIST_INIT }
@@ -475,44 +478,57 @@ CREATETYPE(TEnumSpecifier, ENUM_SPECIFIER_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
+    TTypePointer Type;
+    void *pNext;
+    bool bIsVoid;
+    bool bIsChar;
+    bool bIsShort;
+    bool bIsInt;
+    int nLong; //long long
+    bool bIsFloat;
+    bool bIsDouble;
+    bool bIsSigned;
+    bool bIsUnsigned;
+    bool bIsBool;
+    bool bIsComplex;
 
-  bool bIsVoid;
-  bool bIsChar;
-  bool bIsShort;
-  bool bIsInt;
-  int nLong; //long long
-  bool bIsFloat;
-  bool bIsDouble;
-  bool bIsSigned;
-  bool bIsUnsigned;
-  bool bIsBool;
-  bool bIsComplex;
+    bool bIsTypeDef;
+    String TypedefName;
 
-  bool bIsTypeDef;
-  String TypedefName;
-
-  TScannerItemList ClueList0;
+    TScannerItemList ClueList0;
 } TSingleTypeSpecifier;
 
-#define TBUILDINTYPE_SPECIFIER_INIT { {TSingleTypeSpecifier_ID}, false, false, false, false, 0, false, false , false, false, false, false, false, STRING_INIT, LIST_INIT}
+#define TBUILDINTYPE_SPECIFIER_INIT { {TSingleTypeSpecifier_ID}, NULL, false, false, false, false, 0, false, false , false, false, false, false, false, STRING_INIT, LIST_INIT}
 CREATETYPE(TSingleTypeSpecifier, TBUILDINTYPE_SPECIFIER_INIT)
 
 typedef TTypePointer TTypeSpecifier;
 
-typedef struct
-{
-  TStorageSpecifier StorageSpecifiers;
-  TTypeSpecifier*   pTypeSpecifierOpt;
-  TTypeQualifier TypeQualifiers;
-  TFunctionSpecifier FunctionSpecifiers;
-  TAlignmentSpecifier AlignmentSpecifier;
-  TScannerItemList ClueList;
-} TDeclarationSpecifiers;
-#define TDECLARATION_SPECIFIERS_INIT { TSTORAGE_SPECIFIER_INIT, NULL, TTYPE_QUALIFIER_INIT, TFUNCTION_SPECIFIER_INIT, TALIGNMENT_SPECIFIER, TSCANNERITEMLIST_INIT}
 
+CREATETYPEOR(TSpecifier)
+CAST(TSpecifier, TStorageSpecifier)
+CAST(TSpecifier, TTypeQualifier)
+CAST(TSpecifier, TFunctionSpecifier)
+CAST(TSpecifier, TAlignmentSpecifier)
 
+CREATETYPEOR(TSpecifierQualifier)
+//CAST(TSpecifierQualifier, TSpecifier)
+CAST(TSpecifierQualifier, TStorageSpecifier)
+CAST(TSpecifierQualifier, TTypeQualifier)
+CAST(TSpecifierQualifier, TFunctionSpecifier)
+CAST(TSpecifierQualifier, TAlignmentSpecifier)
+
+//CAST(TSpecifierQualifier, TTypeQualifier)
+
+typedef List(TSpecifierQualifier) TSpecifierQualifierList;
+#define TSPECIFIERQUALIFIERLIST_INIT LIST_INIT
+void TSpecifierQualifierList_Destroy(TSpecifierQualifierList* pDeclarationSpecifiers);
+bool TSpecifierQualifierList_IsTypedef(TSpecifierQualifierList* p);
+const char* TSpecifierQualifierList_GetTypedefName(TSpecifierQualifierList* p);
+
+typedef List(TSpecifier) TDeclarationSpecifiers;
+#define TDECLARATION_SPECIFIERS_INIT LIST_INIT
 void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifiers);
+
 
 struct TParameterDeclaration;
 typedef struct TParameterDeclaration TParameterDeclaration;
@@ -520,11 +536,11 @@ typedef List(TParameterDeclaration) TParameterList;
 
 typedef struct TDesignator
 {
-  String Name;
-  TExpression *  pExpression;
-  struct TDesignator *pNext;
-  TScannerItemList ClueList0; //. ou [
-  TScannerItemList ClueList1; //]
+    String Name;
+    TExpression *  pExpression;
+    struct TDesignator *pNext;
+    TScannerItemList ClueList0; //. ou [
+    TScannerItemList ClueList1; //]
 } TDesignator;
 
 #define TDESIGNATOR_INIT { STRING_INIT , NULL, NULL,TSCANNERITEMLIST_INIT}
@@ -533,9 +549,9 @@ typedef List(TDesignator) TDesignatorList;
 
 
 typedef struct TDesignation
-{    
+{
     TDesignatorList DesignatorList;
-    TScannerItemList ClueList0;    
+    TScannerItemList ClueList0;
 } TDesignation;
 
 #define TDESIGNATION_INIT { LIST_INIT, TSCANNERITEMLIST_INIT}
@@ -545,10 +561,10 @@ typedef TTypePointer TInitializer;
 
 typedef struct TInitializerListItem
 {
-  TDesignatorList  DesignatorList;
-  TInitializer* pInitializer;
-  struct TInitializerListItem* pNext;
-  TScannerItemList ClueList;
+    TDesignatorList  DesignatorList;
+    TInitializer* pInitializer;
+    struct TInitializerListItem* pNext;
+    TScannerItemList ClueList;
 } TInitializerListItem;
 
 #define TINITIALIZER_LIST_ITEM_INIT { LIST_INIT , NULL, NULL, TSCANNERITEMLIST_INIT}
@@ -558,10 +574,10 @@ CREATETYPE(TInitializerListItem, TINITIALIZER_LIST_ITEM_INIT)
 
 typedef struct
 {
-  TTypePointer Type;
-  TInitializerList InitializerList;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
+    TTypePointer Type;
+    TInitializerList InitializerList;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
 } TInitializerListType;
 
 #define TINITIALIZER_LIST_TYPE_INIT {{TInitializerListType_ID}, LIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
@@ -576,9 +592,9 @@ struct TDirectDeclarator;
 
 typedef struct TDeclarator
 {
-  TPointerList PointerList;
-  struct TDirectDeclarator* pDirectDeclarator;
-  TScannerItemList ClueList;
+    TPointerList PointerList;
+    struct TDirectDeclarator* pDirectDeclarator;
+    TScannerItemList ClueList;
 } TDeclarator;
 
 #define TDECLARATOR_INIT {LIST_INIT, NULL, TSCANNERITEMLIST_INIT}
@@ -596,27 +612,27 @@ CREATETYPE(TDeclarator, TDECLARATOR_INIT)
 
 typedef enum TDirectDeclaratorType
 {
-  TDirectDeclaratorTypeNone,
-  TDirectDeclaratorTypeIdentifier,
-  TDirectDeclaratorTypeDeclarator,
-  TDirectDeclaratorTypeFunction,
-  TDirectDeclaratorTypeArray,
+    TDirectDeclaratorTypeNone,
+    TDirectDeclaratorTypeIdentifier,
+    TDirectDeclaratorTypeDeclarator,
+    TDirectDeclaratorTypeFunction,
+    TDirectDeclaratorTypeArray,
 
 }TDirectDeclaratorType;
 
 typedef struct TDirectDeclarator
 {
-  String Identifier; //identifier
-  TDeclarator* pDeclarator; //(declarator)
-  struct TDirectDeclarator* pDirectDeclarator; //
-  TPosition Position;
-  TParameterList  Parameters;
-  TExpression*   pExpression;
-  TDirectDeclaratorType Type; //para diferenciar pois null nao basta []
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
-  TScannerItemList ClueList2;
-  TScannerItemList ClueList3;
+    String Identifier; //identifier
+    TDeclarator* pDeclarator; //(declarator)
+    struct TDirectDeclarator* pDirectDeclarator; //
+    TPosition Position;
+    TParameterList  Parameters;
+    TExpression*   pExpression;
+    TDirectDeclaratorType Type; //para diferenciar pois null nao basta []
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
+    TScannerItemList ClueList2;
+    TScannerItemList ClueList3;
 } TDirectDeclarator;
 
 #define TDIRECTDECLARATOR_INIT { STRING_INIT, NULL  ,NULL, TPOSITION_INIT, LIST_INIT, NULL, TDirectDeclaratorTypeNone, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
@@ -625,10 +641,10 @@ CREATETYPE(TDirectDeclarator, TDIRECTDECLARATOR_INIT)
 
 typedef struct TInitDeclarator
 {
-  TDeclarator* pDeclarator;
-  TInitializer* pInitializer;
-  struct TInitDeclarator * pNext;
-  TScannerItemList ClueList0;
+    TDeclarator* pDeclarator;
+    TInitializer* pInitializer;
+    struct TInitDeclarator * pNext;
+    TScannerItemList ClueList0;
 } TInitDeclarator;
 
 #define TINITDECLARATOR_INIT {NULL, NULL, NULL, TSCANNERITEMLIST_INIT}
@@ -646,13 +662,13 @@ typedef TInitDeclaratorList TStructDeclaratorList;
 
 typedef struct
 {
-  TTypePointer Type;//= {TStructDeclaration_ID}
-  TTypeSpecifier*   pSpecifier;
-  TTypeQualifier Qualifier;
-  TStructDeclaratorList DeclaratorList;
-  TScannerItemList ClueList1;
+    TTypePointer Type;//= {TStructDeclaration_ID}
+
+    TSpecifierQualifierList SpecifierQualifierList;
+    TStructDeclaratorList DeclaratorList;
+    TScannerItemList ClueList1;
 } TStructDeclaration;
-#define TSTRUCT_DECLARATION_BASE_INIT {{TStructDeclaration_ID}, NULL, TTYPE_QUALIFIER_INIT, LIST_INIT, TSCANNERITEMLIST_INIT}
+#define TSTRUCT_DECLARATION_BASE_INIT {{TStructDeclaration_ID}, TSPECIFIERQUALIFIERLIST_INIT,  LIST_INIT, TSCANNERITEMLIST_INIT}
 
 CREATETYPE(TStructDeclaration, TSTRUCT_DECLARATION_BASE_INIT)
 
@@ -665,14 +681,14 @@ typedef ArrayT(TAnyStructDeclaration) TStructDeclarationList;
 
 typedef struct
 {
-  TTypePointer Type;
-  TStructDeclarationList StructDeclarationList;
-  String Name;
-  bool bIsStruct;
-  TScannerItemList ClueList0;
-  TScannerItemList ClueList1;
-  TScannerItemList ClueList2;
-  TScannerItemList ClueList3;
+    TTypePointer Type;
+    TStructDeclarationList StructDeclarationList;
+    String Name;
+    bool bIsStruct;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
+    TScannerItemList ClueList2;
+    TScannerItemList ClueList3;
 
 } TStructUnionSpecifier;
 #define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true , LIST_INIT, LIST_INIT}
@@ -688,8 +704,8 @@ CAST(TTypeSpecifier, TStructUnionSpecifier)
 
 typedef struct TTemplateParameter
 {
-  String Name;
-  struct TTemplateParameter *pNext;
+    String Name;
+    struct TTemplateParameter *pNext;
 } TTemplateParameter;
 #define TTEMPLATEPARAMETER_INIT { STRING_INIT , NULL}
 CREATETYPE(TTemplateParameter, TTEMPLATEPARAMETER_INIT)
@@ -699,20 +715,20 @@ typedef List(TTemplateParameter) TTemplateParameterList;
 
 typedef struct
 {
-  TTypePointer Type;
-  TDeclarationSpecifiers Specifiers;
-  TInitDeclaratorList InitDeclaratorList;
+    TTypePointer Type;
+    TDeclarationSpecifiers Specifiers;
+    TInitDeclaratorList InitDeclaratorList;
 
-  //se for funcao
-  TCompoundStatement* pCompoundStatementOpt;
+    //se for funcao
+    TCompoundStatement* pCompoundStatementOpt;
 
-  TTemplateParameterList TemplateParameters;
-  int FileIndex;
-  int Line;
+    TTemplateParameterList TemplateParameters;
+    int FileIndex;
+    int Line;
 
-  TScannerItemList ClueList0;
-  
-  
+    TScannerItemList ClueList0;
+
+
 } TDeclaration;
 #define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, TSCANNERITEMLIST_INIT}
 CREATETYPE(TDeclaration, TFUNCVARDECLARATION_INIT)
@@ -738,14 +754,14 @@ int TAnyDeclaration_GetFileIndex(TAnyDeclaration* pDeclaration);
 
 typedef struct TParameterDeclaration
 {
-  TDeclarationSpecifiers Specifiers;
-  TDeclarator Declarator;
+    TDeclarationSpecifiers Specifiers;
+    TDeclarator Declarator;
 
-  struct TParameterDeclaration* pNext;
-  //Anotacoes in out opt geradas automaticamente?
-  //para os parametros?
-  //para o retorno opt?
-  TScannerItemList ClueList;
+    struct TParameterDeclaration* pNext;
+    //Anotacoes in out opt geradas automaticamente?
+    //para os parametros?
+    //para o retorno opt?
+    TScannerItemList ClueList;
 
 } TParameterDeclaration;
 #define TPARAMETER_DECLARATION_INIT { TDECLARATION_SPECIFIERS_INIT, TDECLARATOR_INIT, NULL, TSCANNERITEMLIST_INIT}
@@ -770,22 +786,22 @@ Result DeclarationsMap_Add(DeclarationsMap* p, const char* name, TAnyDeclaration
 //Coleta o resultado do parser
 typedef struct
 {
-  //declaracoes
-  TDeclarations Declarations;
+    //declaracoes
+    TDeclarations Declarations;
 
-  //arquivos na qual declaracao tem indice
-  TFileArray Files2;
+    //arquivos na qual declaracao tem indice
+    TFileArray Files2;
 
-  //Diretorios de codigo do usuario
-  StrArray MySourceDir;
+    //Diretorios de codigo do usuario
+    StrArray MySourceDir;
 
-  //multimap dos simbolos
-  DeclarationsMap Symbols;
+    //multimap dos simbolos
+    DeclarationsMap Symbols;
 
-  //Defines
-  MacroMap Defines;
+    //Defines
+    MacroMap Defines;
 
-  Map EnumMap;
+    Map EnumMap;
 
 } TProgram;
 
@@ -811,20 +827,47 @@ CAST(TBlockItem, TDeclaration)
 CAST(TBlockItem, TStaticAssertDeclaration)
 
 
+typedef struct TTypeName
+{
+    Type Type;
+    TSpecifierQualifierList SpecifierQualifierList;
+    TDeclarator Declarator;
+} TTypeName;
 
 //Na verdade Typename nao precisa umas partes do
 //TParameterDeclaration
 //mas para simplificar vou usar o mesmo
-typedef TParameterDeclaration TTypeName;
-#define TTYPENAME_INIT TPARAMETER_DECLARATION_INIT
+//typedef TParameterDeclaration TTypeName;
+#define TTYPENAME_INIT {{TypeName_ID}, TSPECIFIERQUALIFIERLIST_INIT, TDECLARATOR_INIT}
+CREATETYPE(TTypeName, TTYPENAME_INIT)
+typedef struct TPostfixExpressionCoreTag
+{
+    TTypePointer Type;
+    Tokens token;
+    String lexeme;
+    TExpression*  pExpressionLeft;
+    TExpression*  pExpressionRight;
+
+    //cast
+
+
+    struct TPostfixExpressionCoreTag*  pNext;
+    TInitializerList InitializerList;
+    String Identifier;
+    TTypeName* pTypeName; /*typename*/
+    TScannerItemList ClueList;
+} TPostfixExpressionCore;
+#define TPOSTFIX_EXPRESSION_CORE { {TPostfixExpressionCore_ID}, TK_NONE, STRING_INIT, NULL, NULL, NULL, LIST_INIT, STRING_INIT, NULL, TSCANNERITEMLIST_INIT}
+CREATETYPE(TPostfixExpressionCore, TPOSTFIX_EXPRESSION_CORE)
 
 
 typedef struct
 {
-	TTypePointer Type;
-	TExpression*   pExpression;
-	TTypeName TypeName;
-  TScannerItemList ClueList;
+    TTypePointer Type;
+    TExpression*   pExpression;
+    TTypeName TypeName;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
 } TCastExpressionType;
 #define TCAST_EXPRESSION_INIT { {TCastExpressionType_ID}, NULL , TTYPENAME_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TCastExpressionType, TCAST_EXPRESSION_INIT)
@@ -834,10 +877,10 @@ CREATETYPE(TCastExpressionType, TCAST_EXPRESSION_INIT)
 
 typedef struct
 {
-	TTypePointer Type;
-	Tokens token;
-	TExpression*  pExpressionLeft;
-	TTypeName TypeName;
+    TTypePointer Type;
+    Tokens token;
+    TExpression*  pExpressionLeft;
+    TTypeName TypeName;
     TScannerItemList ClueList0;
 } TUnaryExpressionOperator;
 

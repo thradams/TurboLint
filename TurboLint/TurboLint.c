@@ -10,22 +10,19 @@
 #include "..\TurboLint\Base\Path.h"
 #include "UnitTest.h"
 
-void RunLint(const char* configFileName,
+void Compile(const char* configFileName,
 	const char* inputFileName,
-	bool bAmalgamationMode)
+	Options* options)
 {
   TProgram program = TPROGRAM_INIT;
 
 
-
 	printf("Parsing...\n");
-	if (GetAST(inputFileName, configFileName, bAmalgamationMode, &program))
+	if (GetAST(inputFileName, configFileName, &program))
 	{
-		printf("Running Code Analysis...\n");
-
+		
 
 		//TProgram_Analize(&program);
-
 
 		char drive[_MAX_DRIVE];
 		char dir[_MAX_DIR];
@@ -50,15 +47,15 @@ void RunLint(const char* configFileName,
 			inputFileName = NULL;
 		}
 
-
-		TProgram_PrintAstToFile(&program, outjs, inputFileName);
+		//TProgram_PrintAstToFile(&program, outjs, inputFileName);
 
 		strcat(fname, "_gen");
 		MakePath(outjs, drive, dir, fname, ext);
 
-		TProgram_PrintCodeToFile(&program, outjs, inputFileName);
+        printf("Generating code for %s...\n", inputFileName);
+		TProgram_PrintCodeToFile(&program, options, outjs, inputFileName);
 
-		printf("Complete\n");
+		printf("Done!\n");
 	}
 	TProgram_Destroy(&program);
 }
@@ -68,14 +65,14 @@ int main(int argc, char* argv[])
 {
 	printf("Turbo lint " __DATE__ "\n");
 
-  //AllTests();
+
+    //AllTests();
 
 	if (argc < 2)
 	{
 		printf("TurboLint.exe configFile.txt file.c");
 		return 1;
 	}
-
 
 
 	const char* configFileName = argv[1];
@@ -93,7 +90,7 @@ int main(int argc, char* argv[])
         inputFileName = argv[1];
     }
 
-	bool bAmalgamationMode = false;
+	
 	bool bPrintPreprocessed = false;
 	for (int i = 3; i < argc; i++)
 	{
@@ -104,21 +101,24 @@ int main(int argc, char* argv[])
 		}
 		else if (strcmp(option, "-F") == 0)
 		{
-		}
-		else if (strcmp(option, "-A") == 0)
-		{
-			bAmalgamationMode = true;
-		}
+		}		
 	}
 
 	if (bPrintPreprocessed)
 	{
 		PrintPreprocessedToFile(inputFileName, configFileName);
 	}
+
 	String inputFullPath = NULL;
 	GetFullPath(inputFileName, &inputFullPath);
-	RunLint(configFileName, inputFullPath, bAmalgamationMode);
+    
+    Options options;
+    options.bExpandMacros = false;
+    options.bIncludeComments = true;
+
+	Compile(configFileName, inputFullPath, &options);
 	String_Destroy(&inputFullPath);
+
 	return 0;
 }
 

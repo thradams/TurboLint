@@ -270,7 +270,7 @@ void ScannerItem_Init(ScannerItem* scannerItem)
     scannerItem->bActive = true;
     scannerItem->token = TK_NONE;
     scannerItem->pNext = NULL;
-    scannerItem->Line = 0;
+    scannerItem->Line = -1;
     scannerItem->FileIndex = -1;
 }
 
@@ -301,37 +301,33 @@ void ScannerItem_Destroy(ScannerItem* scannerItem)
     StrBuilder_Destroy(&scannerItem->lexeme);
 }
 
-Result BasicScanner_Init(BasicScanner* pBasicScanner,
-                         const char* name,
-                         const char* text,
-                         BasicScannerType Type)
+void BasicScanner_InitCore(BasicScanner* pBasicScanner,                             
+                           BasicScannerType Type)
 {
     pBasicScanner->m_Token = TK_BOF;
     pBasicScanner->Type = Type;
     pBasicScanner->pPrevious = NULL;
     pBasicScanner->FileIndex = -1;
     pBasicScanner->bLineStart = true;
-    pBasicScanner->bMacroExpanded = false;
-    SStream_Init(&pBasicScanner->stream, name, text);
+    pBasicScanner->bMacroExpanded = false;    
     ScannerItem_Init(&pBasicScanner->currentItem);
     pBasicScanner->currentItem.token = TK_BOF;
-    return RESULT_OK;
+}
+
+Result BasicScanner_Init(BasicScanner* pBasicScanner,
+                         const char* name,
+                         const char* text,
+                         BasicScannerType type)
+{
+    BasicScanner_InitCore(pBasicScanner, type);
+    return SStream_Init(&pBasicScanner->stream, name, text);
 }
 
 Result BasicScanner_InitFile(BasicScanner* pBasicScanner,
                              const char* fileName)
 {
-    pBasicScanner->pPrevious = NULL;
-    pBasicScanner->FileIndex = -1;
-    Result result = SStream_InitFile(&pBasicScanner->stream, fileName);
-    if(result == RESULT_OK)
-    {
-        pBasicScanner->bLineStart = true;
-        pBasicScanner->bMacroExpanded = false;
-        ScannerItem_Init(&pBasicScanner->currentItem);
-        pBasicScanner->currentItem.token = TK_BOF;
-    }
-    return result;
+    BasicScanner_InitCore(pBasicScanner, BasicScannerType_File);
+    return SStream_InitFile(&pBasicScanner->stream, fileName);    
 }
 
 Result BasicScanner_Create(BasicScanner** pp, 
@@ -635,6 +631,12 @@ void BasicScanner_Next(BasicScanner* scanner)
                 //escape
                 ch = BasicScanner_MatchChar(scanner);
                 ch = BasicScanner_MatchChar(scanner);
+            }
+            else if (ch == '\0')
+            {
+                //oops
+                scanner->currentItem.token = TK_EOF;
+                break;
             }
             else
             {

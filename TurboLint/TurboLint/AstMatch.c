@@ -28,7 +28,7 @@ TPostfixExpressionCore* MatchStructPointerMember(const char* varName, TExpressio
 
 
 
-bool MatchNULL(TExpression* pExpression)
+/*bool MatchNULL(TExpression* pExpression)
 {
 	bool bResult = false;
 	const char *  lexeme =
@@ -74,7 +74,7 @@ bool MatchNULL(TExpression* pExpression)
 	}
 	return bResult;
 }
-
+*/
 const char * MatchIdentifier(TExpression* pExpression)
 {
 	const char *  pResult = NULL;
