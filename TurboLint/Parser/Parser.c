@@ -3712,7 +3712,12 @@ void Parameter_List(Parser* ctx,
     if (token == TK_COMMA)
     {
         Parser_Match(ctx, NULL);
-        Parameter_List(ctx, pParameterList);
+
+        token = Parser_CurrentToken(ctx);
+        if (token != TK_DOTDOTDOT)
+        {
+            Parameter_List(ctx, pParameterList);
+        }
     }
 }
 
