@@ -40,6 +40,7 @@ typedef enum
     TEnumSpecifier_ID,
     TStructUnionSpecifier_ID,
     TStorageSpecifier_ID,
+    TAtomicTypeSpecifier_ID,
     TStructDeclaration_ID,
     TAlignmentSpecifier_ID,
     TTypeQualifier_ID,
@@ -431,6 +432,8 @@ typedef struct
 } TStorageSpecifier;
 #define TSTORAGE_SPECIFIER_INIT {{TStorageSpecifier_ID}, NULL, false, false, false, false, false, false, TSCANNERITEMLIST_INIT}
 CREATETYPE(TStorageSpecifier, TSTORAGE_SPECIFIER_INIT)
+
+
 
 typedef struct
 {
@@ -850,6 +853,22 @@ typedef struct TTypeName
 //typedef TParameterDeclaration TTypeName;
 #define TTYPENAME_INIT {{TypeName_ID}, TSPECIFIERQUALIFIERLIST_INIT, TDECLARATOR_INIT}
 CREATETYPE(TTypeName, TTYPENAME_INIT)
+
+
+typedef struct TAtomicTypeSpecifier
+{
+    Type Type;
+    void* pNext;
+    TTypeName TypeName;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
+    TScannerItemList ClueList2;
+} TAtomicTypeSpecifier;
+
+#define TATOMICTYPESPECIFIER_INIT {{TStorageSpecifier_ID}, NULL, TTYPENAME_INIT}
+CREATETYPE(TAtomicTypeSpecifier, TATOMICTYPESPECIFIER_INIT)
+CAST(TTypeSpecifier, TAtomicTypeSpecifier)
+
 typedef struct TPostfixExpressionCoreTag
 {
     TTypePointer Type;

@@ -4273,6 +4273,28 @@ bool TTypeSpecifier_IsFirst(Parser* ctx, Tokens token, const char* lexeme)
     return bResult;
 }
 
+void AtomicTypeSpecifier(Parser* ctx,
+                         TTypeSpecifier** ppTypeSpecifier)
+{
+    assert(false); //tODO criar TAtomicTypeSpecifier
+    /*
+    atomic-type-specifier:
+      _Atomic ( type-name )
+    */
+    TAtomicTypeSpecifier* pAtomicTypeSpecifier =
+        TAtomicTypeSpecifier_Create();
+
+    *ppTypeSpecifier = TAtomicTypeSpecifier_As_TTypeSpecifier(pAtomicTypeSpecifier);
+
+    Parser_MatchToken(ctx, TK__ATOMIC, &pAtomicTypeSpecifier->ClueList0);
+
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pAtomicTypeSpecifier->ClueList1);
+    
+    TypeName(ctx, &pAtomicTypeSpecifier->TypeName);
+    
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pAtomicTypeSpecifier->ClueList2);
+}
+
 void Type_Specifier(Parser* ctx,
     TTypeSpecifier** ppTypeSpecifier,
                     int *typedefCount)
@@ -4501,6 +4523,11 @@ void Type_Specifier(Parser* ctx,
         break;
 
         //atomic-type-specifier
+        case TK__ATOMIC:
+          bResult = true;
+          AtomicTypeSpecifier(ctx, ppTypeSpecifier);
+         break;
+
         case TK_STRUCT:
         case TK_UNION:
         {

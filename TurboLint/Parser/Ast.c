@@ -459,6 +459,14 @@ void TStorageSpecifier_Destroy(TStorageSpecifier* p)
     TScannerItemList_Destroy(&p->ClueList0);
 }
 
+void TAtomicTypeSpecifier_Destroy(TAtomicTypeSpecifier* p)
+{
+    TTypeName_Destroy(&p->TypeName);
+    TScannerItemList_Destroy(&p->ClueList0);
+    TScannerItemList_Destroy(&p->ClueList1);
+    TScannerItemList_Destroy(&p->ClueList2);
+    
+}
 
 void TSpecifierQualifierList_Destroy(TSpecifierQualifierList* pDeclarationSpecifiers)
 {
