@@ -168,6 +168,8 @@ typedef enum
     TK_MACRO_CALL,
     TK_MACRO_EOF,
     TK_FILE_EOF,
+
+    TK__TEMPLATE,
     
 } Tokens;
 

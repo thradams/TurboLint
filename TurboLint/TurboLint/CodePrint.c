@@ -1930,6 +1930,29 @@ static bool StorageSpecifier_CodePrint(TProgram* program, Options * options, TSt
     return b;
 }
 
+
+static bool TTemplateTypeSpecifier_CodePrint(TProgram* program, Options * options, TTemplateTypeSpecifier* p, bool b, StrBuilder* fp)
+{
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+    Output_Append(fp, "_Template");
+
+    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+    Output_Append(fp, "(");
+
+    TNodeClueList_CodePrint(options, &p->ClueList2, fp);
+    Output_Append(fp, p->Identifier);
+
+    TNodeClueList_CodePrint(options, &p->ClueList3, fp);
+    Output_Append(fp, ",");
+
+    TTypeName_CodePrint(program, options, &p->TypeName, b, fp);
+
+    TNodeClueList_CodePrint(options, &p->ClueList4, fp);
+    Output_Append(fp, ")");
+
+    return b;
+}
+
 static bool TFunctionSpecifier_CodePrint(TProgram* program, Options * options, TFunctionSpecifier* p, bool b, StrBuilder* fp)
 {
     if (p->bIsInline)
@@ -1957,6 +1980,7 @@ static bool TTypeQualifier_CodePrint(TProgram* program, Options * options, TType
         Output_Append(fp, "_Atomic");
         b = true;
     }
+
 
     if (p->bIsConst)
     {
@@ -2073,6 +2097,10 @@ static bool TDeclarationSpecifiers_CodePrint(TProgram* program, Options * option
             break;
             CASE(TFunctionSpecifier) :
                 TFunctionSpecifier_CodePrint(program, options, (TFunctionSpecifier*)pItem, b, fp);
+            break;
+
+            CASE(TTemplateTypeSpecifier) :
+                TTemplateTypeSpecifier_CodePrint(program, options, (TTemplateTypeSpecifier*)pItem, b, fp);
             break;
             //CASE(TAlignmentSpecifier) : 
             ///TAlignmentSpecifier_CodePrint(program, options, (TAlignmentSpecifier*)pItem, b, fp);

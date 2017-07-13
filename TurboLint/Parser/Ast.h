@@ -41,6 +41,7 @@ typedef enum
     TStructUnionSpecifier_ID,
     TStorageSpecifier_ID,
     TAtomicTypeSpecifier_ID,
+    TTemplateTypeSpecifier_ID,
     TStructDeclaration_ID,
     TAlignmentSpecifier_ID,
     TTypeQualifier_ID,
@@ -865,9 +866,27 @@ typedef struct TAtomicTypeSpecifier
     TScannerItemList ClueList2;
 } TAtomicTypeSpecifier;
 
-#define TATOMICTYPESPECIFIER_INIT {{TStorageSpecifier_ID}, NULL, TTYPENAME_INIT}
+#define TATOMICTYPESPECIFIER_INIT {{TStorageSpecifier_ID}, NULL, TTYPENAME_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TAtomicTypeSpecifier, TATOMICTYPESPECIFIER_INIT)
 CAST(TTypeSpecifier, TAtomicTypeSpecifier)
+
+typedef struct TTemplateTypeSpecifier
+{
+    Type Type;
+    void* pNext;
+    TTypeName TypeName;
+    String Identifier;
+    TScannerItemList ClueList0;
+    TScannerItemList ClueList1;
+    TScannerItemList ClueList2;
+    TScannerItemList ClueList3;
+    TScannerItemList ClueList4;
+} TTemplateTypeSpecifier;
+
+#define TTEMPLATETYPESPECIFIER_INIT {{TTemplateTypeSpecifier_ID}, NULL, TTYPENAME_INIT, STRING_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT, TSCANNERITEMLIST_INIT}
+CREATETYPE(TTemplateTypeSpecifier, TTEMPLATETYPESPECIFIER_INIT)
+CAST(TTypeSpecifier, TTemplateTypeSpecifier)
+
 
 typedef struct TPostfixExpressionCoreTag
 {

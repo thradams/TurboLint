@@ -2959,6 +2959,7 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
         case TK_UNSIGNED:
         case TK__BOOL:
         case TK__COMPLEX:
+        case TK__TEMPLATE:
         case TK_STRUCT:
         case TK_UNION:
         case TK_ENUM:
@@ -4256,6 +4257,8 @@ bool TTypeSpecifier_IsFirst(Parser* ctx, Tokens token, const char* lexeme)
         case TK_UNSIGNED:
         case TK__BOOL:
         case TK__COMPLEX:
+        case TK__ATOMIC:
+        case TK__TEMPLATE:
         case TK_STRUCT:
         case TK_UNION:
         case TK_ENUM:
@@ -4272,6 +4275,34 @@ bool TTypeSpecifier_IsFirst(Parser* ctx, Tokens token, const char* lexeme)
 
     return bResult;
 }
+
+void TemplateTypeSpecifier(Parser* ctx,
+                           TTypeSpecifier** ppTypeSpecifier)
+{
+    /*
+    template-type-specifier:
+    _Template ( identifier, type-name )
+    */
+    TTemplateTypeSpecifier* pTemplateTypeSpecifier =
+        TTemplateTypeSpecifier_Create();
+
+    *ppTypeSpecifier = TTemplateTypeSpecifier_As_TTypeSpecifier(pTemplateTypeSpecifier);
+
+    Parser_MatchToken(ctx, TK__TEMPLATE, &pTemplateTypeSpecifier->ClueList0);
+
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pTemplateTypeSpecifier->ClueList1);
+
+    String_Set(&pTemplateTypeSpecifier->Identifier, Lexeme(ctx));
+    Parser_MatchToken(ctx, TK_IDENTIFIER, &pTemplateTypeSpecifier->ClueList2);
+
+    Parser_MatchToken(ctx, TK_COMMA, &pTemplateTypeSpecifier->ClueList3);
+
+    TypeName(ctx, &pTemplateTypeSpecifier->TypeName);
+
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pTemplateTypeSpecifier->ClueList4);
+
+}
+
 
 void AtomicTypeSpecifier(Parser* ctx,
                          TTypeSpecifier** ppTypeSpecifier)
@@ -4527,6 +4558,13 @@ void Type_Specifier(Parser* ctx,
           bResult = true;
           AtomicTypeSpecifier(ctx, ppTypeSpecifier);
          break;
+
+        //extensao thiago
+        //template-type-specifier
+        case TK__TEMPLATE:
+        bResult = true;
+        TemplateTypeSpecifier(ctx, ppTypeSpecifier);
+        break;
 
         case TK_STRUCT:
         case TK_UNION:

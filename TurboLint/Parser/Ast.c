@@ -468,6 +468,17 @@ void TAtomicTypeSpecifier_Destroy(TAtomicTypeSpecifier* p)
     
 }
 
+void TTemplateTypeSpecifier_Destroy(TTemplateTypeSpecifier* p)
+{
+    TTypeName_Destroy(&p->TypeName);
+    TScannerItemList_Destroy(&p->ClueList0);
+    TScannerItemList_Destroy(&p->ClueList1);
+    TScannerItemList_Destroy(&p->ClueList2);
+    TScannerItemList_Destroy(&p->ClueList3);
+    TScannerItemList_Destroy(&p->ClueList4);
+}
+
+
 void TSpecifierQualifierList_Destroy(TSpecifierQualifierList* pDeclarationSpecifiers)
 {
     ForEachListItem(TTypeSpecifier, pItem, pDeclarationSpecifiers)
@@ -561,10 +572,14 @@ void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifie
             CASE(TFunctionSpecifier) : 
                 TFunctionSpecifier_Delete((TFunctionSpecifier*) pItem);
                 break;
-            CASE(TAlignmentSpecifier) : 
+            
+                CASE(TAlignmentSpecifier) : 
                 TAlignmentSpecifier_Delete((TAlignmentSpecifier*)pItem);
                 break;
                 
+                CASE(TTemplateTypeSpecifier) :
+                    TTemplateTypeSpecifier_Delete((TTemplateTypeSpecifier*)pItem);
+                break;
             default:
             ASSERT(false);
             break;
