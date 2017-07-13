@@ -1,20 +1,17 @@
 
+#include <stdio.h>
 
-typedef struct Point
+typedef enum
 {
-    int x = 1;
-    int y = 2;
-} Point;
+    A,B
+} E;
 
-Point* Point_Create();
+const char* E_ToString(E e);
 
-
-Point* Point_Create(){...}
-void Point_Delete(Point*){...}
-
+const char* E_ToString(E e) { ... }
 
 int main()
 {
-    
- 
+    E e = A;
+    printf("%s", E_ToString(e));
 }

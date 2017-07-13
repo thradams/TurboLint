@@ -2247,6 +2247,52 @@ static bool Template_CodePrint(TProgram* program,
             }
             
         }
+        else if (IsSuffix(functionName, "_ToString"))
+        {
+            TParameterDeclaration* pParameterDeclaration =
+                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.pHead;
+
+            if (pParameterDeclaration != NULL)
+            {
+                TSingleTypeSpecifier *pSingleTypeSpecifier =
+                    TSpecifier_As_TSingleTypeSpecifier(pParameterDeclaration->Specifiers.pHead);
+
+                if (pSingleTypeSpecifier != NULL &&
+                    pSingleTypeSpecifier->bIsTypeDef)
+                {
+                    const char * typedefName = pSingleTypeSpecifier->TypedefName;
+
+                    TDeclaration * pDeclaration = TProgram_GetFinalTypeDeclaration(program, typedefName);
+                    if (pDeclaration)
+                    {
+                        TEnumSpecifier* pEnumSpecifier = 
+                         TSpecifier_As_TEnumSpecifier(pDeclaration->Specifiers.pHead->pNext);
+
+                        if (pEnumSpecifier)
+                        {
+                            StrBuilder_Append(fp, "\n");
+                            StrBuilder_Append(fp, "    switch (e) {\n");
+                            ForEachListItem(TEnumerator, pItem, &pEnumSpecifier->EnumeratorList)
+                            {
+                                StrBuilder_Append(fp, "        case ");
+                                StrBuilder_Append(fp, pItem->Name);
+                                StrBuilder_Append(fp, ": return \"");
+                                StrBuilder_Append(fp, pItem->Name);
+                                StrBuilder_Append(fp, "\";\n");                                                                
+                            }
+                            StrBuilder_Append(fp, "    }\n");
+                            StrBuilder_Append(fp, "    return \"\";\n");
+                        }
+                        //Tem que ver se o typedef nao era ponteiro tb
+                        //TDeclarator* pDeclarator = TDeclaration_FindDeclarator(p, typedefName);
+                        //if (pDeclarator)
+                        //{
+                            
+                        //}
+                    }
+                }
+            }
+        }
     }
     else
     {
