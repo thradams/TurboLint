@@ -1,43 +1,64 @@
-//a
-//#include "Test\Test7.h"
+
 #include <stdio.h>
-#include "h0.h"
 
-#ifndef Y
-#define Y 2
-#endif
-
-int i;
-
-typedef enum E
+typedef enum
 {
-    E1,
-    E2
+    A,B
 } E;
 
-typedef struct Point
+const char* E_ToString(E e);
+
+const char* E_ToString(E e) {
+    switch (e) {
+        case A: return "A";
+        case B: return "B";
+    }
+    return "";
+  }
+
+
+typedef struct 
 {
-    int x /* =   1 */;
-    int y /* =   2 */;
-} Point;
+    int i;
+    int x;
+} Y2;
 
-#define NULL  0
-#define F(a) a + 1
+ inline void Y2_Destroy(Y2 * p) {
+//
+//
+  }
+Y2* Y2_Create() {
+    Y2* p = (Y2*) malloc(sizeof * p);
+   if (p)
+   {
+      Y2 temp = {0,0};
+      *p = temp;
+   }
+   return p; 
+  }
+void  Y2_Delete(Y2 *p) {
+   if (p)
+   {
+      Y2_Destroy(p);
+      free(p);
+   }
+  }
 
-#if 1
-int i = 1;
-#else
-int i = 2;
-#endif
-
-//#define P_INIT {} 2
-
-int /*a*/main()
+typedef struct X
 {
-    Point pt = {1, 2};
-    int* p = NULL
-    p = /*a*/0;
-    p = /*a*/(0 /*b*/);
-    F(2);
+    Y2 y;
+    int x;
+} X;
 
+void X_Destroy(X * p) {
+//
+Y2_Destroy(&p->y);
+//
+//
+}
+
+int main()
+{
+    E e = A;
+    printf("%s", E_ToString(e));
 }

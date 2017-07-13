@@ -4691,7 +4691,7 @@ void Declaration_Specifiers(Parser* ctx,
     {
         TTypeQualifier* pTypeQualifier = TTypeQualifier_Create();
         Type_Qualifier(ctx, pTypeQualifier);
-        List_Add(pDeclarationSpecifiers, TTypeQualifier_As_TSpecifier(pTypeQualifier));
+        List_Add(pDeclarationSpecifiers, TTypeQualifier_As_TSpecifierQualifier(pTypeQualifier));
     }
     else if (TFunctionSpecifier_IsFirst(token))
     {

@@ -507,7 +507,7 @@ typedef TTypePointer TTypeSpecifier;
 
 CREATETYPEOR(TSpecifier)
 CAST(TSpecifier, TStorageSpecifier)
-CAST(TSpecifier, TTypeQualifier)
+//CAST(TSpecifier, TTypeQualifier)
 CAST(TSpecifier, TFunctionSpecifier)
 CAST(TSpecifier, TAlignmentSpecifier)
 CAST(TSpecifier, TSingleTypeSpecifier)
@@ -515,11 +515,12 @@ CAST(TSpecifier, TEnumSpecifier)
 
 
 CREATETYPEOR(TSpecifierQualifier)
-//CAST(TSpecifierQualifier, TSpecifier)
 CAST(TSpecifierQualifier, TStorageSpecifier)
-CAST(TSpecifierQualifier, TTypeQualifier)
-CAST(TSpecifierQualifier, TFunctionSpecifier)
 CAST(TSpecifierQualifier, TAlignmentSpecifier)
+CAST(TSpecifierQualifier, TSingleTypeSpecifier)
+
+CAST(TSpecifierQualifier, TTypeQualifier)
+
 
 //CAST(TSpecifierQualifier, TTypeQualifier)
 
@@ -709,6 +710,7 @@ CAST(TTypeSpecifier, TEnumSpecifier)
 CAST(TTypeSpecifier, TStructUnionSpecifier)
 
 CAST(TSpecifier, TStructUnionSpecifier)
+CAST(TSpecifierQualifier, TStructUnionSpecifier)
 
 typedef struct TTemplateParameter
 {
