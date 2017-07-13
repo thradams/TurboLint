@@ -112,11 +112,11 @@ int main(int argc, char* argv[])
 	String inputFullPath = NULL;
 	GetFullPath(inputFileName, &inputFullPath);
     
-    Options options;
-    options.bExpandMacros = false;
-    options.bIncludeComments = true;
+    Options options = OPTIONS_INIT;
+    
 
 	Compile(configFileName, inputFullPath, &options);
+
 	String_Destroy(&inputFullPath);
 
 	return 0;
