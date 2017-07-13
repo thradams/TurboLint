@@ -503,6 +503,28 @@ void TSpecifierQualifierList_Destroy(TSpecifierQualifierList* pDeclarationSpecif
     }
 }
 
+
+
+const char* TDeclarationSpecifiers_GetTypedefName(TDeclarationSpecifiers* pDeclarationSpecifiers)
+{
+    const char* typeName = NULL;
+
+    ForEachListItem(TSpecifier, pItem, pDeclarationSpecifiers)
+    {
+        TSingleTypeSpecifier* pSingleTypeSpecifier =
+            TSpecifier_As_TSingleTypeSpecifier(pItem);
+        if (pSingleTypeSpecifier != NULL)
+        {
+            if (pSingleTypeSpecifier->bIsTypeDef)
+            {
+                typeName = pSingleTypeSpecifier->TypedefName;
+                break;
+            }
+        }
+    }
+    return typeName;
+}
+
 void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifiers)
 {
     ForEachListItem(TTypeSpecifier, pItem, pDeclarationSpecifiers)

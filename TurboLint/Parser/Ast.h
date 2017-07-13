@@ -161,9 +161,10 @@ typedef struct
     TBlockItemList BlockItemList;
     TScannerItemList ClueList0;
     TScannerItemList ClueList1;
+    bool bTemplate;
 } TCompoundStatement;
 
-#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TSCANNERITEMLIST_INIT}
+#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TSCANNERITEMLIST_INIT, false}
 CREATETYPE(TCompoundStatement, TCOMPOUNDSTATEMENT_INIT)
 
 //////////////////
@@ -509,6 +510,9 @@ CAST(TSpecifier, TStorageSpecifier)
 CAST(TSpecifier, TTypeQualifier)
 CAST(TSpecifier, TFunctionSpecifier)
 CAST(TSpecifier, TAlignmentSpecifier)
+CAST(TSpecifier, TSingleTypeSpecifier)
+CAST(TSpecifier, TEnumSpecifier)
+
 
 CREATETYPEOR(TSpecifierQualifier)
 //CAST(TSpecifierQualifier, TSpecifier)
@@ -528,6 +532,9 @@ const char* TSpecifierQualifierList_GetTypedefName(TSpecifierQualifierList* p);
 typedef List(TSpecifier) TDeclarationSpecifiers;
 #define TDECLARATION_SPECIFIERS_INIT LIST_INIT
 void TDeclarationSpecifiers_Destroy(TDeclarationSpecifiers* pDeclarationSpecifiers);
+
+const char* TDeclarationSpecifiers_GetTypedefName(TDeclarationSpecifiers* pDeclarationSpecifiers);
+
 
 
 struct TParameterDeclaration;
@@ -679,7 +686,7 @@ CAST(TAnyStructDeclaration, TStaticAssertDeclaration)
 
 typedef ArrayT(TAnyStructDeclaration) TStructDeclarationList;
 
-typedef struct
+typedef struct TStructUnionSpecifier
 {
     TTypePointer Type;
     TStructDeclarationList StructDeclarationList;
@@ -701,6 +708,7 @@ CAST(TTypeSpecifier, TSingleTypeSpecifier)
 CAST(TTypeSpecifier, TEnumSpecifier)
 CAST(TTypeSpecifier, TStructUnionSpecifier)
 
+CAST(TSpecifier, TStructUnionSpecifier)
 
 typedef struct TTemplateParameter
 {
@@ -897,3 +905,5 @@ CAST(TExpression, TUnaryExpressionOperator)
 CAST(TExpression, TPostfixExpressionCore)
 CAST(TExpression, TCastExpressionType)
 
+TDeclaration* TProgram_FindFunctionDeclaration(TProgram* p, const char* name);
+TDeclaration* TProgram_FindFunctionDefinition(TProgram* p, const char* name);

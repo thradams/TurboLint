@@ -3041,7 +3041,17 @@ void Compound_Statement(Parser* ctx, TStatement** ppStatement)
 
     Tokens token = Parser_CurrentToken(ctx);
 
-    if (token != TK_RIGHT_CURLY_BRACKET)
+    if (token == TK_DOTDOTDOT)
+    {
+        //Extensao
+        /*
+        compound-statement:
+        { ... }
+        */
+        Parser_Match(ctx, NULL);
+        pCompoundStatement->bTemplate = true;
+    }
+    else if (token != TK_RIGHT_CURLY_BRACKET)
     {
         Block_Item_List(ctx, &pCompoundStatement->BlockItemList);
     }
@@ -5111,6 +5121,24 @@ void SetSymbolsFromDeclaration(Parser* ctx,
                 {
                     Parser_SetSymbol(ctx, declaratorName, pDeclaration2);
                 }
+            }
+
+            if (pTFuncVarDeclaration->InitDeclaratorList.pHead == NULL)
+            {
+                TStructUnionSpecifier * pStructUnionSpecifier =
+                    TSpecifier_As_TStructUnionSpecifier(pTFuncVarDeclaration->Specifiers.pHead);
+                if (pStructUnionSpecifier != NULL)
+                {
+                    if (pStructUnionSpecifier->Name != NULL)
+                    {
+                        Parser_SetSymbol(ctx, pStructUnionSpecifier->Name, pDeclaration2);
+                    }
+                    else
+                    {
+                        printf("warning: unnamed struct/union that defines no instances");
+                    }
+                }
+                
             }
         }
     }

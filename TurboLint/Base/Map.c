@@ -375,6 +375,11 @@ Result Map_SetMoveKey(Map* map, String* key, void* data)
         return BucketItem_Change(pNode, data);
     }
 
+    if (map->buckets.size == 0)
+    {
+        Buckets_Init(&map->buckets, 100);
+    }
+
     uint32_t hash = HashFunc(*key);
     int bucket_n = hash % map->buckets.size;
     Bucket* bucket = map->buckets.data[bucket_n];
