@@ -2318,7 +2318,7 @@ bool Declaration(Parser* ctx, TAnyDeclaration** ppDeclaration);
 void Type_Qualifier_ListOpt(Parser* ctx, TTypeQualifier* pQualifier);
 void Declaration_Specifiers(Parser* ctx, TDeclarationSpecifiers* pDeclarationSpecifiers);
 void Declarator(Parser* ctx, TDeclarator** pTDeclarator2);
-bool Type_Specifier(Parser* ctx, TTypeSpecifier** ppTypeSpecifier, int* typedefCount);
+void Type_Specifier(Parser* ctx, TTypeSpecifier** ppTypeSpecifier, int* typedefCount);
 bool Type_Qualifier(Parser* ctx, TTypeQualifier* pQualifier);
 void Initializer(Parser* ctx,
     TInitializer** ppInitializer,
@@ -4273,7 +4273,7 @@ bool TTypeSpecifier_IsFirst(Parser* ctx, Tokens token, const char* lexeme)
     return bResult;
 }
 
-bool Type_Specifier(Parser* ctx,
+void Type_Specifier(Parser* ctx,
     TTypeSpecifier** ppTypeSpecifier,
                     int *typedefCount)
 {
@@ -4630,9 +4630,11 @@ bool Type_Specifier(Parser* ctx,
         break;
     }
 
-    //ASSERT((bResult && *ppTypeSpecifier != NULL) ||
-    //  (!bResult && *ppTypeSpecifier == NULL));
-    return bResult;
+    //token = Parser_CurrentToken(ctx);
+    //if (token == TK_VERTICAL_LINE)
+    //{
+        //criar uma lista
+    //}
 }
 
 bool Declaration_Specifiers_IsFirst(Parser* ctx, Tokens token, const char* lexeme)

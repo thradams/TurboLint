@@ -911,31 +911,43 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
         if (strcmp(pBucket->data[j]->key, typeName) == 0)
         {
           pDeclaration = TAnyDeclaration_As_TDeclaration((TAnyDeclaration *)pBucket->data[j]->data);
-          if (pDeclaration != NULL &&
-              TDeclarationSpecifiers_IsTypedef(&pDeclaration->Specifiers))
+          if (pDeclaration != NULL) 
           {
-            TSingleTypeSpecifier *  pSingleTypeSpecifier = TTypeSpecifier_As_TSingleTypeSpecifier(pDeclaration->Specifiers.pHead);
-            if (pSingleTypeSpecifier != NULL)
-            {
-              if (pSingleTypeSpecifier->bIsTypeDef)
+              if (TDeclarationSpecifiers_IsTypedef(&pDeclaration->Specifiers))
               {
-                typeName = pSingleTypeSpecifier->TypedefName;
-                break;
+                  TSingleTypeSpecifier *  pSingleTypeSpecifier = TTypeSpecifier_As_TSingleTypeSpecifier(pDeclaration->Specifiers.pHead);
+                  if (pSingleTypeSpecifier != NULL)
+                  {
+                      if (pSingleTypeSpecifier->bIsTypeDef)
+                      {
+                          typeName = pSingleTypeSpecifier->TypedefName;
+                          break;
+                      }
+                      else
+                      {
+                          //int etc..
+                          pDeclarationResult = pDeclaration;
+                          break;
+                      }
+                  }
+                  else
+                  {
+                      //enum or struct union
+                      pDeclarationResult = pDeclaration;
+                      break;
+                  }
               }
               else
               {
-                //int etc..
-                pDeclarationResult = pDeclaration;
-                break;
+                  pDeclarationResult = pDeclaration;
+                  break;
               }
-            }
-            else
-            {
-              //enum or struct union
-              pDeclarationResult = pDeclaration;
-              break;
-            }
           }//declaration
+          else
+          {
+              //nao achou
+              break;
+          }
         }//key
       }//for
       if (pDeclarationResult != NULL)

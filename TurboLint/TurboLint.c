@@ -49,7 +49,7 @@ void Compile(const char* configFileName,
 
 		//TProgram_PrintAstToFile(&program, outjs, inputFileName);
 
-		strcat(fname, "_gen");
+		strcat(dir, "\\out\\");
 		MakePath(outjs, drive, dir, fname, ext);
 
         printf("Generating code for %s...\n", inputFileName);
@@ -70,55 +70,68 @@ int main(int argc, char* argv[])
 
 	if (argc < 2)
 	{
-		printf("TurboLint.exe configFile.txt file.c");
+		printf("TurboLint.exe -config configFile.txt file1.c file2.c");
 		return 1;
 	}
-
-
-	const char* configFileName = argv[1];
-	const char* inputFileName = argv[2];
-
-    if (argc > 2)
-    {
-        configFileName = argv[1];
-        inputFileName = argv[2];
-    }
-    else
-    {
-        //nao tem config
-        configFileName = NULL;
-        inputFileName = argv[1];
-    }
+    
+	const char* configFileName = NULL;
+	
 
 	
 	bool bPrintPreprocessed = false;
-	for (int i = 3; i < argc; i++)
+	for (int i = 1; i < argc; i++)
 	{
 		const char * option = argv[i];
 		if (strcmp(option, "-E") == 0)
 		{
 			bPrintPreprocessed = true;
 		}
-		else if (strcmp(option, "-F") == 0)
+		else if (strcmp(option, "-config") == 0)
 		{
+            if (i + i < argc)
+            {
+                configFileName = argv[i + 1];
+                i++;
+            }
+            else
+            {
+                printf("missing file\n");
+            }
 		}		
 	}
 
-	if (bPrintPreprocessed)
-	{
-		PrintPreprocessedToFile(inputFileName, configFileName);
-	}
-
-	String inputFullPath = NULL;
-	GetFullPath(inputFileName, &inputFullPath);
-    
     Options options = OPTIONS_INIT;
-    
 
-	Compile(configFileName, inputFullPath, &options);
+    for (int i = 1; i < argc; i++)
+    {
+        const char * option = argv[i];
+        if (strcmp(option, "-E") == 0)
+        {
+            
+        }
+        else if (strcmp(option, "-config") == 0)
+        {
+            i++;
+        }
+        else
+        {
+            const char* inputFileName = option;
 
-	String_Destroy(&inputFullPath);
+            if (bPrintPreprocessed)
+            {
+                PrintPreprocessedToFile(inputFileName, configFileName);
+            }
 
+            String inputFullPath = NULL;
+            GetFullPath(inputFileName, &inputFullPath);
+            
+            Compile(configFileName, inputFullPath, &options);
+
+            String_Destroy(&inputFullPath);            
+        }
+    }
+
+	
 	return 0;
 }
 

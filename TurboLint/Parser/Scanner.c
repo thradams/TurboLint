@@ -266,6 +266,7 @@ static Result Scanner_InitCore(Scanner* pScanner)
     AddStandardMacro(pScanner, "__DATE__", "\"__DATE__\"");
     AddStandardMacro(pScanner, "__TIME__", "\"__TIME__\"");
     AddStandardMacro(pScanner, "__STDC__", "1");
+    AddStandardMacro(pScanner, "__COUNTER__", "0");
     //AddStandardMacro(pScanner, "__STD_HOSTED__", "1");
     return RESULT_OK;
 }
