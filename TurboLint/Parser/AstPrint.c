@@ -948,6 +948,10 @@ bool TParameterList_Print(TParameterList *p, bool b, FILE* fp)
     fprintf(fp, "]");
     return true;
 }
+bool TParameterTypeList_Print(TParameterTypeList *p, bool b, FILE* fp)
+{
+    return TParameterList_Print(&p->ParameterList, b, fp);
+}
 
 bool TStructDeclarator_Print(TStructDeclarator* p, bool b, FILE* fp)
 {
@@ -1033,7 +1037,7 @@ bool TDirectDeclarator_Print(TDirectDeclarator* pDirectDeclarator,
         //( parameter-type-list )
         fprintf(fp, ",");
         fprintf(fp, "\"parameter-type-list\":");
-        TParameterList_Print(&pDirectDeclarator->Parameters, b, fp);
+        TParameterTypeList_Print(&pDirectDeclarator->Parameters, b, fp);
     }
 
     if (pDirectDeclarator->pDirectDeclarator)

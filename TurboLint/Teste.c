@@ -5,7 +5,7 @@ typedef enum
 {
     A,B
 } E;
-
+//
 const char* E_ToString(E e);
 
 const char* E_ToString(E e) { ... }

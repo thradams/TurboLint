@@ -847,7 +847,7 @@ void TypeName(Parser* ctx, TTypeName* pTypeName)
 }
 
 
-void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressionCore)
+static void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressionCore)
 {
     //ja entra aqui sendo uma  postfix-expression antes
     /*
@@ -876,7 +876,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
 
             //  postfix-expression ( argument-expression-listopt )    
             token = Parser_Match(ctx,
-                &pPostfixExpressionCore->ClueList);
+                &pPostfixExpressionCore->ClueList0);
 
             if (token != TK_RIGHT_PARENTHESIS)
             {
@@ -884,7 +884,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
             }
 
             Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS,
-                &pPostfixExpressionCore->ClueList);
+                &pPostfixExpressionCore->ClueList1);
         }
         break;
 
@@ -894,11 +894,11 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
             // postfix-expression [ expression ]
 
             Parser_MatchToken(ctx, TK_LEFT_SQUARE_BRACKET,
-                &pPostfixExpressionCore->ClueList);
+                &pPostfixExpressionCore->ClueList0);
 
             Expression0(ctx, &pPostfixExpressionCore->pExpressionRight);
 
-            Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET, NULL);
+            Parser_MatchToken(ctx, TK_RIGHT_SQUARE_BRACKET, &pPostfixExpressionCore->ClueList1);
         }
         break;
 
@@ -907,12 +907,12 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
             // postfix-expression . identifier
             pPostfixExpressionCore->token = token;
 
-            Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
+            Parser_Match(ctx, &pPostfixExpressionCore->ClueList0);
 
             String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
 
             Parser_MatchToken(ctx, TK_IDENTIFIER,
-                &pPostfixExpressionCore->ClueList);
+                &pPostfixExpressionCore->ClueList1);
         }
         break;
 
@@ -921,11 +921,11 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
             // postfix-expression -> identifier
             pPostfixExpressionCore->token = token;
 
-            Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
+            Parser_Match(ctx, &pPostfixExpressionCore->ClueList0);
 
             String_Set(&pPostfixExpressionCore->Identifier, Lexeme(ctx));
 
-            Parser_MatchToken(ctx, TK_IDENTIFIER, &pPostfixExpressionCore->ClueList);
+            Parser_MatchToken(ctx, TK_IDENTIFIER, &pPostfixExpressionCore->ClueList1);
         }
         break;
 
@@ -934,7 +934,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
             pPostfixExpressionCore->token = token;
             //postfix-expression ++
 
-            Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
+            Parser_Match(ctx, &pPostfixExpressionCore->ClueList0);
         }
         break;
 
@@ -942,7 +942,7 @@ void PostfixExpressionCore(Parser* ctx, TPostfixExpressionCore* pPostfixExpressi
         {
             //  postfix-expression --
             pPostfixExpressionCore->token = token;
-            Parser_Match(ctx, &pPostfixExpressionCore->ClueList);
+            Parser_Match(ctx, &pPostfixExpressionCore->ClueList0);
         }
         break;
 
@@ -1001,6 +1001,7 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
     Tokens token = Parser_CurrentToken(ctx);
 
 
+
     if (token == TK_LEFT_PARENTHESIS)
     {
         const char* lookAheadlexeme = Parser_LookAheadLexeme(ctx);
@@ -1013,23 +1014,23 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
             TPostfixExpressionCore *  pTPostfixExpressionCore =
                 TPostfixExpressionCore_Create();
 
-            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pTPostfixExpressionCore->ClueList);
+            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pTPostfixExpressionCore->ClueList0);
 
             TTypeName typeName = TTYPENAME_INIT;
             TypeName(ctx, &typeName);
             TTypeName_Destroy(&typeName);
 
-            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pTPostfixExpressionCore->ClueList);
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pTPostfixExpressionCore->ClueList1);
 
-            Parser_MatchToken(ctx, TK_LEFT_CURLY_BRACKET, &pTPostfixExpressionCore->ClueList);
+            Parser_MatchToken(ctx, TK_LEFT_CURLY_BRACKET, &pTPostfixExpressionCore->ClueList2);
 
             Initializer_List(ctx, &pTPostfixExpressionCore->InitializerList);
 
-            Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET, &pTPostfixExpressionCore->ClueList);
+            Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET, &pTPostfixExpressionCore->ClueList3);
 
             if (Parser_CurrentToken(ctx) == TK_COMMA)
             {
-                Parser_Match(ctx, &pTPostfixExpressionCore->ClueList);
+                Parser_Match(ctx, &pTPostfixExpressionCore->ClueList4);
             }
 
             *ppExpression = (TExpression*)pTPostfixExpressionCore;
@@ -1074,53 +1075,7 @@ void PostfixExpression(Parser* ctx, TExpression** ppExpression)
             *ppExpression = (TExpression*)pPostfixExpressionCore;
 
 
-            if (ppri)
-            {
-                if (IsTemplateFunction(lexemeCopy))
-                {
-                    TDeclaration* pDecl =
-                        FindDeclarationOfDeclarator(&ctx->Symbols, lexemeCopy);
-                    if (!pDecl)
-                    {
-                        StrBuilder sb = STRBUILDER_INIT;
-                        StrBuilder sb2 = STRBUILDER_INIT;
-                        InstantiateTemplateFunction(lexemeCopy, &sb, &sb2);
-
-                        //nao tem a declaracao ainda
-                        PushExpandedMacro(&ctx->Scanner,
-                            "",
-                            "",
-                            sb.c_str);
-
-                        TAnyDeclaration* pDeclaration;
-                        bool bResult = Declaration(ctx,
-                            &pDeclaration);
-                        //expading == 0;
-
-                        ArrayT_Push(&ctx->Templates, pDeclaration);
-                        SetSymbolsFromDeclaration(ctx, pDeclaration);
-                        //TDeclarations_Push(&ctx->TemplatesInstances, pDeclaration);
-
-                        //nao tem a declaracao ainda
-                        PushExpandedMacro(&ctx->Scanner,
-                            "",
-                            "",
-                            sb2.c_str);
-                        pDeclaration = NULL;
-                        bResult = Declaration(ctx,
-                            &pDeclaration);
-                        //expading == 0;
-                        ArrayT_Push(&ctx->TemplatesInstances, pDeclaration);
-                        SetSymbolsFromDeclaration(ctx, pDeclaration);
-
-                        StrBuilder_Destroy(&sb);
-                        StrBuilder_Destroy(&sb2);
-
-
-                    }
-                }
-            }
-
+      
             String_Destroy(&lexemeCopy);
         }
         break;
@@ -2386,21 +2341,17 @@ void Selection_Statement(Parser* ctx, TStatement** ppStatement)
             TSwitchStatement* pSelectionStatement = TSwitchStatement_Create();
             *ppStatement = (TStatement*)pSelectionStatement;
 
-            //TNodeClueList_MoveToEnd(&pSelectionStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pSelectionStatement->ClueList);
+            
+            Parser_Match(ctx, &pSelectionStatement->ClueList0);
 
-            //TNodeClueList_MoveToEnd(&pSelectionStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pSelectionStatement->ClueList);
+            
+            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pSelectionStatement->ClueList1);
 
-            //TExpression0 * pExpression =
-            //NewObject(pStatement, "expression");
             Expression0(ctx, &pSelectionStatement->pConditionExpression);
 
-            //TNodeClueList_MoveToEnd(&pSelectionStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pSelectionStatement->ClueList);
 
-            //TStatement0 * pStatement0 =
-            // NewObject(pStatement, "statement");
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pSelectionStatement->ClueList2);
+
             Statement(ctx, &pSelectionStatement->pExpression);
         }
         break;
@@ -2431,11 +2382,9 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
             pJumpStatement->token = token;
             *ppStatement = (TStatement*)pJumpStatement;
 
-            //TNodeClueList_MoveToEnd(&pJumpStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pJumpStatement->ClueList);
-
-            //TNodeClueList_MoveToEnd(&pJumpStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_IDENTIFIER, &pJumpStatement->ClueList);
+            Parser_Match(ctx, &pJumpStatement->ClueList0);
+            
+            Parser_MatchToken(ctx, TK_IDENTIFIER, &pJumpStatement->ClueList1);
         }
         break;
 
@@ -2444,12 +2393,9 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
             TJumpStatement* pJumpStatement = TJumpStatement_Create();
             pJumpStatement->token = token;
             *ppStatement = (TStatement*)pJumpStatement;
-
-            //TNodeClueList_MoveToEnd(&pJumpStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pJumpStatement->ClueList);
-
-            //TNodeClueList_MoveToEnd(&pJumpStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_SEMICOLON, &pJumpStatement->ClueList);
+            
+            Parser_Match(ctx, &pJumpStatement->ClueList0);
+            Parser_MatchToken(ctx, TK_SEMICOLON, &pJumpStatement->ClueList1);
         }
         break;
 
@@ -2459,11 +2405,8 @@ void Jump_Statement(Parser* ctx, TStatement** ppStatement)
             pJumpStatement->token = token;
             *ppStatement = (TStatement*)pJumpStatement;
 
-            //TNodeClueList_MoveToEnd(&pJumpStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pJumpStatement->ClueList);
-
-            //    //TNodeClueList_MoveToEnd(&pJumpStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_SEMICOLON, &pJumpStatement->ClueList);
+            Parser_Match(ctx, &pJumpStatement->ClueList0);
+            Parser_MatchToken(ctx, TK_SEMICOLON, &pJumpStatement->ClueList1);
         }
         break;
 
@@ -2508,16 +2451,13 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
             TWhileStatement* pWhileStatement = TWhileStatement_Create();
             *ppStatement = (TStatement*)pWhileStatement;
 
-            //TNodeClueList_MoveToEnd(&pWhileStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pWhileStatement->ClueList);
-
-            //    //TNodeClueList_MoveToEnd(&pWhileStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pWhileStatement->ClueList);
+            Parser_Match(ctx, &pWhileStatement->ClueList0);
+            
+            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pWhileStatement->ClueList1);
 
             Expression0(ctx, &pWhileStatement->pExpression);
-
-            //    //TNodeClueList_MoveToEnd(&pWhileStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pWhileStatement->ClueList);
+            
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pWhileStatement->ClueList2);
 
             Statement(ctx, &pWhileStatement->pStatement);
         }
@@ -2527,25 +2467,20 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
         {
             TDoStatement* pDoStatement = TDoStatement_Create();
             *ppStatement = (TStatement*)pDoStatement;
-
-            //    //TNodeClueList_MoveToEnd(&pDoStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pDoStatement->ClueList);
+            
+            Parser_Match(ctx, &pDoStatement->ClueList0); //do
 
             Statement(ctx, &pDoStatement->pStatement);
+            
+            Parser_MatchToken(ctx, TK_WHILE, &pDoStatement->ClueList1); //while
 
-            //    //TNodeClueList_MoveToEnd(&pDoStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_WHILE, &pDoStatement->ClueList);
-
-            //    //TNodeClueList_MoveToEnd(&pDoStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pDoStatement->ClueList);
+            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pDoStatement->ClueList2); //(
 
             Expression0(ctx, &pDoStatement->pExpression);
-
-            //    //TNodeClueList_MoveToEnd(&pDoStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pDoStatement->ClueList);
-
-            ////TNodeClueList_MoveToEnd(&pDoStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_SEMICOLON, &pDoStatement->ClueList);
+            
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pDoStatement->ClueList3); //)
+            
+            Parser_MatchToken(ctx, TK_SEMICOLON, &pDoStatement->ClueList4); //;
         }
         break;
 
@@ -2554,12 +2489,9 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
             TForStatement* pIterationStatement = TForStatement_Create();
             *ppStatement = (TStatement*)pIterationStatement;
 
-            ////TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_Match(ctx, &pIterationStatement->ClueList);
+            Parser_Match(ctx, &pIterationStatement->ClueList0);
 
-            ////TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-            token = Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS,
-                &pIterationStatement->ClueList);
+            token = Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pIterationStatement->ClueList1);
 
             //primeira expressao do for
             if (token != TK_SEMICOLON)
@@ -2578,15 +2510,13 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
                     {
                         //Esta eh a 2 expressao do for, a declaracao ja comeu 1
                         Expression0(ctx, &pIterationStatement->pExpression2);
-
-                        ////TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                        
+                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList2);
                     }
                     else
                     {
-                        //segunda expressao vazia
-                        ////TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                        //segunda expressao vazia                        
+                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList2);
                     }
                 }
 
@@ -2599,8 +2529,8 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
                         //primeira expressao do for
                         Expression0(ctx, &pIterationStatement->pExpression1);
 
-                        ////TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                        
+                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList2);
                     }
 
                     token = Parser_CurrentToken(ctx);
@@ -2609,16 +2539,14 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
                     {
                         //segunda expressao do for
                         Expression0(ctx, &pIterationStatement->pExpression2);
-
-                        //TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                        
+                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList3);
                     }
 
                     else
                     {
-                        //segunda expressao vazia
-                        //TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                        //segunda expressao vazia                        
+                        Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList3);
                     }
 
                 }
@@ -2627,8 +2555,8 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
             else
             {
                 //primeira expressao do for vazia
-                //TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                
+                Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList2);
 
                 token = Parser_CurrentToken(ctx);
 
@@ -2637,15 +2565,14 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
                     //Esta eh a 2 expressao do for, a declaracao ja comeu 1
                     Expression0(ctx, &pIterationStatement->pExpression2);
 
-                    //TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                    Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                    
+                    Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList3);
                 }
 
                 else
                 {
                     //segunda expressao do for vazia tb
-                    //TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-                    Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList);
+                    Parser_MatchToken(ctx, TK_SEMICOLON, &pIterationStatement->ClueList3);
                 }
             }
 
@@ -2657,8 +2584,7 @@ void Iteration_Statement(Parser* ctx, TStatement** ppStatement)
                 Expression0(ctx, &pIterationStatement->pExpression3);
             }
 
-            //TNodeClueList_MoveToEnd(&pIterationStatement->ClueList, &ctx->Scanner.ClueList);
-            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pIterationStatement->ClueList);
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pIterationStatement->ClueList4);
 
             Statement(ctx, &pIterationStatement->pStatement);
         }
@@ -2688,36 +2614,33 @@ void Labeled_Statement(Parser* ctx, TStatement** ppStatement)
     {
         //aqui nao eh um tipo
         String_Set(&pLabeledStatement->Identifier, Lexeme(ctx));
-
-        //TNodeClueList_MoveToEnd(&pLabeledStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pLabeledStatement->ClueList);
-
-        //TNodeClueList_MoveToEnd(&pLabeledStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_COLON, &pLabeledStatement->ClueList);
+        
+        Parser_Match(ctx, &pLabeledStatement->ClueList0);
+        
+        Parser_MatchToken(ctx, TK_COLON, &pLabeledStatement->ClueList1);
 
         Statement(ctx, &pLabeledStatement->pStatementOpt);
     }
 
     else if (token == TK_CASE)
     {
-        //TNodeClueList_MoveToEnd(&pLabeledStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pLabeledStatement->ClueList);
+        
+        Parser_Match(ctx, &pLabeledStatement->ClueList0);
 
         ConstantExpression(ctx, &pLabeledStatement->pExpression);
 
-        //TNodeClueList_MoveToEnd(&pLabeledStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_COLON, &pLabeledStatement->ClueList);
+        
+        Parser_MatchToken(ctx, TK_COLON, &pLabeledStatement->ClueList1);
 
         Statement(ctx, &pLabeledStatement->pStatementOpt);
     }
 
     else if (token == TK_DEFAULT)
     {
-        //TNodeClueList_MoveToEnd(&pLabeledStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pLabeledStatement->ClueList);
-
-        //TNodeClueList_MoveToEnd(&pLabeledStatement->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_COLON, &pLabeledStatement->ClueList);
+        
+        Parser_Match(ctx, &pLabeledStatement->ClueList0);
+        
+        Parser_MatchToken(ctx, TK_COLON, &pLabeledStatement->ClueList1);
 
         Statement(ctx, &pLabeledStatement->pStatementOpt);
     }
@@ -2843,13 +2766,14 @@ bool Statement(Parser* ctx, TStatement** ppStatement)
         Selection_Statement(ctx, ppStatement);
         break;
 
-        case TK_ELSE:
+        //case TK_ELSE:
+        //assert(false);
         //Ele tem que estar fazendo os statement do IF!
-        bResult = true;
-        Parser_Match(ctx, NULL); //else
+        //bResult = true;
+        //Parser_Match(ctx, NULL); //else
         //poderia retornar uma coisa so  p dizer q eh else
         //Statement(ctx, obj);
-        break;
+        //break;
 
         //iteration-statement
         case TK_WHILE:
@@ -3042,12 +2966,14 @@ void Compound_Statement(Parser* ctx, TStatement** ppStatement)
 
     Tokens token = Parser_CurrentToken(ctx);
 
-    if (token == TK_DOTDOTDOT)
+    if (token == TK_DOTDOTDOT ||
+        token == TK_DEFAULT)
     {
-        //Extensao
+        //Extensao nao sei qual fica melhor?
         /*
         compound-statement:
         { ... }
+        { default }
         */
         Parser_Match(ctx, NULL);
         pCompoundStatement->bTemplate = true;
@@ -3097,27 +3023,22 @@ void Static_Assert_Declaration(Parser* ctx, TStaticAssertDeclaration* pStaticAss
     Tokens token = Parser_CurrentToken(ctx);
 
     if (token == TK__STATIC_ASSERT)
-    {
-        //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->ClueList, &ctx->Scanner.ClueList);
-        Parser_Match(ctx, &pStaticAssertDeclaration->ClueList);
-
-        //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pStaticAssertDeclaration->ClueList);
+    {        
+        Parser_Match(ctx, &pStaticAssertDeclaration->ClueList0);
+        
+        Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pStaticAssertDeclaration->ClueList1);
 
         ConstantExpression(ctx,
             &pStaticAssertDeclaration->pConstantExpression);
-
-        //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_COMMA, &pStaticAssertDeclaration->ClueList);
-
-        //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_STRING_LITERAL, &pStaticAssertDeclaration->ClueList);
-
-        //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pStaticAssertDeclaration->ClueList);
-
-        //TNodeClueList_MoveToEnd(&pStaticAssertDeclaration->ClueList, &ctx->Scanner.ClueList);
-        Parser_MatchToken(ctx, TK_SEMICOLON, &pStaticAssertDeclaration->ClueList);
+        
+        Parser_MatchToken(ctx, TK_COMMA, &pStaticAssertDeclaration->ClueList2);
+        
+        String_Set(&pStaticAssertDeclaration->Text, Lexeme(ctx));
+        Parser_MatchToken(ctx, TK_STRING_LITERAL, &pStaticAssertDeclaration->ClueList3);
+        
+        Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pStaticAssertDeclaration->ClueList4);
+        
+        Parser_MatchToken(ctx, TK_SEMICOLON, &pStaticAssertDeclaration->ClueList5);
     }
 }
 
@@ -3722,7 +3643,9 @@ void Parameter_List(Parser* ctx,
     token = Parser_CurrentToken(ctx);
     if (token == TK_COMMA)
     {
-        Parser_Match(ctx, NULL);
+        //a virgula fica no anterior
+        pParameter->bHasComma = true;
+        Parser_Match(ctx, &pParameter->ClueList0);
 
         token = Parser_CurrentToken(ctx);
         if (token != TK_DOTDOTDOT)
@@ -3783,21 +3706,23 @@ void Parameter_Declaration(Parser* ctx,
 }
 
 void Parameter_Type_List(Parser* ctx,
-    TParameterList* pParameterList)
+    TParameterTypeList* pParameterList)
 {
     /*
     parameter-type-list:
     parameter-list
     parameter-list , ...
     */
-    //TODO  make ... as a type of parameter
-    Parameter_List(ctx, pParameterList);
+    
+    Parameter_List(ctx, &pParameterList->ParameterList);
+
     Tokens token = Parser_CurrentToken(ctx);
 
     if (token == TK_DOTDOTDOT)
     {
+        pParameterList->bVariadicArgs = true;
         //TODO ADD this parameter
-        Parser_Match(ctx, NULL);
+        Parser_Match(ctx, &pParameterList->ClueList1);
     }
 }
 
@@ -4276,12 +4201,50 @@ bool TTypeSpecifier_IsFirst(Parser* ctx, Tokens token, const char* lexeme)
     return bResult;
 }
 
+void TemplateTypeSpecifierArgument(Parser* ctx,
+                                    TTemplateTypeSpecifierArgument* p)
+{
+    /*
+    Thiago
+    template-type-specifier-argument:
+    typename
+    */
+
+    TypeName(ctx, &p->TypeName);
+}
+
+void TemplateTypeSpecifierArgumentList(Parser* ctx,
+                           TTemplateTypeSpecifierArgumentList* pList)
+{
+    /*
+    template-type-specifier-argument-list:
+    template-type-specifier-argument 
+    template-type-specifier-argument , template-type-specifier-argument-list
+    */
+
+    TTemplateTypeSpecifierArgument* pTemplateTypeSpecifierArgument
+        = TTemplateTypeSpecifierArgument_Create();
+
+    TemplateTypeSpecifierArgument(ctx, pTemplateTypeSpecifierArgument);
+
+    List_Add(pList, pTemplateTypeSpecifierArgument);
+
+    //Tem mais?
+    Tokens token = Parser_CurrentToken(ctx);
+    if (token == TK_COMMA)
+    {
+        Parser_Match(ctx, NULL);
+        TemplateTypeSpecifierArgumentList(ctx, pList);
+    }
+}
+
 void TemplateTypeSpecifier(Parser* ctx,
                            TTypeSpecifier** ppTypeSpecifier)
 {
     /*
     template-type-specifier:
-    _Template ( identifier, type-name )
+    _Template ( identifier)
+    _Template ( identifier, template-type-specifier-argument-list )
     */
     TTemplateTypeSpecifier* pTemplateTypeSpecifier =
         TTemplateTypeSpecifier_Create();
@@ -4290,16 +4253,20 @@ void TemplateTypeSpecifier(Parser* ctx,
 
     Parser_MatchToken(ctx, TK__TEMPLATE, &pTemplateTypeSpecifier->ClueList0);
 
-    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, &pTemplateTypeSpecifier->ClueList1);
+    Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS, NULL);
 
     String_Set(&pTemplateTypeSpecifier->Identifier, Lexeme(ctx));
-    Parser_MatchToken(ctx, TK_IDENTIFIER, &pTemplateTypeSpecifier->ClueList2);
+    Parser_MatchToken(ctx, TK_IDENTIFIER, NULL);
 
-    Parser_MatchToken(ctx, TK_COMMA, &pTemplateTypeSpecifier->ClueList3);
+    Tokens token = Parser_CurrentToken(ctx);
+    if (token == TK_COMMA)
+    {
+        Parser_MatchToken(ctx, TK_COMMA, NULL);
+        TemplateTypeSpecifierArgumentList(ctx,
+                                          &pTemplateTypeSpecifier->Args);
+    }
 
-    TypeName(ctx, &pTemplateTypeSpecifier->TypeName);
-
-    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, &pTemplateTypeSpecifier->ClueList4);
+    Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, NULL);
 
 }
 

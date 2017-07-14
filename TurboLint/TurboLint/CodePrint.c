@@ -398,6 +398,9 @@ void BuildInitialization(TProgram* program,
                 break;
 
 
+                case TTemplateTypeSpecifier_ID:
+                Output_Append(strBuilder, "{0}");
+                break;
 
                 default:
                 ASSERT(false);
@@ -475,22 +478,29 @@ static bool TLabeledStatement_CodePrint(TProgram* program, Options * options, TL
 
     if (p->token == TK_CASE)
     {
-        Output_Append(fp, "case ");
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+        Output_Append(fp, "case");
         if (p->pStatementOpt)
         {
             b = TExpression_CodePrint(program, options, p->pExpression, "", false, fp);
         }
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, ":");
         b = TStatement_CodePrint(program, options, p->pStatementOpt, false, fp);
     }
     else if (p->token == TK_DEFAULT)
     {
-        Output_Append(fp, "default:");
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+        Output_Append(fp, "default");
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+        Output_Append(fp, ":");
         b = TStatement_CodePrint(program, options, p->pStatementOpt, false, fp);
     }
     else if (p->token == TK_IDENTIFIER)
     {
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, p->Identifier);
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, ":");
     }
 
@@ -501,7 +511,11 @@ static bool TLabeledStatement_CodePrint(TProgram* program, Options * options, TL
 static bool TForStatement_CodePrint(TProgram* program, Options * options, TForStatement * p, bool b, StrBuilder* fp)
 {
     b = true;
-    Output_Append(fp, "for (");
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+    Output_Append(fp, "for");
+    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+    Output_Append(fp, "(");
+
     if (p->pInitDeclarationOpt)
     {
         TAnyDeclaration_CodePrint(program, options, p->pInitDeclarationOpt, b, fp);
@@ -509,19 +523,22 @@ static bool TForStatement_CodePrint(TProgram* program, Options * options, TForSt
         {
             b = TExpression_CodePrint(program, options, p->pExpression2, "expr2", true, fp);
         }
+        TNodeClueList_CodePrint(options, &p->ClueList2, fp);
         Output_Append(fp, ";");
         b = TExpression_CodePrint(program, options, p->pExpression3, "expr3", b, fp);
     }
     else
     {
         b = TExpression_CodePrint(program, options, p->pExpression1, "expr1", true, fp);
+        TNodeClueList_CodePrint(options, &p->ClueList2, fp);
         Output_Append(fp, ";");
         b = TExpression_CodePrint(program, options, p->pExpression2, "expr2", b, fp);
+        TNodeClueList_CodePrint(options, &p->ClueList3, fp);
         Output_Append(fp, ";");
         b = TExpression_CodePrint(program, options, p->pExpression3, "expr3", b, fp);
     }
 
-
+    TNodeClueList_CodePrint(options, &p->ClueList4, fp);
     Output_Append(fp, ")");
 
     b = TStatement_CodePrint(program, options, p->pStatement, false, fp);
@@ -533,8 +550,12 @@ static bool TForStatement_CodePrint(TProgram* program, Options * options, TForSt
 static bool TWhileStatement_CodePrint(TProgram* program, Options * options, TWhileStatement * p, bool b, StrBuilder* fp)
 {
     b = true;
-    Output_Append(fp, "while (");
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+    Output_Append(fp, "while");
+    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+    Output_Append(fp, "(");
     b = TExpression_CodePrint(program, options, p->pExpression, "expr", false, fp);
+    TNodeClueList_CodePrint(options, &p->ClueList2, fp);
     Output_Append(fp, ")");
     b = TStatement_CodePrint(program, options, p->pStatement, false, fp);
     return b;
@@ -554,12 +575,21 @@ static bool TReturnStatement_CodePrint(TProgram* program, Options * options, TRe
 static bool TDoStatement_CodePrint(TProgram* program, Options * options, TDoStatement * p, bool b, StrBuilder* fp)
 {
     b = true;
-    Output_Append(fp, "do {");
-    b = TStatement_CodePrint(program, options, p->pStatement, false, fp);
-    Output_Append(fp, "} while (");
-    b = TExpression_CodePrint(program, options, p->pExpression, "expr", false, fp);
-    Output_Append(fp, ")");
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+    Output_Append(fp, "do");
 
+    b = TStatement_CodePrint(program, options, p->pStatement, false, fp);
+    
+    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+    Output_Append(fp, "while");
+    TNodeClueList_CodePrint(options, &p->ClueList2, fp);
+    Output_Append(fp, "(");
+    b = TExpression_CodePrint(program, options, p->pExpression, "expr", false, fp);
+    TNodeClueList_CodePrint(options, &p->ClueList3, fp);
+    Output_Append(fp, ")");
+    TNodeClueList_CodePrint(options, &p->ClueList4, fp);
+    Output_Append(fp, ";");
+    
     return b;
 }
 
@@ -577,21 +607,22 @@ static bool TExpressionStatement_CodePrint(TProgram* program, Options * options,
 
 static bool TJumpStatement_CodePrint(TProgram* program, Options * options, TJumpStatement * p, bool b, StrBuilder* fp)
 {
-
-
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
     Output_Append(fp, TokenToString(((TBinaryExpression*)p)->token));
+
     if (p->pExpression)
     {
-
         b = TExpression_CodePrint(program, options, p->pExpression, "statement", false, fp);
     }
 
     if (p->token == TK_BREAK)
     {
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, ";");
     }
     else
     {
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, ";");
     }
 
@@ -607,9 +638,17 @@ static bool TAsmStatement_CodePrint(TProgram* program, Options * options, TAsmSt
 static bool TSwitchStatement_CodePrint(TProgram* program, Options * options, TSwitchStatement * p, bool b, StrBuilder* fp)
 {
     b = true;
-    Output_Append(fp, "switch (");
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+    Output_Append(fp, "switch");
+
+    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+    Output_Append(fp, "(");
+
     b = TExpression_CodePrint(program, options, p->pConditionExpression, "expr", false, fp);
+    
+    TNodeClueList_CodePrint(options, &p->ClueList2, fp);
     Output_Append(fp, ")");
+
     b = TStatement_CodePrint(program, options, p->pExpression, false, fp);
     return b;
 }
@@ -812,18 +851,47 @@ static bool IsSuffix(const char* s, const char* suffix)
     return bResult;
 
 }
+
+
 bool GetType(const char* source,
-    StrBuilder* strBuilder)
+                        StrBuilder* strBuilderType)
 {
 
     while (*source  &&
-        *source != '_')
+           *source != '_')
     {
-        StrBuilder_AppendChar(strBuilder, *source);
+        StrBuilder_AppendChar(strBuilderType, *source);
         *source++;
     }
+
+
     return *source == '_';
 }
+
+
+bool GetTypeAndFunction(const char* source,
+    StrBuilder* strBuilderType,
+    StrBuilder* strBuilderFunc)
+{
+    
+    while (*source  &&
+        *source != '_')
+    {
+        StrBuilder_AppendChar(strBuilderType, *source);
+        *source++;
+    }
+
+    while (*source)
+    {
+        StrBuilder_AppendChar(strBuilderFunc, *source);
+        *source++;
+    }
+
+    return *source == '_';
+}
+
+
+
 
 static bool TPostfixExpressionCore_CodePrint(TProgram* program,
     Options * options,
@@ -832,164 +900,6 @@ static bool TPostfixExpressionCore_CodePrint(TProgram* program,
     StrBuilder* fp)
 {
 
-#if 0
-    if (p->pExpressionLeft &&
-        p->pExpressionLeft->Type == TPrimaryExpressionValue_ID &&
-        p->token == TK_LEFT_PARENTHESIS)
-    {
-        TPrimaryExpressionValue* pPrimaryExpressionValue =
-            TExpression_As_TPrimaryExpressionValue(p->pExpressionLeft);
-
-        const char* functionName = pPrimaryExpressionValue->lexeme;
-
-        TDeclaration* pDeclaration =
-            TProgram_FindFunctionDeclaration(program, functionName);
-
-        TDeclaration* pDeclarationImplementation =
-            TProgram_FindFunctionDefinition(program, functionName);
-
-        //os parametros estao no p->pExpressionRight
-
-        if (pDeclaration == NULL && pDeclarationImplementation == NULL)
-        {
-            if (IsSuffix(functionName, "_Create"))
-            {
-                StrBuilder typeName = STRBUILDER_INIT;
-
-                GetType(functionName, &typeName);
-
-
-
-                void *ins = Map_Find2(&options->Templates, functionName);
-
-                //if (pDeclaration == NULL)
-                //{
-                  //  if (ins == NULL)
-                    //{
-                        //Ve se ja colocou a declaracao template
-                      //  StrBuilder_Append(&options->TemplateDeclarations, "static X* X_Create();");
-
-                    //}
-
-
-                //}
-
-                if (pDeclarationImplementation == NULL)
-                {
-                    Map_Set(&options->Templates, functionName, (void*)1);
-
-                    if (ins == NULL)
-                    {
-                        StrBuilder strBuilder = STRBUILDER_INIT;
-                        BuildInitializationForTypedef(program,
-                            options,
-                            typeName.c_str,
-                            &strBuilder);
-
-                        //ve se ja colocou a implementacao do template
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            "\n"
-                            "\nstatic ");
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            typeName.c_str);
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            "* ");
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            typeName.c_str);
-
-
-                        //ve se ja colocou a implementacao do template
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            "_Create()\n"
-                            "{\n"
-                            "   ");
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            typeName.c_str);
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            "* p = (");
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            typeName.c_str);
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            "*) malloc(sizeof * p);\n"
-                            "   if (p)\n"
-                            "   {\n"
-                            "      ");
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            typeName.c_str);
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            " temp = ");
-
-                        StrBuilder_Append(&options->TemplateInstanciation, strBuilder.c_str);
-
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            ";\n"
-                            "      *p = temp;\n"
-                            "   }\n"
-                            "   return p; \n"
-                            "}\n");
-                        StrBuilder_Destroy(&strBuilder);
-
-                    }
-                }
-                StrBuilder_Destroy(&typeName);
-            }//X_Create
-            else if (IsSuffix(functionName, "X_Delete"))
-            {
-                void *ins = Map_Find2(&options->Templates, functionName);
-
-                //if (pDeclaration == NULL)
-                //{
-                //  if (ins == NULL)
-                //{
-                //Ve se ja colocou a declaracao template
-                //  StrBuilder_Append(&options->TemplateDeclarations, "static X* X_Create();");
-
-                //}
-
-
-                //}
-
-                if (pDeclarationImplementation == NULL)
-                {
-                    Map_Set(&options->Templates, functionName, (void*)1);
-
-                    if (ins == NULL)
-                    {
-                        //ve se ja colocou a implementacao do template
-                        StrBuilder_Append(&options->TemplateInstanciation,
-                            "\n"
-                            "\nstatic void X_Delete(X* p)\n"
-                            "{\n"
-                            "   if (p)\n"
-                            "   {\n"
-                            "      X_Destroy(p);\n"
-                            "      free(p);\n"
-                            "   }\n"
-                            " }\n");
-                    }
-                }
-            }
-
-            //nao achou a declaracao
-            pDeclaration = 0;
-        }
-
-
-        if (pDeclarationImplementation == NULL)
-        {
-            //nao achou a declaracao
-            pDeclaration = 0;
-        }
-
-    }
-#endif
 
     b = false;
 
@@ -1004,9 +914,10 @@ static bool TPostfixExpressionCore_CodePrint(TProgram* program,
         TTypeName *pTypeName = NULL;
         if (p->pTypeName)
         {
-
+            TNodeClueList_CodePrint(options, &p->ClueList0, fp);
             Output_Append(fp, "(");
             TTypeName_CodePrint(program, options, p->pTypeName, b, fp);
+            TNodeClueList_CodePrint(options, &p->ClueList1, fp);
             Output_Append(fp, ")");
 
             //pSpecifierQualifierList = &p->pTypeName->SpecifierQualifierList;
@@ -1028,34 +939,44 @@ static bool TPostfixExpressionCore_CodePrint(TProgram* program,
     switch (p->token)
     {
         case TK_FULL_STOP:
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, ".");
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, p->Identifier);
         b = true;
         break;
         case TK_ARROW:
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, "->");
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, p->Identifier);
         b = true;
         break;
 
         case TK_LEFT_SQUARE_BRACKET:
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, "[");
         b = TExpression_CodePrint(program, options, p->pExpressionRight, "r", b, fp);
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, "]");
         break;
 
         case TK_LEFT_PARENTHESIS:
         //Do lado esquerdo vem o nome da funcao p->pExpressionLeft
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, "(");
         b = TExpression_CodePrint(program, options, p->pExpressionRight, "r", b, fp);
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
         Output_Append(fp, ")");
         break;
 
         case TK_PLUSPLUS:
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, "++");
         b = true;
         break;
         case TK_MINUSMINUS:
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
         Output_Append(fp, "--");
         b = true;
         break;
@@ -1697,22 +1618,39 @@ static bool TPointerList_CodePrint(TProgram* program, Options * options, TPointe
 static bool TParameterList_CodePrint(TProgram* program, Options * options, TParameterList *p, bool b, StrBuilder* fp)
 {
     b = false;
-    Output_Append(fp, "(");
+    
 
     ForEachListItem(TParameterDeclaration, pItem, p)
     {
-        if (!List_IsFirstItem(p, pItem))
-            Output_Append(fp, ",");
-
+        //if (!List_IsFirstItem(p, pItem))
+        //{
+          //  TNodeClueList_CodePrint(options, &pItem->ClueList, fp);
+//            Output_Append(fp, ",");
+        //}
         //TParameterDeclaration * pItem = p->pItems[i];
         b = TParameterDeclaration_CodePrint(program, options, pItem, b, fp);
     }
 
-    Output_Append(fp, ")");
+
     return true;
 }
 
+static bool TParameterTypeList_CodePrint(TProgram* program, Options * options, TParameterTypeList *p, bool b, StrBuilder* fp)
+{
+    //Output_Append(fp, "(");
+    TParameterList_CodePrint(program, options, &p->ParameterList, b, fp);
+    
+    if (p->bVariadicArgs)
+    {
+        //TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+        //Output_Append(fp, ",");
 
+        TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+        Output_Append(fp, "...");
+    }
+    //Output_Append(fp, ")");
+    return b;
+}
 
 static bool TDirectDeclarator_CodePrint(TProgram* program, Options * options, TDirectDeclarator* pDirectDeclarator,
     bool b,
@@ -1765,9 +1703,11 @@ static bool TDirectDeclarator_CodePrint(TProgram* program, Options * options, TD
     if (pDirectDeclarator->Type == TDirectDeclaratorTypeFunction)
     {
         //( parameter-type-list )
-        //fprintf(fp, ",");
-        //fprintf(fp, "\"parameter-type-list\":");
-        TParameterList_CodePrint(program, options, &pDirectDeclarator->Parameters, b, fp);
+        TNodeClueList_CodePrint(options, &pDirectDeclarator->ClueList2, fp);
+        Output_Append(fp, "(");
+        TParameterTypeList_CodePrint(program, options, &pDirectDeclarator->Parameters, b, fp);
+        TNodeClueList_CodePrint(options, &pDirectDeclarator->ClueList3, fp);
+        Output_Append(fp, ")");
     }
 
     if (pDirectDeclarator->pDirectDeclarator)
@@ -1931,25 +1871,56 @@ static bool StorageSpecifier_CodePrint(TProgram* program, Options * options, TSt
 }
 
 
+
 static bool TTemplateTypeSpecifier_CodePrint(TProgram* program, Options * options, TTemplateTypeSpecifier* p, bool b, StrBuilder* fp)
 {
     TNodeClueList_CodePrint(options, &p->ClueList0, fp);
-    Output_Append(fp, "_Template");
 
-    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
-    Output_Append(fp, "(");
+    if (strcmp(p->Identifier, "List") == 0)
+    {
+        
+        StrBuilder strBuilder = STRBUILDER_INIT;
+        
+        if (p->Args.pHead != NULL)
+        {
+            TTypeName_CodePrint(program, options, &p->Args.pHead->TypeName, false, &strBuilder);
+        }
+        else
+        {
+            //TODO
+            //tem que ter 1 arg
+        }
+        
 
-    TNodeClueList_CodePrint(options, &p->ClueList2, fp);
-    Output_Append(fp, p->Identifier);
+        Output_Append(fp, "struct {");
+        Output_Append(fp, strBuilder.c_str);
+        Output_Append(fp, "* pHead; ");
+        Output_Append(fp, strBuilder.c_str);
+        Output_Append(fp, "* pTail; }");
 
-    TNodeClueList_CodePrint(options, &p->ClueList3, fp);
-    Output_Append(fp, ",");
+        StrBuilder_Destroy(&strBuilder);
+    }
+    else if (strcmp(p->Identifier, "Union") == 0)
+    {
+        Output_Append(fp, "struct { int type; }");        
+    }
+    else
+    {
+        //ERROR
+        printf("ERROR _Template\n");
+        Output_Append(fp, "struct { /*error*/}");
 
-    TTypeName_CodePrint(program, options, &p->TypeName, b, fp);
+        //TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+        //Output_Append(fp, "_Template");
 
-    TNodeClueList_CodePrint(options, &p->ClueList4, fp);
-    Output_Append(fp, ")");
 
+        //Output_Append(fp, "(");
+        //Output_Append(fp, p->Identifier);
+        //Output_Append(fp, ",");
+        //TTypeName_CodePrint(program, options, &p->TypeName, b, fp);
+
+        //Output_Append(fp, ")");
+    }
     return b;
 }
 
@@ -2237,13 +2208,13 @@ static bool Template_CodePrint(TProgram* program,
 
                 if (HasFunction(program, pSingleTypeSpecifier->TypedefName, "_Init"))
                 {
-             
+
                     StrBuilder_Append(fp,
                                       pSingleTypeSpecifier->TypedefName);
                     StrBuilder_Append(fp,
                                       "_Init(p);\n");
                     //
-                   
+
                 }
                 else
                 {
@@ -2262,7 +2233,7 @@ static bool Template_CodePrint(TProgram* program,
 
                     StrBuilder_Append(fp,
                                       ";\n"
-                                      "      *p = temp;\n");         
+                                      "      *p = temp;\n");
                 }
                 StrBuilder_Append(fp,
                                   "   }\n"
@@ -2274,7 +2245,7 @@ static bool Template_CodePrint(TProgram* program,
         else if (IsSuffix(functionName, "_Delete"))
         {
             TParameterDeclaration* pParameterDeclaration =
-                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.pHead;
+                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.ParameterList.pHead;
 
             if (pParameterDeclaration != NULL)
             {
@@ -2304,7 +2275,7 @@ static bool Template_CodePrint(TProgram* program,
         else if (IsSuffix(functionName, "_ToString"))
         {
             TParameterDeclaration* pParameterDeclaration =
-                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.pHead;
+                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.ParameterList.pHead;
 
             if (pParameterDeclaration != NULL)
             {
@@ -2350,7 +2321,7 @@ static bool Template_CodePrint(TProgram* program,
         else if (IsSuffix(functionName, "_Destroy"))
         {
             TParameterDeclaration* pParameterDeclaration =
-                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.pHead;
+                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.ParameterList.pHead;
 
             if (pParameterDeclaration != NULL)
             {
@@ -2440,10 +2411,180 @@ static bool Template_CodePrint(TProgram* program,
                 }
             }
         }//destroy
-        else if (IsSuffix(functionName, "_Init"))
+
+        TParameterDeclaration* pParameterDeclaration =
+            pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.ParameterList.pHead;
+
+        if (pParameterDeclaration != NULL)
+        {
+            StrBuilder strBuilderType = STRBUILDER_INIT;
+            StrBuilder strBuilderFunc =  STRBUILDER_INIT;
+
+            GetTypeAndFunction(functionName,
+                                   &strBuilderType,
+                                   &strBuilderFunc);
+
+            TSingleTypeSpecifier *pSingleTypeSpecifier =
+                TSpecifier_As_TSingleTypeSpecifier(pParameterDeclaration->Specifiers.pHead);
+
+            if (pSingleTypeSpecifier != NULL &&
+                pSingleTypeSpecifier->bIsTypeDef)
+            {
+                const char * typedefName = pSingleTypeSpecifier->TypedefName;
+
+                TDeclaration * pDeclaration = TProgram_GetFinalTypeDeclaration(program, typedefName);
+                if (pDeclaration)
+                {
+                    TTemplateTypeSpecifier* pTemplateTypeSpecifier =
+                        TSpecifier_As_TTemplateTypeSpecifier(pDeclaration->Specifiers.pHead->pNext);
+
+                    if (pTemplateTypeSpecifier)
+                    {
+                        //eh template tipo
+                        if (strcmp(pTemplateTypeSpecifier->Identifier, "Union") == 0)
+                        {
+                            StrBuilder_Append(fp, "\n");
+                            StrBuilder_Append(fp, "    switch(p->type) {\n");
+                            ForEachListItem(TTemplateTypeSpecifierArgument, pItem, &pTemplateTypeSpecifier->Args)
+                            {
+                                TSingleTypeSpecifier* pSingleTypeSpecifier =
+                                 TSpecifier_As_TSingleTypeSpecifier(pItem->TypeName.SpecifierQualifierList.pHead);
+                                if (pSingleTypeSpecifier && pSingleTypeSpecifier->bIsTypeDef)
+                                {
+                                    const char* typedefName = pSingleTypeSpecifier->TypedefName;
+                                    TDeclaration * pDeclaration = TProgram_GetFinalTypeDeclaration(program, typedefName);
+                                    if (pDeclaration)
+                                    {
+                                        TStructUnionSpecifier* pStructUnionSpecifier =
+                                            TSpecifier_As_TStructUnionSpecifier(pDeclaration->Specifiers.pHead->pNext);
+
+                                        if (pStructUnionSpecifier && 
+                                            pStructUnionSpecifier->StructDeclarationList.size > 0)
+                                        {
+                                            TStructDeclaration* pStructDeclaration =
+                                                TAnyStructDeclaration_As_TStructDeclaration(pStructUnionSpecifier->StructDeclarationList.pItems[0]);
+                                            if (pStructDeclaration)
+                                            {
+                                                TPrimaryExpressionValue* pExpression =
+                                                  TExpression_As_TPrimaryExpressionValue(TInitializer_As_TExpression(pStructDeclaration->DeclaratorList.pHead->pInitializer));
+                                                
+                                                if (pExpression)
+                                                {
+
+                                                    StrBuilder_Append(fp, "    case ");
+                                                    StrBuilder_Append(fp, pExpression->lexeme);
+                                                    StrBuilder_Append(fp, ":\n");
+
+                                                    StrBuilder_Append(fp, "        ");
+                                                    
+
+                                                    StrBuilder_Append(fp, typedefName);
+                                                    StrBuilder_Append(fp, strBuilderFunc.c_str);
+                                                    
+                                                    StrBuilder_Append(fp, "(");
+                                                    StrBuilder_Append(fp, "(");
+                                                    StrBuilder_Append(fp, typedefName);
+                                                    StrBuilder_Append(fp, "*) p");
+                                                    StrBuilder_Append(fp, ");\n");
+
+                                                    StrBuilder_Append(fp, "    break;\n");
+
+                                                    
+                                                }
+
+                                            }
+
+                                        }
+                                    }
+                                
+                                 
+                                }
+
+                               
+                            }
+                            StrBuilder_Append(fp, "    }\n");
+                        }
+                    }
+                }
+            }
+
+            StrBuilder_Destroy(&strBuilderType);
+            StrBuilder_Destroy(&strBuilderFunc);
+
+        }
+        //
+        if (IsSuffix(functionName, "_Add") ||
+            IsSuffix(functionName, "_Destroy") ||
+            IsSuffix(functionName, "_Init"))
         {
             TParameterDeclaration* pParameterDeclaration =
-                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.pHead;
+                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.ParameterList.pHead;
+
+            if (pParameterDeclaration != NULL)
+            {
+                TSingleTypeSpecifier *pSingleTypeSpecifier =
+                    TSpecifier_As_TSingleTypeSpecifier(pParameterDeclaration->Specifiers.pHead);
+
+                if (pSingleTypeSpecifier != NULL &&
+                    pSingleTypeSpecifier->bIsTypeDef)
+                {
+                    const char * typedefName = pSingleTypeSpecifier->TypedefName;
+
+                    TDeclaration * pDeclaration = TProgram_GetFinalTypeDeclaration(program, typedefName);
+                    if (pDeclaration)
+                    {
+                        TTemplateTypeSpecifier* pTemplateTypeSpecifier =
+                            TSpecifier_As_TTemplateTypeSpecifier(pDeclaration->Specifiers.pHead->pNext);
+
+                        if (pTemplateTypeSpecifier)
+                        {
+                            if (IsSuffix(functionName, "_Add") &&
+                                strcmp(pTemplateTypeSpecifier->Identifier, "List") == 0)
+                            {
+                                StrBuilder_Append(fp, "\n"
+                                "    if (pList->pHead == NULL) {\n"
+                                "        pList->pHead = pItem; \n"
+                                "        pList->pTail = pItem; \n"
+                                "    }\n"
+                                "    else\n"
+                                "    {\n"
+                                "        pList->pTail->pNext = pItem; \n"
+                                "        pList->pTail = pItem; \n"
+                                "    }\n");
+                            }
+                            else if (IsSuffix(functionName, "_Destroy") &&
+                                strcmp(pTemplateTypeSpecifier->Identifier, "List") == 0)
+                            {
+                                StrBuilder strBuilder = STRBUILDER_INIT;
+                                if (pTemplateTypeSpecifier->Args.pHead)
+                                {
+                                    TTypeName_CodePrint(program, options, &pTemplateTypeSpecifier->Args.pHead->TypeName, false, &strBuilder);
+                                }
+                                StrBuilder_Append(fp, "\n");
+                                StrBuilder_Append(fp,
+                                                  "\n   while (p->pHead) {\n");
+                                StrBuilder_Append(fp, "    ");
+                                StrBuilder_Append(fp, strBuilder.c_str);
+                                StrBuilder_Append(fp,
+                                                  "* pCurrent = p->pHead; \n"
+                                                  "     p->pHead = p->pHead->pNext; \n");
+                                StrBuilder_Append(fp, "    ");
+                                StrBuilder_Append(fp, strBuilder.c_str);
+                                StrBuilder_Append(fp, "_Delete(pCurrent); \n"
+                                                  "    }\n");
+
+                                StrBuilder_Destroy(&strBuilder);
+                            }
+                        }
+                    }
+                }
+            }
+        }//_Add
+
+        if (IsSuffix(functionName, "_Init"))
+        {
+            TParameterDeclaration* pParameterDeclaration =
+                pInitDeclarator->pDeclarator->pDirectDeclarator->Parameters.ParameterList.pHead;
 
             if (pParameterDeclaration != NULL)
             {
@@ -2534,10 +2675,7 @@ static bool Template_CodePrint(TProgram* program,
             }
         }//init
     }
-    else
-    {
-        //Error
-    }
+
 
     return b;
 }
@@ -2626,7 +2764,38 @@ static bool TParameterDeclaration_CodePrint(TProgram* program,
 
     b = TDeclarator_CodePrint(program, options, &p->Declarator, b, fp);
 
+    if (p->bHasComma)
+    {
+        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+        Output_Append(fp, ",");
+    }
+
     return b;
+}
+
+static bool TStaticAssertDeclaration_CodePrint(TProgram* program,
+                                               Options * options,
+                                               TStaticAssertDeclaration *p,
+                                               bool b,
+                                               StrBuilder* fp)
+{
+    TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+    Output_Append(fp, "_StaticAssert");
+    TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+    Output_Append(fp, "(");
+    TExpression_CodePrint(program, options, p->pConstantExpression, "", b, fp);
+    Output_Append(fp, ",");
+    TNodeClueList_CodePrint(options, &p->ClueList2, fp);
+
+    TNodeClueList_CodePrint(options, &p->ClueList3, fp);
+    Output_Append(fp, p->Text);
+
+
+    TNodeClueList_CodePrint(options, &p->ClueList4, fp);
+    Output_Append(fp, ")");
+    TNodeClueList_CodePrint(options, &p->ClueList5, fp);
+    Output_Append(fp, ";");
+    return true;
 }
 
 static bool TAnyDeclaration_CodePrint(TProgram* program, Options * options, TAnyDeclaration *pDeclaration, bool b, StrBuilder* fp)
@@ -2634,6 +2803,7 @@ static bool TAnyDeclaration_CodePrint(TProgram* program, Options * options, TAny
     switch (pDeclaration->Type)
     {
         case TStaticAssertDeclaration_ID:
+        b = TStaticAssertDeclaration_CodePrint(program, options, (TStaticAssertDeclaration*)pDeclaration, b, fp);
         break;
 
         case TDeclaration_ID:

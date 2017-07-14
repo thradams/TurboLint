@@ -16,7 +16,8 @@ void TLabeledStatement_Destroy(TLabeledStatement *p)
   TStatement_Delete(p->pStatementOpt);
   String_Destroy(&p->Identifier);
   TExpression_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TForStatement_Destroy(TForStatement *p)
@@ -26,14 +27,20 @@ void TForStatement_Destroy(TForStatement *p)
   TExpression_Delete(p->pExpression2);
   TExpression_Delete(p->pExpression3);
   TStatement_Delete(p->pStatement);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
+  TScannerItemList_Destroy(&p->ClueList4);
 }
 
 void TWhileStatement_Destroy(TWhileStatement *p)
 {
   TExpression_Delete(p->pExpression);
   TStatement_Delete(p->pStatement);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
 }
 
 void TReturnStatement_Destroy(TReturnStatement *p)
@@ -47,7 +54,12 @@ void TDoStatement_Destroy(TDoStatement *p)
 {
   TExpression_Delete(p->pExpression);
   TStatement_Delete(p->pStatement);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
+  TScannerItemList_Destroy(&p->ClueList4);
+
 }
 
 void TExpressionStatement_Destroy(TExpressionStatement *p)
@@ -59,7 +71,8 @@ void TExpressionStatement_Destroy(TExpressionStatement *p)
 void TJumpStatement_Destroy(TJumpStatement *p)
 {
   TExpression_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
 }
 
 void TAsmStatement_Destroy(TAsmStatement *p)
@@ -72,7 +85,9 @@ void TSwitchStatement_Destroy(TSwitchStatement *p)
 {
   TExpression_Delete(p->pConditionExpression);
   TStatement_Delete(p->pExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
 }
 
 void TIfStatement_Destroy(TIfStatement *p)
@@ -192,7 +207,11 @@ void TPostfixExpressionCore_Destroy(TPostfixExpressionCore* p)
   TExpression_Delete(p->pExpressionLeft);
   TExpression_Delete(p->pExpressionRight);
   TTypeName_Delete(p->pTypeName);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
+  TScannerItemList_Destroy(&p->ClueList4);
 }
 
 void TBinaryExpression_Destroy(TBinaryExpression* p)
@@ -263,7 +282,14 @@ void TStaticAssertDeclaration_Destroy(TStaticAssertDeclaration* p)
 {
   p->Type.Type = TypeNull;
   TExpression_Delete(p->pConstantExpression);
-  TScannerItemList_Destroy(&p->ClueList);
+  String_Destroy(&p->Text);
+
+  TScannerItemList_Destroy(&p->ClueList0);
+  TScannerItemList_Destroy(&p->ClueList1);
+  TScannerItemList_Destroy(&p->ClueList2);
+  TScannerItemList_Destroy(&p->ClueList3);
+  TScannerItemList_Destroy(&p->ClueList4);
+  TScannerItemList_Destroy(&p->ClueList5);
 }
 
 void TEnumerator_Destroy(TEnumerator* p)
@@ -468,14 +494,16 @@ void TAtomicTypeSpecifier_Destroy(TAtomicTypeSpecifier* p)
     
 }
 
-void TTemplateTypeSpecifier_Destroy(TTemplateTypeSpecifier* p)
+void TTemplateTypeSpecifierArgument_Destroy(TTemplateTypeSpecifierArgument* p)
 {
     TTypeName_Destroy(&p->TypeName);
+}
+
+void TTemplateTypeSpecifier_Destroy(TTemplateTypeSpecifier* p)
+{    
+    TTemplateTypeSpecifierArgumentList_Destroy(&p->Args);
     TScannerItemList_Destroy(&p->ClueList0);
-    TScannerItemList_Destroy(&p->ClueList1);
-    TScannerItemList_Destroy(&p->ClueList2);
-    TScannerItemList_Destroy(&p->ClueList3);
-    TScannerItemList_Destroy(&p->ClueList4);
+    String_Destroy(&p->Identifier);
 }
 
 
@@ -703,9 +731,15 @@ void TParameterDeclaration_Destroy(TParameterDeclaration* p)
 {
   TDeclarator_Destroy(&p->Declarator);
   TDeclarationSpecifiers_Destroy(&p->Specifiers);
-  TScannerItemList_Destroy(&p->ClueList);
+  TScannerItemList_Destroy(&p->ClueList0);
 }
 
+void TParameterTypeList_Destroy(TParameterTypeList* p)
+{
+    TParameterList_Destroy(&p->ParameterList);
+    TScannerItemList_Destroy(&p->ClueList0);
+    TScannerItemList_Destroy(&p->ClueList1);
+}
 
 bool TAnyDeclaration_Is_StructOrUnionDeclaration(TAnyDeclaration* pAnyDeclaration)
 {
@@ -955,15 +989,45 @@ TDeclaration* TProgram_GetFinalTypeDeclaration(TProgram* p, const char* typeName
                   }
                   else
                   {
-                      //enum or struct union
                       pDeclarationResult = pDeclaration;
-                      break;
+                      //enum or struct union
+                      TStructUnionSpecifier* pTStructUnionSpecifier = NULL;
+                      if (pDeclarationResult->Specifiers.pHead->pNext)
+                      {
+                          pTStructUnionSpecifier =
+                              TSpecifier_As_TStructUnionSpecifier(pDeclarationResult->Specifiers.pHead->pNext);
+                      }
+
+                      if (pTStructUnionSpecifier)
+                      {
+                          if (pTStructUnionSpecifier->StructDeclarationList.size > 0)
+                              break;
+                      }
+                      else
+                      {
+                          pDeclarationResult = pDeclaration;
+                          break;
+                      }
                   }
               }
               else
               {
                   pDeclarationResult = pDeclaration;
-                  break;
+                  TStructUnionSpecifier* pTStructUnionSpecifier = NULL;
+                  if (pDeclarationResult->Specifiers.pHead->pNext)
+                  {
+                      pTStructUnionSpecifier = TSpecifier_As_TStructUnionSpecifier(pDeclarationResult->Specifiers.pHead->pNext);
+                  }
+                  if (pTStructUnionSpecifier)
+                  {
+                      if (pTStructUnionSpecifier->StructDeclarationList.size > 0)
+                          break;
+                  }
+                  else
+                  {
+                      pDeclarationResult = pDeclaration;
+                      break;
+                  }
               }
           }//declaration
           else
