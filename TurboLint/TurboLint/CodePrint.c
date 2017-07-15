@@ -1226,7 +1226,7 @@ static bool TStructUnionSpecifier_CodePrint(TProgram* program, Options * options
                 Output_Append(fp, "{");
 
                 TTypeName_CodePrint(program, options, &p->Args.pHead->TypeName, b, fp);
-                Output_Append(fp, "* pHead, pTail;");
+                Output_Append(fp, "* pHead, *pTail;");
 
                 Output_Append(fp, "}");
             }

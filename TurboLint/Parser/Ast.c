@@ -878,6 +878,11 @@ Result DeclarationsMap_Add(DeclarationsMap* p, const char* name, TAnyDeclaration
 
 TDeclaration* DeclarationsMap_FindDeclaration(DeclarationsMap* p, const char* name)
 {
+    if (name == NULL)
+    {
+        return NULL;
+    }
+
   Bucket *  pBucket =
     MultiMap_FindBucket(p, name);
   if (pBucket)
