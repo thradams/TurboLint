@@ -14,6 +14,10 @@ bool TTypeSpecifier_IsFirst(Parser* ctx, Tokens token, const char* lexeme);
 //static bool Is_Type_QualifierFirst(Tokens token);
 void Specifier_Qualifier_List(Parser* ctx, TSpecifierQualifierList* pSpecifierQualifierList);
 static bool TTypeQualifier_IsFirst(Tokens token);
+
+void TemplateTypeSpecifierArgumentList(Parser* ctx,
+    TTemplateTypeSpecifierArgumentList* pList);
+
 static bool IsPreprocessorTokenPhase(Tokens token)
 {
     return
@@ -2966,19 +2970,7 @@ void Compound_Statement(Parser* ctx, TStatement** ppStatement)
 
     Tokens token = Parser_CurrentToken(ctx);
 
-    if (token == TK_DOTDOTDOT ||
-        token == TK_DEFAULT)
-    {
-        //Extensao nao sei qual fica melhor?
-        /*
-        compound-statement:
-        { ... }
-        { default }
-        */
-        Parser_Match(ctx, NULL);
-        pCompoundStatement->bTemplate = true;
-    }
-    else if (token != TK_RIGHT_CURLY_BRACKET)
+    if (token != TK_RIGHT_CURLY_BRACKET)
     {
         Block_Item_List(ctx, &pCompoundStatement->BlockItemList);
     }
@@ -3257,36 +3249,39 @@ void Struct_Or_Union_Specifier(Parser* ctx,
     struct-or-union identifieropt { struct-declaration-list }
     struct-or-union identifier
     */
+
+    /*
+    struct-or-union-specifier:    
+    struct-or-union { struct-declaration-list }
+    struct-or-union identifier
+
+    struct-or-union identifier (argument-list)
+    struct-or-union identifier { struct-declaration-list }
+    struct-or-union identifier identifier (argument-list)
+    */
+
     Struct_Or_Union(ctx, pStructUnionSpecifier);//TODO
 
 
-    Tokens token0 = Parser_CurrentToken(ctx);
+    Tokens token = Parser_CurrentToken(ctx);
     const char* lexeme = Lexeme(ctx);
 
-    if (token0 == TK_IDENTIFIER)
+    if (token == TK_IDENTIFIER)
     {
-
         String_Set(&pStructUnionSpecifier->Name, lexeme);
-
-        //name
         Parser_Match(ctx, &pStructUnionSpecifier->ClueList1);
-    }
+        token = Parser_CurrentToken(ctx);
+        if (token == TK_LEFT_PARENTHESIS)
+        {
+            //na verdade eh nome do template
+            String_Swap(&pStructUnionSpecifier->Name, &pStructUnionSpecifier->TemplateName);
 
-    else
-    {
-        const char* name = GetName();
-        String_Set(&pStructUnionSpecifier->Name, name);
-        //{
-        Parser_Match(ctx, &pStructUnionSpecifier->ClueList2);
-    }
-
-
-    Tokens token1 = Parser_CurrentToken(ctx);
-
-    if (token0 == TK_IDENTIFIER)
-    {
-        //ja foi feito match do identificador
-        if (token1 == TK_LEFT_CURLY_BRACKET)
+            Parser_Match(ctx, NULL);
+            TemplateTypeSpecifierArgumentList(ctx,
+                (TTemplateTypeSpecifierArgumentList *) &pStructUnionSpecifier->Args);
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, NULL);
+        }
+        else if (token == TK_LEFT_CURLY_BRACKET)
         {
             Parser_Match(ctx, &pStructUnionSpecifier->ClueList2);
 
@@ -3296,19 +3291,29 @@ void Struct_Or_Union_Specifier(Parser* ctx,
             Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET,
                 &pStructUnionSpecifier->ClueList3);
         }
-        else
+        else if (token == TK_IDENTIFIER)
         {
-            //
+            String_Set(&pStructUnionSpecifier->TemplateName, Lexeme(ctx));
+            Parser_Match(ctx, NULL);
+
+            Parser_MatchToken(ctx, TK_LEFT_PARENTHESIS , NULL);
+
+            TemplateTypeSpecifierArgumentList(ctx,
+            (TTemplateTypeSpecifierArgumentList *)    &pStructUnionSpecifier->Args);
+
+            Parser_MatchToken(ctx, TK_RIGHT_PARENTHESIS, NULL);
         }
     }
-    else if (token0 == TK_LEFT_CURLY_BRACKET)
+    else if (token == TK_LEFT_CURLY_BRACKET)
     {
-        Struct_Declaration_List(ctx, &pStructUnionSpecifier->StructDeclarationList);
+        Parser_Match(ctx, &pStructUnionSpecifier->ClueList2);
+
+        Struct_Declaration_List(ctx,
+            &pStructUnionSpecifier->StructDeclarationList);
 
         Parser_MatchToken(ctx, TK_RIGHT_CURLY_BRACKET,
             &pStructUnionSpecifier->ClueList3);
     }
-
     else
     {
         SetError2(ctx, "expected name or {", "");
@@ -5029,9 +5034,12 @@ bool  Declaration(Parser* ctx,
 {
     /*
     declaration:
-    declaration-specifiers init-declarator-listopt ;
+    declaration-specifiers;
+    declaration-specifiers init-declarator-list ;
     static_assert-declaration
     */
+
+    
 
     bool bHasDeclaration = false;
     Tokens token = Parser_CurrentToken(ctx);
@@ -5099,8 +5107,23 @@ bool  Declaration(Parser* ctx,
                 Init_Declarator_List(ctx, &pFuncVarDeclaration->InitDeclaratorList);
                 token = Parser_CurrentToken(ctx);
 
+                if (token == TK_DEFAULT)
+                {
+                    /*
+                    6.9.1) function-definition:
+                    declaration-specifiers declarator declaration-listopt defaultopt compound-statement
+                    */
+
+                    pFuncVarDeclaration->bDefault = true;
+                    Parser_Match(ctx, &pFuncVarDeclaration->ClueList1);
+                }
+
                 if (token == TK_LEFT_CURLY_BRACKET)
                 {
+                    /*
+                    6.9.1) function-definition:
+                    declaration-specifiers declarator declaration-listopt compound-statement
+                    */
                     TStatement* pStatement;
                     Compound_Statement(ctx, &pStatement);
                     //TODO cast

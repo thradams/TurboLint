@@ -315,11 +315,13 @@ void TEnumSpecifier_Destroy(TEnumSpecifier* p)
 void TStructUnionSpecifier_Destroy(TStructUnionSpecifier* p)
 {
   String_Destroy(&p->Name);
+  String_Destroy(&p->TemplateName);
   ArrayT_Destroy(TAnyStructDeclaration, &p->StructDeclarationList);
   TScannerItemList_Destroy(&p->ClueList0);
   TScannerItemList_Destroy(&p->ClueList1);
   TScannerItemList_Destroy(&p->ClueList2);
   TScannerItemList_Destroy(&p->ClueList3);
+  TTemplateTypeSpecifierArgumentList_Destroy((TTemplateTypeSpecifierArgumentList*)&p->Args);
 }
 
 void TSingleTypeSpecifier_Destroy(TSingleTypeSpecifier* p)

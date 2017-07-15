@@ -1216,20 +1216,43 @@ static bool TStructUnionSpecifier_CodePrint(TProgram* program, Options * options
     TNodeClueList_CodePrint(options, &p->ClueList1, fp);
     Output_Append(fp, p->Name);
 
-    if (p->StructDeclarationList.size > 0)
+    if (p->TemplateName != NULL)
     {
-        TNodeClueList_CodePrint(options, &p->ClueList2, fp);
-
-        Output_Append(fp, "{");
-
-        for (size_t i = 0; i < p->StructDeclarationList.size; i++)
+        if (strcmp(p->TemplateName, "List") == 0)
         {
-            TAnyStructDeclaration * pStructDeclaration = p->StructDeclarationList.pItems[i];
-            b = TAnyStructDeclaration_CodePrint(program, options, pStructDeclaration, b, fp);
-        }
+            if (p->Args.pHead)
+            {
+                Output_Append(fp, " ");
+                Output_Append(fp, "{");
 
-        TNodeClueList_CodePrint(options, &p->ClueList3, fp);
-        Output_Append(fp, "}");
+                TTypeName_CodePrint(program, options, &p->Args.pHead->TypeName, b, fp);
+                Output_Append(fp, "* pHead, pTail;");
+
+                Output_Append(fp, "}");
+            }
+            else
+            {
+                //error
+            }
+        }
+    }
+    else
+    {
+        if (p->StructDeclarationList.size > 0)
+        {
+            TNodeClueList_CodePrint(options, &p->ClueList2, fp);
+
+            Output_Append(fp, "{");
+
+            for (size_t i = 0; i < p->StructDeclarationList.size; i++)
+            {
+                TAnyStructDeclaration * pStructDeclaration = p->StructDeclarationList.pItems[i];
+                b = TAnyStructDeclaration_CodePrint(program, options, pStructDeclaration, b, fp);
+            }
+
+            TNodeClueList_CodePrint(options, &p->ClueList3, fp);
+            Output_Append(fp, "}");
+        }
     }
 
     return true;
@@ -2435,17 +2458,17 @@ static bool Template_CodePrint(TProgram* program,
                 TDeclaration * pDeclaration = TProgram_GetFinalTypeDeclaration(program, typedefName);
                 if (pDeclaration)
                 {
-                    TTemplateTypeSpecifier* pTemplateTypeSpecifier =
-                        TSpecifier_As_TTemplateTypeSpecifier(pDeclaration->Specifiers.pHead->pNext);
+                    TStructUnionSpecifier* pTStructUnionSpecifier3 =
+                        TSpecifier_As_TStructUnionSpecifier(pDeclaration->Specifiers.pHead->pNext);
 
-                    if (pTemplateTypeSpecifier)
+                    if (pTStructUnionSpecifier3 && pTStructUnionSpecifier3->TemplateName)
                     {
                         //eh template tipo
-                        if (strcmp(pTemplateTypeSpecifier->Identifier, "Union") == 0)
+                        if (strcmp(pTStructUnionSpecifier3->TemplateName, "Union") == 0)
                         {
                             StrBuilder_Append(fp, "\n");
                             StrBuilder_Append(fp, "    switch(p->type) {\n");
-                            ForEachListItem(TTemplateTypeSpecifierArgument, pItem, &pTemplateTypeSpecifier->Args)
+                            ForEachListItem(TTemplateTypeSpecifierArgument, pItem, (TTemplateTypeSpecifierArgumentList*)&pTStructUnionSpecifier3->Args)
                             {
                                 TSingleTypeSpecifier* pSingleTypeSpecifier =
                                  TSpecifier_As_TSingleTypeSpecifier(pItem->TypeName.SpecifierQualifierList.pHead);
@@ -2533,13 +2556,13 @@ static bool Template_CodePrint(TProgram* program,
                     TDeclaration * pDeclaration = TProgram_GetFinalTypeDeclaration(program, typedefName);
                     if (pDeclaration)
                     {
-                        TTemplateTypeSpecifier* pTemplateTypeSpecifier =
-                            TSpecifier_As_TTemplateTypeSpecifier(pDeclaration->Specifiers.pHead->pNext);
+                        TStructUnionSpecifier* pStructUnionSpecifier4 =
+                            TSpecifier_As_TStructUnionSpecifier(pDeclaration->Specifiers.pHead->pNext);
 
-                        if (pTemplateTypeSpecifier)
+                        if (pStructUnionSpecifier4 && pStructUnionSpecifier4->TemplateName)
                         {
                             if (IsSuffix(functionName, "_Add") &&
-                                strcmp(pTemplateTypeSpecifier->Identifier, "List") == 0)
+                                strcmp(pStructUnionSpecifier4->TemplateName, "List") == 0)
                             {
                                 StrBuilder_Append(fp, "\n"
                                 "    if (pList->pHead == NULL) {\n"
@@ -2553,12 +2576,12 @@ static bool Template_CodePrint(TProgram* program,
                                 "    }\n");
                             }
                             else if (IsSuffix(functionName, "_Destroy") &&
-                                strcmp(pTemplateTypeSpecifier->Identifier, "List") == 0)
+                                strcmp(pStructUnionSpecifier4->TemplateName, "List") == 0)
                             {
                                 StrBuilder strBuilder = STRBUILDER_INIT;
-                                if (pTemplateTypeSpecifier->Args.pHead)
+                                if (pStructUnionSpecifier4->Args.pHead)
                                 {
-                                    TTypeName_CodePrint(program, options, &pTemplateTypeSpecifier->Args.pHead->TypeName, false, &strBuilder);
+                                    TTypeName_CodePrint(program, options, &pStructUnionSpecifier4->Args.pHead->TypeName, false, &strBuilder);
                                 }
                                 StrBuilder_Append(fp, "\n");
                                 StrBuilder_Append(fp,
@@ -2701,7 +2724,7 @@ static bool TDeclaration_CodePrint(TProgram* program,
            void Items_Delete(Items* p,int i) {...}
         */
 
-        if (p->pCompoundStatementOpt->bTemplate)
+        if (p->bDefault)
         {
             TNodeClueList_CodePrint(options, &p->pCompoundStatementOpt->ClueList0, fp);
             Output_Append(fp, "{");
@@ -2721,17 +2744,41 @@ static bool TDeclaration_CodePrint(TProgram* program,
         }
         else
         {
-            TCompoundStatement_CodePrint(program,
-                options,
-                p->pCompoundStatementOpt,
-                b,
-                fp);
+            if (p->pCompoundStatementOpt != NULL)
+            {
+                //normal
+                TCompoundStatement_CodePrint(program,
+                    options,
+                    p->pCompoundStatementOpt,
+                    b,
+                    fp);
+            }
         }
     }
     else
     {
-        TNodeClueList_CodePrint(options, &p->ClueList0, fp);
-        Output_Append(fp, ";");
+        if (p->bDefault)
+        {
+            TNodeClueList_CodePrint(options, &p->ClueList1, fp);
+            Output_Append(fp, " /*default*/\n");
+            Output_Append(fp, "{");
+
+            Template_CodePrint(program,
+                options,
+                p,
+                b,
+                fp);
+
+            Output_Append(fp, "\n");
+            Output_Append(fp, "}");
+
+            return true;
+        }
+        else
+        {
+            TNodeClueList_CodePrint(options, &p->ClueList0, fp);
+            Output_Append(fp, ";");
+        }
     }
 
 

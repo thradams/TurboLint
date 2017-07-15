@@ -171,10 +171,10 @@ typedef struct
     TBlockItemList BlockItemList;
     TScannerItemList ClueList0;
     TScannerItemList ClueList1;
-    bool bTemplate;
+    //bool bTemplate;
 } TCompoundStatement;
 
-#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TSCANNERITEMLIST_INIT, false}
+#define TCOMPOUNDSTATEMENT_INIT { {TCompoundStatement_ID}, ARRAYT_INIT, TSCANNERITEMLIST_INIT}
 CREATETYPE(TCompoundStatement, TCOMPOUNDSTATEMENT_INIT)
 
 //////////////////
@@ -725,19 +725,21 @@ CAST(TAnyStructDeclaration, TStaticAssertDeclaration)
 
 typedef ArrayT(TAnyStructDeclaration) TStructDeclarationList;
 
+
 typedef struct TStructUnionSpecifier
 {
     TTypePointer Type;
     TStructDeclarationList StructDeclarationList;
     String Name;
+    String TemplateName;
     bool bIsStruct;
     TScannerItemList ClueList0;
     TScannerItemList ClueList1;
     TScannerItemList ClueList2;
     TScannerItemList ClueList3;
-
+    List(struct TTemplateTypeSpecifierArgument) Args;
 } TStructUnionSpecifier;
-#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , true , LIST_INIT, LIST_INIT}
+#define TSTRUCT_UNION_SPECIFIER_INIT { {TStructUnionSpecifier_ID}, ARRAYT_INIT, STRING_INIT , STRING_INIT , true , LIST_INIT, LIST_INIT, LIST_INIT}
 
 CREATETYPE(TStructUnionSpecifier, TSTRUCT_UNION_SPECIFIER_INIT)
 
@@ -776,9 +778,12 @@ typedef struct
 
     TScannerItemList ClueList0;
 
+    bool bDefault;
+    TScannerItemList ClueList1;
+
 
 } TDeclaration;
-#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, TSCANNERITEMLIST_INIT}
+#define TFUNCVARDECLARATION_INIT { {TDeclaration_ID}, TDECLARATION_SPECIFIERS_INIT, LIST_INIT, NULL, LIST_INIT, -1, -1, TSCANNERITEMLIST_INIT, false, TSCANNERITEMLIST_INIT}
 CREATETYPE(TDeclaration, TFUNCVARDECLARATION_INIT)
 
 void TDeclaration_Destroy(TDeclaration* p);
@@ -912,6 +917,8 @@ typedef struct  TTemplateTypeSpecifierArgument
 
 #define TTEMPLATETYPESPECIFIERARGUMENT_INIT {TTYPENAME_INIT, NULL}
 CREATETYPE(TTemplateTypeSpecifierArgument, TTEMPLATETYPESPECIFIERARGUMENT_INIT)
+
+
 
 typedef List(TTemplateTypeSpecifierArgument) TTemplateTypeSpecifierArgumentList;
 
